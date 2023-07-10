@@ -57,9 +57,21 @@ local function tree_to_lines(tree)
   return lines
 end
 
+local function get_filetype_from_path(path)
+  local temp_buf = vim.api.nvim_create_buf(false, true)
+  local filetype = nil
+  vim.api.nvim_buf_call(temp_buf, function ()
+    vim.cmd.edit(path)
+    filetype = vim.bo.filetype
+  end)
+  vim.api.nvim_buf_delete(temp_buf, { force = true })
+  return filetype
+end
+
 return {
   list_dir_contents = list_dir_contents,
   get_dirname_of_current_buffer = get_dirname_of_current_buffer,
   get_parent = get_parent,
-  tree_to_lines = tree_to_lines
+  tree_to_lines = tree_to_lines,
+  get_filetype_from_path = get_filetype_from_path
 }

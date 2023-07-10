@@ -147,9 +147,14 @@ vim.api.nvim_create_autocmd('CursorMoved', {
   callback = handle_cursor_moved
 })
 
+local function setup()
+  vim.print('SETUP')
+end
+
 return {
   open_tryptic = open_tryptic,
   nav_to = nav_to,
   get_target_under_cursor = get_target_under_cursor,
-  edit_file = edit_file
+  edit_file = edit_file,
+  setup = setup
 }

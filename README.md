@@ -1,8 +1,11 @@
 # tryptic
 
 ## TODO
+- Fix plugin not autoloading
 - File icons
 - Custom bindings
+- Make left and right windows not-focuseable, or close tryptic
+- Organise the contents of init.lua into a separate module
 - Aesthetics
     - Border style
     - Window titles
