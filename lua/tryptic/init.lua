@@ -10,7 +10,7 @@ vim.keymap.set('n', '<leader>9', ':lua vim.g.tryptic_close()<CR>')
 vim.keymap.set('n', '<leader>0', ':lua require"tryptic".open_tryptic()<CR>')
 
 local function update_child_window(target)
-  vim.print('update_child_window', target)
+  -- TODO: Is this a smell? Why should it ever be nil?
   if (target == nil) then
     return
   end

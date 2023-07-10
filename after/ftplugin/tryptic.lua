@@ -3,7 +3,7 @@ local t = require 'tryptic'
 
 map('n', 'h', function()
   require 'tryptic'.nav_to(vim.g.tryptic_state.parent.path)
-end)
+end, { buffer = 0 })
 
 map('n', 'l', function()
   local target = t.get_target_under_cursor()
@@ -12,4 +12,4 @@ map('n', 'l', function()
   else
     require 'tryptic'.edit_file(target.path)
   end
-end)
+end, { buffer = 0 })
