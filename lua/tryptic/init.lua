@@ -11,7 +11,6 @@ vim.keymap.set('n', '<leader>0', ':lua require"tryptic".open_tryptic()<CR>')
 
 local function update_child_window(target)
   vim.print('update_child_window', target)
-
   if (target == nil) then
     return
   end
@@ -29,7 +28,7 @@ end
 
 local function open_tryptic(_path, _windows)
   -- TODO: I should only need to do call list_dir_contents once, because it's recurssive
-  local focused_path = _path or fs.get_path_of_current_buffer()
+  local focused_path = _path or fs.get_dirname_of_current_buffer()
   local focused_contents = fs.list_dir_contents(focused_path)
   local focused_lines = fs.tree_to_lines(focused_contents)
 
@@ -84,16 +83,23 @@ local function open_tryptic(_path, _windows)
       vim.g.tryptic_state.current.win,
       vim.g.tryptic_state.child.win,
     })
+
+    vim.g.tryptic_target_buffer = nil
+    vim.g.tryptic_state = nil
   end
 
 end
 
 local au_group = vim.api.nvim_create_augroup("TrypticAutoCmd", { clear = true })
 
+local function get_target_under_cursor()
+  local line_number = vim.api.nvim_win_get_cursor(0)[1]
+  return vim.g.tryptic_state.current.contents.children[line_number]
+end
+
 local function handle_cursor_moved()
   if vim.bo.filetype == 'tryptic' and vim.g.tryptic_state ~= nil then
-    local line_number = vim.api.nvim_win_get_cursor(0)[1]
-    local target = vim.g.tryptic_state.current.contents.children[line_number]
+    local target = get_target_under_cursor()
     update_child_window(target)
   end
 end
@@ -129,11 +135,11 @@ local function nav_to(target_path)
       win = vim.g.tryptic_state.child.win
     }
   }
+end
 
-  -- local line_number = vim.api.nvim_win_get_cursor(0)[1]
-  -- local target = vim.g.tryptic_state.current.contents.children[line_number]
-  -- update_child_window(target)
-
+local function edit_file(path)
+  vim.g.tryptic_close()
+  vim.cmd.edit(path)
 end
 
 vim.api.nvim_create_autocmd('CursorMoved', {
@@ -143,5 +149,7 @@ vim.api.nvim_create_autocmd('CursorMoved', {
 
 return {
   open_tryptic = open_tryptic,
-  nav_to = nav_to
+  nav_to = nav_to,
+  get_target_under_cursor = get_target_under_cursor,
+  edit_file = edit_file
 }

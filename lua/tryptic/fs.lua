@@ -1,6 +1,7 @@
 local u = require 'tryptic.utils'
 
-local function list_dir_contents(path, _tree, _current_depth)
+local function list_dir_contents(_path, _tree, _current_depth)
+  local path = vim.fs.normalize(_path)
   local current_depth = _current_depth or 0
 
   local tree = _tree or {
@@ -10,7 +11,7 @@ local function list_dir_contents(path, _tree, _current_depth)
     children = {}
   }
 
-  if current_depth == 3 then
+  if current_depth == 2 then
     return tree
   end
 
@@ -40,8 +41,8 @@ local function list_dir_contents(path, _tree, _current_depth)
   return tree
 end
 
-local function get_path_of_current_buffer()
-  return vim.fs.normalize(vim.fn.expand('%:h'))
+local function get_dirname_of_current_buffer()
+  return vim.fs.dirname(vim.api.nvim_buf_get_name(0))
 end
 
 local function get_parent(path)
@@ -58,7 +59,7 @@ end
 
 return {
   list_dir_contents = list_dir_contents,
-  get_path_of_current_buffer = get_path_of_current_buffer,
+  get_dirname_of_current_buffer = get_dirname_of_current_buffer,
   get_parent = get_parent,
   tree_to_lines = tree_to_lines
 }
