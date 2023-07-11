@@ -6,8 +6,11 @@ require 'plenary.reload'.reload_module('tryptic')
 -- Globals
 vim.g.tryptic_state = nil
 vim.g.tryptic_is_open = false
+vim.g.tryptic_autocmds = {}
 
 vim.keymap.set('n', '<leader>0', ':lua require"tryptic".toggle_tryptic()<CR>')
+
+local au_group = vim.api.nvim_create_augroup("TrypticAutoCmd", { clear = true })
 
 local function update_child_window(target)
   -- TODO: Is this a smell? Why should it ever be nil?
@@ -23,6 +26,42 @@ local function update_child_window(target)
     float.buf_set_lines(buf, lines)
   else
     float.buf_set_lines_from_path(buf, target.path)
+  end
+end
+
+local function get_target_under_cursor()
+  local line_number = vim.api.nvim_win_get_cursor(0)[1]
+  return vim.g.tryptic_state.current.contents.children[line_number]
+end
+
+local function handle_cursor_moved()
+  local target = get_target_under_cursor()
+  update_child_window(target)
+end
+
+local function handle_buf_leave()
+  if vim.g.tryptic_is_open then
+    vim.g.tryptic_close()
+  end
+end
+
+local function create_autocommands()
+  local a = vim.api.nvim_create_autocmd('CursorMoved', {
+    group = au_group,
+    callback = handle_cursor_moved
+  })
+
+  local b = vim.api.nvim_create_autocmd('BufLeave', {
+    group = au_group,
+    callback = handle_buf_leave
+  })
+
+  vim.g.tryptic_autocmds = { a, b }
+end
+
+local function destroy_autocommands()
+  for _, autocmd in pairs(vim.g.tryptic_autocmds) do
+    vim.api.nvim_del_autocmd(autocmd)
   end
 end
 
@@ -83,6 +122,8 @@ local function open_tryptic(_path, _windows)
 
   update_child_window(focused_contents.children[1])
 
+  create_autocommands()
+
   vim.g.tryptic_close = function()
     vim.g.tryptic_is_open = false
 
@@ -91,6 +132,8 @@ local function open_tryptic(_path, _windows)
       vim.g.tryptic_state.current.win,
       vim.g.tryptic_state.child.win,
     })
+
+    destroy_autocommands()
 
     vim.g.tryptic_target_buffer = nil
     vim.g.tryptic_state = nil
@@ -103,20 +146,6 @@ local function toggle_tryptic()
     vim.g.tryptic_close()
   else
     open_tryptic()
-  end
-end
-
-local au_group = vim.api.nvim_create_augroup("TrypticAutoCmd", { clear = true })
-
-local function get_target_under_cursor()
-  local line_number = vim.api.nvim_win_get_cursor(0)[1]
-  return vim.g.tryptic_state.current.contents.children[line_number]
-end
-
-local function handle_cursor_moved()
-  if vim.bo.filetype == 'tryptic' and vim.g.tryptic_state ~= nil then
-    local target = get_target_under_cursor()
-    update_child_window(target)
   end
 end
 
@@ -157,11 +186,6 @@ local function edit_file(path)
   vim.g.tryptic_close()
   vim.cmd.edit(path)
 end
-
-vim.api.nvim_create_autocmd('CursorMoved', {
-  group = au_group,
-  callback = handle_cursor_moved
-})
 
 local function setup()
   vim.print('SETUP')
