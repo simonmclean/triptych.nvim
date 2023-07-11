@@ -27,6 +27,10 @@ local function update_child_window(target)
 end
 
 local function open_tryptic(_path, _windows)
+  if vim.g.tryptic_is_open then
+    return
+  end
+
   vim.g.tryptic_is_open = true
 
   -- TODO: I should only need to do call list_dir_contents once, because it's recurssive

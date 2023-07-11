@@ -2,7 +2,6 @@
 
 ## TODO
 - Fix plugin not autoloading
-- Prevent multiple instances of tryptic
 - Close tryptic when middle window is un-focused
 - Organise the contents of init.lua into a separate module
 - Aesthetics
