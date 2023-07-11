@@ -10,7 +10,8 @@ end
 local function buf_set_lines(buf, lines)
   buf_set_options(buf, {
     readonly = false,
-    modifiable = true
+    modifiable = true,
+    filetype = 'tryptic',
   })
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
   buf_set_options(buf, {

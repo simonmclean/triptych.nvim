@@ -1,8 +1,11 @@
 # tryptic
 
 ## TODO
-- Fix plugin not autoloading
-- Organise the contents of init.lua into a separate module
+- Bugs/issues
+    - Fix plugin not autoloading
+- Code quality
+    - Organise the contents of init.lua into a separate module
+    - Sort out the duplication of trees things
 - Aesthetics
     - File icons
     - Border style
@@ -13,11 +16,11 @@
 - Expose config
     - Border style
     - Key mappings
-- Actions
+- Features
+    - Smart cursor positioning
     - Delete (single and visual selection)
     - Create
     - Rename
     - Cut and paste
     - Copy
-- Sort out the duplication of trees things
 - tests
