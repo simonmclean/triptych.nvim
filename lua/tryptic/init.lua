@@ -5,9 +5,9 @@ require 'plenary.reload'.reload_module('tryptic')
 
 -- Globals
 vim.g.tryptic_state = nil
+vim.g.tryptic_is_open = false
 
-vim.keymap.set('n', '<leader>9', ':lua vim.g.tryptic_close()<CR>')
-vim.keymap.set('n', '<leader>0', ':lua require"tryptic".open_tryptic()<CR>')
+vim.keymap.set('n', '<leader>0', ':lua require"tryptic".toggle_tryptic()<CR>')
 
 local function update_child_window(target)
   -- TODO: Is this a smell? Why should it ever be nil?
@@ -27,6 +27,8 @@ local function update_child_window(target)
 end
 
 local function open_tryptic(_path, _windows)
+  vim.g.tryptic_is_open = true
+
   -- TODO: I should only need to do call list_dir_contents once, because it's recurssive
   local focused_path = _path or fs.get_dirname_of_current_buffer()
   local focused_contents = fs.list_dir_contents(focused_path)
@@ -78,6 +80,8 @@ local function open_tryptic(_path, _windows)
   update_child_window(focused_contents.children[1])
 
   vim.g.tryptic_close = function()
+    vim.g.tryptic_is_open = false
+
     float.close_floats({
       vim.g.tryptic_state.parent.win,
       vim.g.tryptic_state.current.win,
@@ -88,6 +92,14 @@ local function open_tryptic(_path, _windows)
     vim.g.tryptic_state = nil
   end
 
+end
+
+local function toggle_tryptic()
+  if vim.g.tryptic_is_open then
+    vim.g.tryptic_close()
+  else
+    open_tryptic()
+  end
 end
 
 local au_group = vim.api.nvim_create_augroup("TrypticAutoCmd", { clear = true })
@@ -152,9 +164,9 @@ local function setup()
 end
 
 return {
-  open_tryptic = open_tryptic,
+  toggle_tryptic = toggle_tryptic,
   nav_to = nav_to,
   get_target_under_cursor = get_target_under_cursor,
   edit_file = edit_file,
-  setup = setup
+  setup = setup,
 }
