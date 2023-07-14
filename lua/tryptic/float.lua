@@ -30,7 +30,6 @@ local function buf_set_lines_from_path(buf, path)
   buf_set_options(buf, {
     readonly = false,
     modifiable = true,
-    filetype = fs.get_filetype_from_path(path)
   })
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, {})
   vim.api.nvim_buf_call(buf, function ()
@@ -38,7 +37,8 @@ local function buf_set_lines_from_path(buf, path)
   end)
   buf_set_options(buf, {
     readonly = true,
-    modifiable = false
+    modifiable = false,
+    filetype = fs.get_filetype_from_path(path)
   })
 end
 

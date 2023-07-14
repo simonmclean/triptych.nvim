@@ -13,7 +13,7 @@ vim.keymap.set('n', '<leader>0', ':lua require"tryptic".toggle_tryptic()<CR>')
 local au_group = vim.api.nvim_create_augroup("TrypticAutoCmd", { clear = true })
 
 local function update_child_window(target)
-  -- TODO: Is this a smell? Why should it ever be nil?
+  -- TODO: Is this a smell? Why would this function ever be called when the target is nil?
   if (target == nil) then
     return
   end
