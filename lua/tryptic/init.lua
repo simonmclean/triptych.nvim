@@ -41,7 +41,7 @@ end
 
 local function handle_buf_leave()
   if vim.g.tryptic_is_open then
-    vim.g.tryptic_close()
+    -- vim.g.tryptic_close()
   end
 end
 
