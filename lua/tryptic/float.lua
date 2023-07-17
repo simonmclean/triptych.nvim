@@ -1,11 +1,19 @@
 local u = require 'tryptic.utils'
 local fs = require 'tryptic.fs'
 
-local function buf_set_lines(buf, lines)
+local function modify_locked_buffer(buf, fn)
+  vim.api.nvim_buf_set_option(buf, 'readonly', false)
   vim.api.nvim_buf_set_option(buf, 'modifiable', true)
-  vim.api.nvim_buf_set_option(buf, 'filetype', 'tryptic')
-  vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+  fn()
+  vim.api.nvim_buf_set_option(buf, 'readonly', true)
   vim.api.nvim_buf_set_option(buf, 'modifiable', false)
+end
+
+local function buf_set_lines(buf, lines)
+  modify_locked_buffer(buf, function()
+    vim.api.nvim_buf_set_option(buf, 'filetype', 'tryptic')
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+  end)
 end
 
 local function win_set_lines(win, lines)
@@ -24,29 +32,27 @@ local function win_set_title(win, title, icon)
 end
 
 local function buf_set_lines_from_path(buf, path)
-  vim.api.nvim_buf_set_option(buf, 'modifiable', true)
-  vim.api.nvim_buf_set_option(buf, 'readonly', false)
-  vim.api.nvim_buf_set_lines(buf, 0, -1, false, {})
-  local ft = fs.get_filetype_from_path(path)
-  if ft == '' or ft == nil then
-  	ft = 'tryptic'
-  end
-  vim.api.nvim_buf_set_option(buf, 'filetype', ft)
-  vim.api.nvim_buf_call(buf, function()
-    vim.cmd.read(path)
-    -- TODO: This is kind of hacky
-    vim.api.nvim_exec2('normal! 1G0dd', {})
+  modify_locked_buffer(buf, function()
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, {})
+    local ft = fs.get_filetype_from_path(path)
+    if ft == '' or ft == nil then
+      ft = 'tryptic'
+    end
+    vim.api.nvim_buf_set_option(buf, 'filetype', ft)
+    vim.api.nvim_buf_call(buf, function()
+      vim.cmd.read(path)
+      -- TODO: This is kind of hacky
+      vim.api.nvim_exec2('normal! 1G0dd', {})
+    end)
   end)
-  vim.api.nvim_buf_set_option(buf, 'modifiable', false)
-  vim.api.nvim_buf_set_option(buf, 'readonly', true)
 end
 
 local function create_new_buffer(lines)
-  local buf = vim.api.nvim_create_buf(false, false)
-  buf_set_lines(buf, lines)
-  vim.api.nvim_buf_set_option(buf, 'filetype', 'tryptic')
-  vim.api.nvim_buf_set_option(buf, 'readonly', true)
-  vim.api.nvim_buf_set_option(buf, 'modifiable', false)
+  local buf = vim.api.nvim_create_buf(false, true)
+  modify_locked_buffer(buf, function()
+    buf_set_lines(buf, lines)
+    vim.api.nvim_buf_set_option(buf, 'filetype', 'tryptic')
+  end)
   return buf
 end
 

@@ -68,7 +68,15 @@ local function tree_to_lines(tree)
         return " " .. child.display_name
       end,
       when_false = function()
-        local icon = devicons.get_icon_by_filetype(child.filetype) or ""
+        local maybe_icon, color = devicons.get_icon_color_by_filetype(child.filetype)
+        local fallback = ""
+        local icon = u.cond(maybe_icon ~= nil, {
+          when_true = function ()
+	    -- TODO: Icon color
+            return maybe_icon
+          end,
+          when_false = fallback
+        })
         return icon .. ' ' .. child.display_name
       end
     })
