@@ -58,14 +58,10 @@ local function tree_to_lines(tree)
 end
 
 local function get_filetype_from_path(path)
-  local temp_buf = vim.api.nvim_create_buf(false, true)
-  local filetype = nil
-  vim.api.nvim_buf_call(temp_buf, function ()
-    vim.cmd.edit(path)
-    filetype = vim.bo.filetype
-  end)
-  vim.api.nvim_buf_delete(temp_buf, { force = true })
-  return filetype
+  -- There are more robust ways than just using the filetype
+  -- Check the help docs
+  -- Might be worth improving in future
+  return vim.filetype.match({ filename = path })
 end
 
 return {

@@ -1,5 +1,6 @@
 local fs = require 'tryptic.fs'
 local float = require 'tryptic.float'
+local devicons_installed, devicons = pcall(require, 'nvim-web-devicons')
 
 require 'plenary.reload'.reload_module('tryptic')
 
@@ -22,9 +23,20 @@ local function update_child_window(target)
   vim.g.tryptic_state.child.path = target.path
 
   if target.is_dir then
+    float.win_set_title(
+      vim.g.tryptic_state.child.win,
+      vim.fs.basename(target.path),
+      ""
+    )
     local lines = fs.tree_to_lines(target)
     float.buf_set_lines(buf, lines)
   else
+    local filetype = fs.get_filetype_from_path(target.path) -- TODO: De-dupe this
+    float.win_set_title(
+      vim.g.tryptic_state.child.win,
+      vim.fs.basename(target.path),
+      devicons.get_icon_by_filetype(filetype)
+    )
     float.buf_set_lines_from_path(buf, target.path)
   end
 end
@@ -41,7 +53,7 @@ end
 
 local function handle_buf_leave()
   if vim.g.tryptic_is_open then
-    -- vim.g.tryptic_close()
+    vim.g.tryptic_close()
   end
 end
 
@@ -83,15 +95,15 @@ local function open_tryptic(_path, _windows)
 
   local configs = {
     {
-      title = parent_path,
+      title = " " .. vim.fs.basename(parent_path),
       lines = parent_lines
     },
     {
-      title = focused_path,
+      title = " " .. vim.fs.basename(focused_path),
       lines = focused_lines
     },
     {
-      title = 'todo',
+      title = '',
       lines = {}
     },
   }
@@ -138,7 +150,6 @@ local function open_tryptic(_path, _windows)
     vim.g.tryptic_target_buffer = nil
     vim.g.tryptic_state = nil
   end
-
 end
 
 local function toggle_tryptic()
@@ -151,20 +162,25 @@ end
 
 local function nav_to(target_path)
   local focused_contents = fs.list_dir_contents(target_path)
+  local focused_title = vim.fs.basename(target_path)
   local focused_lines = fs.tree_to_lines(focused_contents)
 
   local parent_path = fs.get_parent(target_path)
+  local parent_title = vim.fs.basename(parent_path)
   local parent_contents = fs.list_dir_contents(parent_path)
   local parent_lines = fs.tree_to_lines(parent_contents)
 
   float.win_set_lines(vim.g.tryptic_state.parent.win, parent_lines)
   float.win_set_lines(vim.g.tryptic_state.current.win, focused_lines)
 
+  float.win_set_title(vim.g.tryptic_state.parent.win, parent_title, "")
+  float.win_set_title(vim.g.tryptic_state.current.win, focused_title, "")
+
   vim.g.tryptic_state = {
     parent = {
       path = parent_path,
       contents = parent_contents, -- TODO: Do I need this in the state?
-      lines = parent_lines, -- TODO: Do I need this in the state?
+      lines = parent_lines,       -- TODO: Do I need this in the state?
       win = vim.g.tryptic_state.parent.win
     },
     current = {
