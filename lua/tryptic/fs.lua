@@ -1,4 +1,12 @@
 local u = require 'tryptic.utils'
+local devicons_installed, devicons = pcall(require, 'nvim-web-devicons')
+
+local function get_filetype_from_path(path)
+  -- There are more robust ways than just using the filetype
+  -- Check the help docs
+  -- Might be worth improving in future
+  return vim.filetype.match({ filename = path })
+end
 
 local function list_dir_contents(_path, _tree, _current_depth)
   local path = vim.fs.normalize(_path)
@@ -8,6 +16,7 @@ local function list_dir_contents(_path, _tree, _current_depth)
     path = nil,
     display_name = nil,
     is_dir = nil,
+    filetype = nil,
     children = {}
   }
 
@@ -19,13 +28,15 @@ local function list_dir_contents(_path, _tree, _current_depth)
 
   for child_name, child_type in vim.fs.dir(path) do
     local is_dir = child_type == 'directory'
+    local child_path = path .. '/' .. child_name
 
     tree.children[index] = {
-      path = path .. '/' .. child_name,
+      path = child_path,
       display_name = u.cond(is_dir, {
         when_true = child_name .. '/',
         when_false = child_name
       }),
+      filetype = get_filetype_from_path(child_path),
       is_dir = is_dir,
       children = {}
     }
@@ -51,17 +62,19 @@ end
 
 local function tree_to_lines(tree)
   local lines = {}
-  for _, v in ipairs(tree.children) do
-    table.insert(lines, v.display_name)
+  for _, child in ipairs(tree.children) do
+    local line = u.cond(child.is_dir, {
+      when_true = function()
+        return " " .. child.display_name
+      end,
+      when_false = function()
+        local icon = devicons.get_icon_by_filetype(child.filetype) or ""
+        return icon .. ' ' .. child.display_name
+      end
+    })
+    table.insert(lines, line)
   end
   return lines
-end
-
-local function get_filetype_from_path(path)
-  -- There are more robust ways than just using the filetype
-  -- Check the help docs
-  -- Might be worth improving in future
-  return vim.filetype.match({ filename = path })
 end
 
 return {

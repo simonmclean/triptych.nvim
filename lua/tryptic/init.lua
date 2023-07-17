@@ -1,5 +1,6 @@
 local fs = require 'tryptic.fs'
 local float = require 'tryptic.float'
+local u = require 'tryptic.utils'
 local devicons_installed, devicons = pcall(require, 'nvim-web-devicons')
 
 require 'plenary.reload'.reload_module('tryptic')
@@ -14,15 +15,22 @@ vim.keymap.set('n', '<leader>0', ':lua require"tryptic".toggle_tryptic()<CR>')
 local au_group = vim.api.nvim_create_augroup("TrypticAutoCmd", { clear = true })
 
 local function update_child_window(target)
-  -- TODO: Is this a smell? Why would this function ever be called when the target is nil?
-  if (target == nil) then
-    return
-  end
-
   local buf = vim.api.nvim_win_get_buf(vim.g.tryptic_state.child.win)
-  vim.g.tryptic_state.child.path = target.path
 
-  if target.is_dir then
+  vim.g.tryptic_state.child.path = u.cond(target == nil, {
+    when_true = nil,
+    when_false = function()
+      return target.path
+    end
+  })
+
+  if (target == nil) then
+    float.win_set_title(
+      vim.g.tryptic_state.child.win,
+      '[empty directory]'
+    )
+    float.buf_set_lines(buf, {})
+  elseif target.is_dir then
     float.win_set_title(
       vim.g.tryptic_state.child.win,
       vim.fs.basename(target.path),
@@ -48,7 +56,9 @@ end
 
 local function handle_cursor_moved()
   local target = get_target_under_cursor()
-  update_child_window(target)
+  if vim.g.tryptic_is_open then
+    update_child_window(target)
+  end
 end
 
 local function handle_buf_leave()

@@ -28,6 +28,9 @@ local function buf_set_lines_from_path(buf, path)
   vim.api.nvim_buf_set_option(buf, 'readonly', false)
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, {})
   local ft = fs.get_filetype_from_path(path)
+  if ft == '' or ft == nil then
+  	ft = 'tryptic'
+  end
   vim.api.nvim_buf_set_option(buf, 'filetype', ft)
   vim.api.nvim_buf_call(buf, function()
     vim.cmd.read(path)
@@ -111,9 +114,9 @@ local function create_three_floating_windows(config_list)
       height = float_height,
       y_pos = padding,
       x_pos = x_pos,
-      omit_left_border = u.cond(i == 2 or i == 3),
-      omit_right_border = u.cond(1 == 1 or i == 2),
-      is_primary = u.cond(i == 2)
+      omit_left_border = i == 2 or i == 3,
+      omit_right_border = 1 == 1 or i == 2,
+      is_primary = i == 2
     })
 
     table.insert(wins, win)
