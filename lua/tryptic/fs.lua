@@ -60,35 +60,9 @@ local function get_parent(path)
   return vim.fs.dirname(path)
 end
 
-local function tree_to_lines(tree)
-  local lines = {}
-  for _, child in ipairs(tree.children) do
-    local line = u.cond(child.is_dir, {
-      when_true = function()
-        return " " .. child.display_name
-      end,
-      when_false = function()
-        local maybe_icon, color = devicons.get_icon_color_by_filetype(child.filetype)
-        local fallback = ""
-        local icon = u.cond(maybe_icon ~= nil, {
-          when_true = function ()
-	    -- TODO: Icon color
-            return maybe_icon
-          end,
-          when_false = fallback
-        })
-        return icon .. ' ' .. child.display_name
-      end
-    })
-    table.insert(lines, line)
-  end
-  return lines
-end
-
 return {
   list_dir_contents = list_dir_contents,
   get_dirname_of_current_buffer = get_dirname_of_current_buffer,
   get_parent = get_parent,
-  tree_to_lines = tree_to_lines,
   get_filetype_from_path = get_filetype_from_path
 }

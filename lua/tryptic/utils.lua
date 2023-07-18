@@ -16,6 +16,11 @@ local function cond(value, handlers)
   return handlers.when_false
 end
 
+local function with_highlight_group(group_name, str)
+  return '%#' .. group_name .. '#' .. str
+end
+
 return {
-  cond = cond
+  cond = cond,
+  with_highlight_group = with_highlight_group
 }

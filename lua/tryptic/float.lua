@@ -16,6 +16,19 @@ local function buf_set_lines(buf, lines)
   end)
 end
 
+local function buf_apply_highlights(buf, highlights)
+  for i, highlight in ipairs(highlights) do
+    vim.api.nvim_buf_add_highlight(
+      buf,
+      0,
+      highlight,
+      i - 1,
+      0,
+      3
+    )
+  end
+end
+
 local function win_set_lines(win, lines)
   local buf = vim.api.nvim_win_get_buf(win)
   buf_set_lines(buf, lines)
@@ -48,7 +61,7 @@ local function buf_set_lines_from_path(buf, path)
 end
 
 local function create_new_buffer(lines)
-  local buf = vim.api.nvim_create_buf(false, true)
+  local buf = vim.api.nvim_create_buf(false, false)
   modify_locked_buffer(buf, function()
     buf_set_lines(buf, lines)
     vim.api.nvim_buf_set_option(buf, 'filetype', 'tryptic')
@@ -70,7 +83,7 @@ local function configure_border_with_missing_side(omit_left, omit_right)
 end
 
 local function create_floating_window(config)
-  local buf = create_new_buffer(config.lines)
+  local buf = create_new_buffer({})
   local win = vim.api.nvim_open_win(buf, true, {
     width = config.width,
     height = config.height,
@@ -90,12 +103,11 @@ local function create_floating_window(config)
     vim.api.nvim_win_set_option(win, 'cursorline', true)
     vim.api.nvim_win_set_option(win, 'number', true)
   end
-  win_set_title(win, config.title)
   return win
 end
 
 -- TODO: Split this out into separate create and update functions
-local function create_three_floating_windows(config_list)
+local function create_three_floating_windows()
   local screen_height = vim.o.lines
   local screen_width = vim.o.columns
   local padding = 4
@@ -104,7 +116,7 @@ local function create_three_floating_windows(config_list)
 
   local wins = {}
 
-  for i, config in ipairs(config_list) do
+  for i = 1, 3, 1 do
     local x_pos
     if i == 1 then
       x_pos = padding
@@ -114,8 +126,6 @@ local function create_three_floating_windows(config_list)
       x_pos = padding + (float_width * (i - 1)) + 4
     end
     local win = create_floating_window({
-      title = config.title,
-      lines = config.lines,
       width = float_width,
       height = float_height,
       y_pos = padding,
@@ -148,5 +158,6 @@ return {
   buf_set_lines = buf_set_lines,
   buf_set_lines_from_path = buf_set_lines_from_path,
   win_set_lines = win_set_lines,
-  win_set_title = win_set_title
+  win_set_title = win_set_title,
+  buf_apply_highlights = buf_apply_highlights
 }
