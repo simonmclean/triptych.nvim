@@ -22,3 +22,11 @@ end, { buffer = 0 })
 map('n', 'a', function()
   require 'tryptic'.add_file_or_dir()
 end, { buffer = 0 })
+
+map('n', 'c', function()
+  require 'tryptic'.duplicate()
+end, { buffer = 0 })
+
+map('n', 'r', function()
+  require 'tryptic'.rename()
+end, { buffer = 0 })

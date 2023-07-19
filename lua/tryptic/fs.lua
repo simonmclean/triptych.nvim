@@ -60,9 +60,20 @@ local function get_parent(path)
   return vim.fs.dirname(path)
 end
 
+local function read_lines_from_file(path)
+  local temp_buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_call(temp_buf, function()
+    vim.cmd.read(path)
+    -- TODO: This is kind of hacky
+    vim.api.nvim_exec2('normal! 1G0dd', {})
+  end)
+  return vim.api.nvim_buf_get_lines(temp_buf, 0, -1, true)
+end
+
 return {
   list_dir_contents = list_dir_contents,
   get_dirname_of_current_buffer = get_dirname_of_current_buffer,
   get_parent = get_parent,
-  get_filetype_from_path = get_filetype_from_path
+  get_filetype_from_path = get_filetype_from_path,
+  read_lines_from_file = read_lines_from_file
 }

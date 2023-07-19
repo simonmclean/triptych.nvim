@@ -262,7 +262,7 @@ local function delete()
     '&y\n&n',
     "Question"
   )
-  if response == 1 then
+  if response and response == 1 then
     vim.fn.delete(target.path, "rf")
     -- TODO: This an inefficient way of refreshing the view
     nav_to(vim.g.tryptic_state.current.path)
@@ -274,6 +274,9 @@ local function add_file_or_dir()
   local response = vim.fn.trim(vim.fn.input(
     'Enter name for new file or directory (dirs end with a "/"): '
   ))
+  if not response then
+    return
+  end
   local response_length = string.len(response)
   local includes_file = string.sub(response, response_length, response_length) ~= '/'
   if includes_file then
@@ -293,20 +296,37 @@ local function add_file_or_dir()
   else
     vim.fn.mkdir(current_directory .. '/' .. response, "p")
   end
-  -- local parts = vim.fn.split(response, '/', true)
-  -- vim.print(parts)
 
   -- TODO: This an inefficient way of refreshing the view
   nav_to(vim.g.tryptic_state.current.path)
 end
 
+local function duplicate()
+  local target = get_target_under_cursor()
+  local response = vim.fn.trim(vim.fn.input(
+    'Copy "' .. target.display_name .. '" as: '
+  ))
+  if response and response ~= target.display_name then
+    vim.fn.writefile(
+      fs.read_lines_from_file(target.path),
+      vim.g.tryptic_state.current.path .. '/' .. response
+    )
+    -- TODO: This an inefficient way of refreshing the view
+    nav_to(vim.g.tryptic_state.current.path)
+  end
+end
+
 local function rename()
   local target = get_target_under_cursor()
-  local response = vim.fn.input(
-    'Enter new name for ' .. target.display_name
-  )
-  local basename = vim.fs.dirname(target.path)
-  vim.fn.rename(target.path, basename .. response)
+  local response = vim.fn.trim(vim.fn.input(
+    'Enter new name for ' .. target.display_name .. ': '
+  ))
+  if response and response ~= target.display_name then
+    local basename = vim.fs.dirname(target.path)
+    vim.fn.rename(target.path, basename .. '/' .. response)
+    -- TODO: This an inefficient way of refreshing the view
+    nav_to(vim.g.tryptic_state.current.path)
+  end
 end
 
 return {
@@ -316,5 +336,7 @@ return {
   edit_file = edit_file,
   setup = setup,
   delete = delete,
-  add_file_or_dir = add_file_or_dir
+  add_file_or_dir = add_file_or_dir,
+  duplicate = duplicate,
+  rename = rename
 }
