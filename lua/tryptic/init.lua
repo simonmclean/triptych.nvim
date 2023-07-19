@@ -11,7 +11,7 @@ vim.g.tryptic_state = {
     win = nil
   },
   current = {
-    win = nil
+    win = nil,
   },
   child = {
     win = nil
@@ -19,6 +19,7 @@ vim.g.tryptic_state = {
 }
 vim.g.tryptic_is_open = false
 vim.g.tryptic_autocmds = {}
+local path_to_line_map = {}
 
 vim.keymap.set('n', '<leader>0', ':lua require"tryptic".toggle_tryptic()<CR>')
 
@@ -74,17 +75,20 @@ local function update_child_window(target)
     float.win_set_title(
       vim.g.tryptic_state.child.win,
       vim.fs.basename(target.path),
-      ""
+      "",
+      "Directory"
     )
     local lines, highlights = tree_to_lines(target)
     float.buf_set_lines(buf, lines)
     float.buf_apply_highlights(buf, highlights)
   else
     local filetype = fs.get_filetype_from_path(target.path) -- TODO: De-dupe this
+    local maybe_icon, maybe_highlight = devicons.get_icon_by_filetype(filetype)
     float.win_set_title(
       vim.g.tryptic_state.child.win,
       vim.fs.basename(target.path),
-      devicons.get_icon_by_filetype(filetype)
+      maybe_icon,
+      maybe_highlight
     )
     float.buf_set_lines_from_path(buf, target.path)
   end
@@ -96,8 +100,11 @@ local function get_target_under_cursor()
 end
 
 local function handle_cursor_moved()
-  local target = get_target_under_cursor()
   if vim.g.tryptic_is_open then
+    local target = get_target_under_cursor()
+    local current_dir = vim.g.tryptic_state.current.path
+    local line_number = vim.api.nvim_win_get_cursor(0)[1]
+    path_to_line_map[current_dir] = line_number
     update_child_window(target)
   end
 end
@@ -111,7 +118,9 @@ end
 local function create_autocommands()
   local a = vim.api.nvim_create_autocmd('CursorMoved', {
     group = au_group,
-    callback = handle_cursor_moved
+    callback = function()
+      handle_cursor_moved()
+    end
   })
 
   local b = vim.api.nvim_create_autocmd('BufLeave', {
@@ -128,43 +137,59 @@ local function destroy_autocommands()
   end
 end
 
-local function nav_to(target_path)
-  local focused_buf = vim.api.nvim_win_get_buf(vim.g.tryptic_state.current.win)
-  local focused_contents = fs.list_dir_contents(target_path)
-  local focused_title = vim.fs.basename(target_path)
+local function nav_to(target_dir)
+  local focused_win = vim.g.tryptic_state.current.win
+  local parent_win = vim.g.tryptic_state.parent.win
+  local child_win = vim.g.tryptic_state.child.win
+
+  local focused_buf = vim.api.nvim_win_get_buf(focused_win)
+  local focused_contents = fs.list_dir_contents(target_dir)
+  local focused_title = vim.fs.basename(target_dir)
   local focused_lines, focused_highlights = tree_to_lines(focused_contents)
 
-  local parent_buf = vim.api.nvim_win_get_buf(vim.g.tryptic_state.parent.win)
-  local parent_path = fs.get_parent(target_path)
+  local parent_buf = vim.api.nvim_win_get_buf(parent_win)
+  local parent_path = fs.get_parent(target_dir)
   local parent_title = vim.fs.basename(parent_path)
   local parent_contents = fs.list_dir_contents(parent_path)
   local parent_lines, parent_highlights = tree_to_lines(parent_contents)
 
-  float.win_set_lines(vim.g.tryptic_state.parent.win, parent_lines)
-  float.win_set_lines(vim.g.tryptic_state.current.win, focused_lines)
+  float.win_set_lines(parent_win, parent_lines)
+  float.win_set_lines(focused_win, focused_lines)
 
-  float.win_set_title(vim.g.tryptic_state.parent.win, parent_title, "")
-  float.win_set_title(vim.g.tryptic_state.current.win, focused_title, "")
+  float.win_set_title(parent_win, parent_title, "", "Directory")
+  float.win_set_title(focused_win, focused_title, "", "Directory")
 
   float.buf_apply_highlights(focused_buf, focused_highlights)
   float.buf_apply_highlights(parent_buf, parent_highlights)
 
+  local focused_win_line_number = path_to_line_map[target_dir] or 1
+  vim.api.nvim_win_set_cursor(0, { focused_win_line_number, 0 })
+
+  local parent_win_line_number = 1
+  for i, child in ipairs(parent_contents.children) do
+    if child.path == target_dir then
+      parent_win_line_number = i
+      break
+    end
+  end
+  vim.api.nvim_win_set_cursor(parent_win, { parent_win_line_number, 0 })
+
   vim.g.tryptic_state = {
     parent = {
       path = parent_path,
-      contents = parent_contents, -- TODO: Do I need this in the state?
-      win = vim.g.tryptic_state.parent.win
+      contents = parent_contents,
+      win = parent_win
     },
     current = {
-      path = target_path,
+      path = target_dir,
       contents = focused_contents,
-      win = vim.g.tryptic_state.current.win
+      win = focused_win,
     },
     child = {
       path = nil,
       contents = nil,
       lines = nil,
-      win = vim.g.tryptic_state.child.win
+      win = child_win
     }
   }
 end
@@ -174,7 +199,7 @@ local function open_tryptic()
     return
   end
 
-  local path = fs.get_dirname_of_current_buffer()
+  local file_path_dir = fs.get_dirname_of_current_buffer()
 
   vim.g.tryptic_is_open = true
 
@@ -185,7 +210,7 @@ local function open_tryptic()
       win = windows[1]
     },
     current = {
-      win = windows[2]
+      win = windows[2],
     },
     child = {
       win = windows[3]
@@ -210,7 +235,7 @@ local function open_tryptic()
     vim.g.tryptic_state = nil
   end
 
-  nav_to(path)
+  nav_to(file_path_dir)
 end
 
 local function toggle_tryptic()
@@ -230,10 +255,66 @@ local function setup()
   vim.print('SETUP')
 end
 
+local function delete()
+  local target = get_target_under_cursor()
+  local response = vim.fn.confirm(
+    'Are you sure you want to delete "' .. target.display_name .. '"?',
+    '&y\n&n',
+    "Question"
+  )
+  if response == 1 then
+    vim.fn.delete(target.path, "rf")
+    -- TODO: This an inefficient way of refreshing the view
+    nav_to(vim.g.tryptic_state.current.path)
+  end
+end
+
+local function add_file_or_dir()
+  local current_directory = vim.g.tryptic_state.current.path
+  local response = vim.fn.trim(vim.fn.input(
+    'Enter name for new file or directory (dirs end with a "/"): '
+  ))
+  local response_length = string.len(response)
+  local includes_file = string.sub(response, response_length, response_length) ~= '/'
+  if includes_file then
+    local includes_dirs = string.find(response, '/') ~= nil
+
+    if includes_dirs then
+      local length_of_filename = string.find(string.reverse(response), '/') - 1
+      local filename = string.sub(response, response_length - length_of_filename + 1, response_length)
+      local dirs_to_create = string.sub(response, 1, response_length - length_of_filename)
+      local absolute_dir_path = current_directory .. '/' .. dirs_to_create
+      vim.fn.mkdir(absolute_dir_path, "p")
+      -- TODO: writefile is destructive. Add checking
+      vim.fn.writefile({}, absolute_dir_path .. filename)
+    else
+      vim.fn.writefile({}, current_directory .. '/' .. response)
+    end
+  else
+    vim.fn.mkdir(current_directory .. '/' .. response, "p")
+  end
+  -- local parts = vim.fn.split(response, '/', true)
+  -- vim.print(parts)
+
+  -- TODO: This an inefficient way of refreshing the view
+  nav_to(vim.g.tryptic_state.current.path)
+end
+
+local function rename()
+  local target = get_target_under_cursor()
+  local response = vim.fn.input(
+    'Enter new name for ' .. target.display_name
+  )
+  local basename = vim.fs.dirname(target.path)
+  vim.fn.rename(target.path, basename .. response)
+end
+
 return {
   toggle_tryptic = toggle_tryptic,
   nav_to = nav_to,
   get_target_under_cursor = get_target_under_cursor,
   edit_file = edit_file,
   setup = setup,
+  delete = delete,
+  add_file_or_dir = add_file_or_dir
 }

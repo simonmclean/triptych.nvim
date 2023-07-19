@@ -34,13 +34,18 @@ local function win_set_lines(win, lines)
   buf_set_lines(buf, lines)
 end
 
-local function win_set_title(win, title, icon)
+local function win_set_title(win, title, icon, highlight)
   vim.api.nvim_win_call(win, function()
     local maybe_icon = ''
     if icon then
-      maybe_icon = icon .. ' '
+      if highlight then
+        maybe_icon = u.with_highlight_group(highlight, icon) .. ' '
+      else
+        maybe_icon = icon .. ' '
+      end
     end
-    vim.wo.winbar = '%=' .. maybe_icon .. title .. '%='
+    local title_with_hi = u.with_highlight_group("WinBar", title)
+    vim.wo.winbar = '%=' .. maybe_icon .. title_with_hi .. '%='
   end)
 end
 
@@ -97,12 +102,10 @@ local function create_floating_window(config)
     -- ),
     style = 'minimal',
     noautocmd = true,
-    focusable = config.is_primary,
+    focusable = config.is_focusable,
   })
-  if config.is_primary then
-    vim.api.nvim_win_set_option(win, 'cursorline', true)
-    vim.api.nvim_win_set_option(win, 'number', true)
-  end
+  vim.api.nvim_win_set_option(win, 'cursorline', config.enable_cursorline)
+  vim.api.nvim_win_set_option(win, 'number', config.show_numbers)
   return win
 end
 
@@ -117,10 +120,13 @@ local function create_three_floating_windows()
   local wins = {}
 
   for i = 1, 3, 1 do
+    local is_parent = i == 1
+    local is_primary = i == 2
+    local is_child = i == 3
     local x_pos
-    if i == 1 then
+    if is_parent then
       x_pos = padding
-    elseif i == 2 then
+    elseif is_primary then
       x_pos = padding + (float_width * (i - 1)) + 2
     else
       x_pos = padding + (float_width * (i - 1)) + 4
@@ -130,9 +136,11 @@ local function create_three_floating_windows()
       height = float_height,
       y_pos = padding,
       x_pos = x_pos,
-      omit_left_border = i == 2 or i == 3,
-      omit_right_border = 1 == 1 or i == 2,
-      is_primary = i == 2
+      omit_left_border = is_primary or is_child,
+      omit_right_border = is_parent or is_primary,
+      enable_cursorline = is_parent or is_primary,
+      is_focusable = is_primary,
+      show_numbers = is_primary
     })
 
     table.insert(wins, win)

@@ -1,8 +1,4 @@
 local function cond(value, handlers)
-  if type(value) ~= "boolean" then
-    error("cond expects value to be a boolean")
-  end
-
   if (value) then
     if type(handlers.when_true) == 'function' then
       return handlers.when_true()
