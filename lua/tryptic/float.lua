@@ -74,19 +74,6 @@ local function create_new_buffer(lines)
   return buf
 end
 
--- TODO: This is borked
-local function configure_border_with_missing_side(omit_left, omit_right)
-  local left_border = u.cond(omit_left, {
-    when_true = "",
-    when_false = "║"
-  })
-  local right_border = u.cond(omit_right, {
-    when_true = "",
-    when_false = "║"
-  })
-  return { "╔", "═", "╗", right_border, "╝", "═", "╚", left_border }
-end
-
 local function create_floating_window(config)
   local buf = create_new_buffer({})
   local win = vim.api.nvim_open_win(buf, true, {
@@ -96,10 +83,6 @@ local function create_floating_window(config)
     col = config.x_pos,
     row = config.y_pos,
     border = 'single',
-    -- border = configure_border_with_missing_side(
-    --   config.omit_left_border,
-    --   config.omit_right_border
-    -- ),
     style = 'minimal',
     noautocmd = true,
     focusable = config.is_focusable,
@@ -109,32 +92,45 @@ local function create_floating_window(config)
   return win
 end
 
--- TODO: Split this out into separate create and update functions
 local function create_three_floating_windows()
+  local max_width = 220
+  local max_height = 45
   local screen_height = vim.o.lines
   local screen_width = vim.o.columns
   local padding = 4
-  local float_width = math.floor((screen_width / 3)) - padding
-  local float_height = screen_height - (padding * 3)
+  local max_float_width = math.floor(max_width / 3)
+  local float_width = math.min(
+    math.floor((screen_width / 3)) - padding,
+    max_float_width
+  )
+  local float_height = math.min(
+    screen_height - (padding * 3),
+    max_height
+  )
 
   local wins = {}
 
+  local x_pos = u.cond(screen_width > (max_width + (padding * 2)), {
+    when_true = math.floor((screen_width - max_width) / 2),
+    when_false = padding
+  })
+  local y_pos = u.cond(screen_height > (max_height + (padding * 2)), {
+    when_true = math.floor((screen_height - max_height) / 2),
+    when_false = padding
+  })
   for i = 1, 3, 1 do
     local is_parent = i == 1
     local is_primary = i == 2
     local is_child = i == 3
-    local x_pos
-    if is_parent then
-      x_pos = padding
-    elseif is_primary then
-      x_pos = padding + (float_width * (i - 1)) + 2
-    else
-      x_pos = padding + (float_width * (i - 1)) + 4
+    if is_primary then
+      x_pos = x_pos + float_width + 2
+    elseif is_child then
+      x_pos = x_pos + float_width + 2
     end
     local win = create_floating_window({
       width = float_width,
       height = float_height,
-      y_pos = padding,
+      y_pos = y_pos,
       x_pos = x_pos,
       omit_left_border = is_primary or is_child,
       omit_right_border = is_parent or is_primary,
