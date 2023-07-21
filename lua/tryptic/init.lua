@@ -5,25 +5,28 @@ local devicons_installed, devicons = pcall(require, 'nvim-web-devicons')
 
 require 'plenary.reload'.reload_module('tryptic')
 
--- Globals
-vim.g.tryptic_state = {
-  parent = {
-    win = nil
-  },
-  current = {
-    win = nil,
-  },
-  child = {
-    win = nil
-  },
-}
-vim.g.tryptic_is_open = false
-vim.g.tryptic_autocmds = {}
 local path_to_line_map = {}
 
 vim.keymap.set('n', '<leader>0', ':lua require"tryptic".toggle_tryptic()<CR>')
 
 local au_group = vim.api.nvim_create_augroup("TrypticAutoCmd", { clear = true })
+
+local function initialise_state()
+  vim.g.tryptic_state = {
+    parent = {
+      win = nil
+    },
+    current = {
+      win = nil,
+    },
+    child = {
+      win = nil
+    },
+  }
+  vim.g.tryptic_is_open = false
+  vim.g.tryptic_autocmds = {}
+  path_to_line_map = {}
+end
 
 local function tree_to_lines(tree)
   local lines = {}
@@ -78,7 +81,7 @@ local function update_child_window(target)
       "",
       "Directory"
     )
-    local lines, highlights = tree_to_lines(target)
+    local lines, highlights = tree_to_lines(fs.list_dir_contents(target.path))
     float.buf_set_lines(buf, lines)
     float.buf_apply_highlights(buf, highlights)
   else
@@ -137,7 +140,18 @@ local function destroy_autocommands()
   end
 end
 
-local function nav_to(target_dir)
+local function index_of_path(path, paths_list)
+  local num = 1
+  for i, child in ipairs(paths_list) do
+    if child.path == path then
+      num = i
+      break
+    end
+  end
+  return num
+end
+
+local function nav_to(target_dir, cursor_target)
   local focused_win = vim.g.tryptic_state.current.win
   local parent_win = vim.g.tryptic_state.parent.win
   local child_win = vim.g.tryptic_state.child.win
@@ -162,16 +176,16 @@ local function nav_to(target_dir)
   float.buf_apply_highlights(focused_buf, focused_highlights)
   float.buf_apply_highlights(parent_buf, parent_highlights)
 
-  local focused_win_line_number = path_to_line_map[target_dir] or 1
-  vim.api.nvim_win_set_cursor(0, { focused_win_line_number, 0 })
+  local focused_win_line_number = u.cond(cursor_target, {
+    when_true = function()
+      return index_of_path(cursor_target, focused_contents.children)
+    end,
+    when_false = path_to_line_map[target_dir] or 1
+  })
+  local buf_line_count = vim.api.nvim_buf_line_count(focused_buf)
+  vim.api.nvim_win_set_cursor(0, { math.min(focused_win_line_number, buf_line_count), 0 })
 
-  local parent_win_line_number = 1
-  for i, child in ipairs(parent_contents.children) do
-    if child.path == target_dir then
-      parent_win_line_number = i
-      break
-    end
-  end
+  local parent_win_line_number = index_of_path(target_dir, parent_contents.children)
   vim.api.nvim_win_set_cursor(parent_win, { parent_win_line_number, 0 })
 
   vim.g.tryptic_state = {
@@ -199,7 +213,10 @@ local function open_tryptic()
     return
   end
 
-  local file_path_dir = fs.get_dirname_of_current_buffer()
+  initialise_state()
+
+  local buf = vim.api.nvim_buf_get_name(0)
+  local buf_dir = vim.fs.dirname(buf)
 
   vim.g.tryptic_is_open = true
 
@@ -230,12 +247,10 @@ local function open_tryptic()
     })
 
     destroy_autocommands()
-
-    vim.g.tryptic_target_buffer = nil
-    vim.g.tryptic_state = nil
+    initialise_state()
   end
 
-  nav_to(file_path_dir)
+  nav_to(buf_dir, buf)
 end
 
 local function toggle_tryptic()

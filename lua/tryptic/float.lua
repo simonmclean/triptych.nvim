@@ -44,7 +44,8 @@ local function win_set_title(win, title, icon, highlight)
         maybe_icon = icon .. ' '
       end
     end
-    local title_with_hi = u.with_highlight_group("WinBar", title)
+    local safe_title = string.gsub(title, "%%", '')
+    local title_with_hi = u.with_highlight_group("WinBar", safe_title)
     vim.wo.winbar = '%=' .. maybe_icon .. title_with_hi .. '%='
   end)
 end
@@ -58,15 +59,28 @@ local function buf_set_lines_from_path(buf, path)
     end
     vim.api.nvim_buf_set_option(buf, 'filetype', ft)
     vim.api.nvim_buf_call(buf, function()
-      vim.cmd.read(path)
-      -- TODO: This is kind of hacky
-      vim.api.nvim_exec2('normal! 1G0dd', {})
+      local file_size = fs.get_file_size_in_kb(path)
+      if file_size < 300 then
+        local success = pcall(function()
+          vim.cmd.read(path)
+        end)
+        if success then
+          --TODO: This is kind of hacky
+          vim.api.nvim_exec2('normal! 1G0dd', {})
+        else
+          local msg = '[Unable to preview file contents]'
+          vim.api.nvim_buf_set_lines(buf, 0, -1, false, { '', msg })
+        end
+      else
+        local msg = '[File size too large to preview]'
+        vim.api.nvim_buf_set_lines(buf, 0, -1, false, { '', msg })
+      end
     end)
   end)
 end
 
 local function create_new_buffer(lines)
-  local buf = vim.api.nvim_create_buf(false, false)
+  local buf = vim.api.nvim_create_buf(false, true)
   modify_locked_buffer(buf, function()
     buf_set_lines(buf, lines)
     vim.api.nvim_buf_set_option(buf, 'filetype', 'tryptic')

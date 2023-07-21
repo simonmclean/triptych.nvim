@@ -2,8 +2,9 @@ local map = vim.keymap.set
 local t = require 'tryptic'
 
 map('n', 'h', function()
+  local focused_path = vim.g.tryptic_state.current.path
   local parent_path = vim.g.tryptic_state.parent.path
-  require 'tryptic'.nav_to(parent_path)
+  require 'tryptic'.nav_to(parent_path, focused_path)
 end, { buffer = 0 })
 
 map('n', 'l', function()

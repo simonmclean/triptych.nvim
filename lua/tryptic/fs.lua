@@ -1,28 +1,46 @@
 local u = require 'tryptic.utils'
-local devicons_installed, devicons = pcall(require, 'nvim-web-devicons')
 
-local function get_filetype_from_path(path)
-  -- There are more robust ways than just using the filetype
-  -- Check the help docs
-  -- Might be worth improving in future
-  return vim.filetype.match({ filename = path })
+local function get_file_size_in_kb(path)
+  local bytes = vim.fn.getfsize(path)
+  return bytes / 1000
 end
 
-local function list_dir_contents(_path, _tree, _current_depth)
-  local path = vim.fs.normalize(_path)
-  local current_depth = _current_depth or 0
+local function get_filetype_from_path(path)
+  local filename = vim.fs.basename(path)
+  local extension = vim.fn.fnamemodify(filename, ':e')
+  local ft = vim.filetype.match({ filename = filename })
 
-  local tree = _tree or {
+  -- TODO: This extension to filetype mapping is a hack
+  -- I should be able to use filetype.match but it isn't working
+  if ft == nil then
+    if extension == 'ts' then return 'typescript' end
+    if extension == 'txt' then return 'text' end
+  end
+
+  -- if ft == nil and get_file_size_in_kb(path) < 300 then
+  --   vim.print('getting thing for ' .. filename)
+  --   local lines = vim.fn.readfile(path)
+  --   if filename == 'config.ts' then
+  --     vim.print('lines', lines)
+  --   end
+  --   local x = vim.filetype.match({ filename = filename, contents = lines })
+  --   vim.print('ft = ' .. (x or ''))
+  --   return x
+  -- end
+
+  return ft
+end
+
+local function list_dir_contents(_path)
+  local path = vim.fs.normalize(_path)
+
+  local tree = {
     path = nil,
     display_name = nil,
     is_dir = nil,
     filetype = nil,
     children = {}
   }
-
-  if current_depth == 2 then
-    return tree
-  end
 
   local index = 1
 
@@ -36,15 +54,15 @@ local function list_dir_contents(_path, _tree, _current_depth)
         when_true = child_name .. '/',
         when_false = child_name
       }),
-      filetype = get_filetype_from_path(child_path),
+      filetype = u.cond(is_dir, {
+        when_true = nil,
+        when_false = function()
+          return get_filetype_from_path(child_path)
+        end
+      }),
       is_dir = is_dir,
       children = {}
     }
-
-    if is_dir then
-      local child_dir_path = tree.children[index].path
-      list_dir_contents(child_dir_path, tree.children[index], current_depth + 1)
-    end
 
     index = index + 1
   end
@@ -75,5 +93,6 @@ return {
   get_dirname_of_current_buffer = get_dirname_of_current_buffer,
   get_parent = get_parent,
   get_filetype_from_path = get_filetype_from_path,
-  read_lines_from_file = read_lines_from_file
+  read_lines_from_file = read_lines_from_file,
+  get_file_size_in_kb = get_file_size_in_kb
 }
