@@ -25,7 +25,7 @@ map('n', 'a', function()
 end, { buffer = 0 })
 
 map('n', 'c', function()
-  require 'tryptic'.duplicate()
+  require 'tryptic'.copy()
 end, { buffer = 0 })
 
 map('n', 'r', function()

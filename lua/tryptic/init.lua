@@ -1,13 +1,14 @@
 local fs = require 'tryptic.fs'
 local float = require 'tryptic.float'
 local u = require 'tryptic.utils'
+local plenary_path = require 'plenary.path'
 local devicons_installed, devicons = pcall(require, 'nvim-web-devicons')
 
 require 'plenary.reload'.reload_module('tryptic')
 
 local path_to_line_map = {}
 
-vim.keymap.set('n', '<leader>0', ':lua require"tryptic".toggle_tryptic()<CR>')
+vim.keymap.set('n', '<leader>-', ':lua require"tryptic".toggle_tryptic()<CR>')
 
 local au_group = vim.api.nvim_create_augroup("TrypticAutoCmd", { clear = true })
 
@@ -316,16 +317,27 @@ local function add_file_or_dir()
   nav_to(vim.g.tryptic_state.current.path)
 end
 
-local function duplicate()
+local function copy()
   local target = get_target_under_cursor()
-  local response = vim.fn.trim(vim.fn.input(
-    'Copy "' .. target.display_name .. '" as: '
-  ))
+  local prompt = 'Copy '
+  prompt = prompt .. u.cond(target.is_dir, {
+    when_true = 'directory "',
+    when_false = 'file "',
+  })
+  prompt = prompt .. u.cond(target.is_dir, {
+    when_true = string.sub(target.display_name, 1, string.len(target.display_name) - 1),
+    when_false = target.display_name
+  })
+  prompt = prompt .. '" as: '
+  local response = vim.fn.trim(vim.fn.input(prompt))
   if response and response ~= target.display_name then
-    vim.fn.writefile(
-      fs.read_lines_from_file(target.path),
-      vim.g.tryptic_state.current.path .. '/' .. response
-    )
+    local p = plenary_path:new(target.path)
+    p:copy({
+      destination = vim.fs.dirname(target.path) .. '/' .. response,
+      recursive = true,
+      override = false,
+      interactive = true
+    })
     -- TODO: This an inefficient way of refreshing the view
     nav_to(vim.g.tryptic_state.current.path)
   end
@@ -352,6 +364,6 @@ return {
   setup = setup,
   delete = delete,
   add_file_or_dir = add_file_or_dir,
-  duplicate = duplicate,
+  copy = copy,
   rename = rename
 }

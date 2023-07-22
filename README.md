@@ -9,6 +9,7 @@
 - Expose config
     - Key mappings
 - Features
+    - Something (like an icon) to clearly signal project root
     - Toggle hidden
     - Delete visual selection
     - Cut and paste (including visual selection)
