@@ -37,8 +37,11 @@ local function list_dir_contents(_path)
   local tree = {
     path = nil,
     display_name = nil,
+    basename = nil, -- i.e file or folder name
+    dirname = nil, -- i.e. parent
     is_dir = nil,
     filetype = nil,
+    cutting = false,
     children = {}
   }
 
@@ -60,6 +63,8 @@ local function list_dir_contents(_path)
           return get_filetype_from_path(child_path)
         end
       }),
+      basename = vim.fs.basename(child_path),
+      dirname = vim.fs.dirname(child_path),
       is_dir = is_dir,
       children = {}
     }

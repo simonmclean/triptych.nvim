@@ -7,6 +7,7 @@ local devicons_installed, devicons = pcall(require, 'nvim-web-devicons')
 require 'plenary.reload'.reload_module('tryptic')
 
 local path_to_line_map = {}
+local cut_list = {}
 
 vim.keymap.set('n', '<leader>-', ':lua require"tryptic".toggle_tryptic()<CR>')
 
@@ -27,6 +28,7 @@ local function initialise_state()
   vim.g.tryptic_is_open = false
   vim.g.tryptic_autocmds = {}
   path_to_line_map = {}
+  cut_list = {}
 end
 
 local function tree_to_lines(tree)
@@ -52,6 +54,19 @@ local function tree_to_lines(tree)
         return line, highlight_name or 'Comment'
       end
     })
+
+    local cut_paths = u.eval(function()
+      local paths = {}
+      for _, cut_item in ipairs(cut_list) do
+        table.insert(paths, cut_item.path)
+      end
+      return paths
+    end)
+
+    if (u.list_includes(cut_paths, child.path)) then
+      line = line .. ' (cut)'
+    end
+
     table.insert(lines, line)
     table.insert(highlights, highlight_name)
   end
@@ -78,7 +93,7 @@ local function update_child_window(target)
   elseif target.is_dir then
     float.win_set_title(
       vim.g.tryptic_state.child.win,
-      vim.fs.basename(target.path),
+      target.basename,
       "",
       "Directory"
     )
@@ -90,7 +105,7 @@ local function update_child_window(target)
     local maybe_icon, maybe_highlight = devicons.get_icon_by_filetype(filetype)
     float.win_set_title(
       vim.g.tryptic_state.child.win,
-      vim.fs.basename(target.path),
+      target.basename,
       maybe_icon,
       maybe_highlight
     )
@@ -271,17 +286,24 @@ local function setup()
   vim.print('SETUP')
 end
 
-local function delete()
-  local target = get_target_under_cursor()
-  local response = vim.fn.confirm(
-    'Are you sure you want to delete "' .. target.display_name .. '"?',
-    '&y\n&n',
-    "Question"
-  )
-  if response and response == 1 then
+local function delete(_target, without_confirm)
+  local target = _target or get_target_under_cursor()
+
+  if without_confirm then
     vim.fn.delete(target.path, "rf")
     -- TODO: This an inefficient way of refreshing the view
     nav_to(vim.g.tryptic_state.current.path)
+  else
+    local response = vim.fn.confirm(
+      'Are you sure you want to delete "' .. target.display_name .. '"?',
+      '&y\n&n',
+      "Question"
+    )
+    if response and response == 1 then
+      vim.fn.delete(target.path, "rf")
+      -- TODO: This an inefficient way of refreshing the view
+      nav_to(vim.g.tryptic_state.current.path)
+    end
   end
 end
 
@@ -317,23 +339,51 @@ local function add_file_or_dir()
   nav_to(vim.g.tryptic_state.current.path)
 end
 
-local function copy()
+local function toggle_cut()
   local target = get_target_under_cursor()
-  local prompt = 'Copy '
-  prompt = prompt .. u.cond(target.is_dir, {
-    when_true = 'directory "',
-    when_false = 'file "',
+  local index = u.list_index_of(cut_list, function(list_item)
+    return target.path == list_item.path
+  end)
+  if index > -1 then
+    table.remove(cut_list, index)
+  else
+    table.insert(cut_list, target)
+  end
+  local lines, highlights = tree_to_lines(vim.g.tryptic_state.current.contents)
+  float.win_set_lines(
+    vim.g.tryptic_state.current.win,
+    lines
+  )
+  float.buf_apply_highlights(0, highlights)
+end
+
+local function copy(_target, _destination)
+  local target = _target or get_target_under_cursor()
+
+  local destination = u.cond(_destination, {
+    when_true = _destination,
+    when_false = function()
+      local prompt = 'Copy '
+      prompt = prompt .. u.cond(target.is_dir, {
+        when_true = 'directory "',
+        when_false = 'file "',
+      })
+      prompt = prompt .. u.cond(target.is_dir, {
+        when_true = string.sub(target.display_name, 1, string.len(target.display_name) - 1),
+        when_false = target.display_name
+      })
+      prompt = prompt .. '" as: '
+      local response = vim.fn.trim(vim.fn.input(prompt))
+      if response and response ~= target.display_name then
+        return target.dirname .. '/' .. response
+      end
+    end
   })
-  prompt = prompt .. u.cond(target.is_dir, {
-    when_true = string.sub(target.display_name, 1, string.len(target.display_name) - 1),
-    when_false = target.display_name
-  })
-  prompt = prompt .. '" as: '
-  local response = vim.fn.trim(vim.fn.input(prompt))
-  if response and response ~= target.display_name then
+
+  if destination then
     local p = plenary_path:new(target.path)
     p:copy({
-      destination = vim.fs.dirname(target.path) .. '/' .. response,
+      destination = destination,
       recursive = true,
       override = false,
       interactive = true
@@ -343,14 +393,33 @@ local function copy()
   end
 end
 
+-- TODO: If the target and destination are the same, do nothing
+-- Also, visual indicator of cut status
+-- Also, visual selection
+local function paste()
+  local cursor_target = get_target_under_cursor()
+  local destination_dir = u.cond(cursor_target.is_dir, {
+    when_true = cursor_target.path,
+    when_false = cursor_target.dirname
+  })
+  -- Using pcall because we want to empty the cut_list, regardless of the outcome
+  pcall(function()
+    for _, cut_item in ipairs(cut_list) do
+      local destination = destination_dir .. '/' .. cut_item.basename
+      copy(cut_item, destination)
+      delete(cut_item, true)
+    end
+  end)
+  cut_list = {}
+end
+
 local function rename()
   local target = get_target_under_cursor()
   local response = vim.fn.trim(vim.fn.input(
     'Enter new name for ' .. target.display_name .. ': '
   ))
   if response and response ~= target.display_name then
-    local basename = vim.fs.dirname(target.path)
-    vim.fn.rename(target.path, basename .. '/' .. response)
+    vim.fn.rename(target.path, target.basename .. '/' .. response)
     -- TODO: This an inefficient way of refreshing the view
     nav_to(vim.g.tryptic_state.current.path)
   end
@@ -365,5 +434,7 @@ return {
   delete = delete,
   add_file_or_dir = add_file_or_dir,
   copy = copy,
-  rename = rename
+  rename = rename,
+  toggle_cut = toggle_cut,
+  paste = paste
 }

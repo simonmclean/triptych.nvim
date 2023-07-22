@@ -31,3 +31,15 @@ end, { buffer = 0 })
 map('n', 'r', function()
   require 'tryptic'.rename()
 end, { buffer = 0 })
+
+map('n', 'q', function()
+  vim.g.tryptic_close()
+end, { buffer = 0 })
+
+map('n', 'x', function()
+  require 'tryptic'.toggle_cut()
+end, { buffer = 0 })
+
+map('n', 'p', function()
+  require 'tryptic'.paste()
+end, { buffer = 0 })
