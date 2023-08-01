@@ -3,6 +3,7 @@
 ## TODO
 - Bug
     - Funky syntax highlighting
+    - When doing cut-n-paste, cursor pos can change in unintuitive way
 - Code quality
     - Organise the contents of init.lua into a separate module
     - Make devicons optional

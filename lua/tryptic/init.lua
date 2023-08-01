@@ -224,6 +224,11 @@ local function nav_to(target_dir, cursor_target)
   }
 end
 
+local function refresh_view()
+  -- TODO: This an inefficient way of refreshing the view
+  nav_to(vim.g.tryptic_state.current.path)
+end
+
 local function open_tryptic()
   if vim.g.tryptic_is_open then
     return
@@ -291,18 +296,16 @@ local function delete(_target, without_confirm)
 
   if without_confirm then
     vim.fn.delete(target.path, "rf")
-    -- TODO: This an inefficient way of refreshing the view
-    nav_to(vim.g.tryptic_state.current.path)
+    refresh_view()
   else
     local response = vim.fn.confirm(
       'Are you sure you want to delete "' .. target.display_name .. '"?',
       '&y\n&n',
       "Question"
     )
-    if response and response == 1 then
+    if u.is_defined(response) and response == 1 then
       vim.fn.delete(target.path, "rf")
-      -- TODO: This an inefficient way of refreshing the view
-      nav_to(vim.g.tryptic_state.current.path)
+      refresh_view()
     end
   end
 end
@@ -312,7 +315,7 @@ local function add_file_or_dir()
   local response = vim.fn.trim(vim.fn.input(
     'Enter name for new file or directory (dirs end with a "/"): '
   ))
-  if not response then
+  if u.is_empty(response) then
     return
   end
   local response_length = string.len(response)
@@ -335,8 +338,7 @@ local function add_file_or_dir()
     vim.fn.mkdir(current_directory .. '/' .. response, "p")
   end
 
-  -- TODO: This an inefficient way of refreshing the view
-  nav_to(vim.g.tryptic_state.current.path)
+  refresh_view()
 end
 
 local function toggle_cut()
@@ -369,12 +371,12 @@ local function copy(_target, _destination)
         when_false = 'file "',
       })
       prompt = prompt .. u.cond(target.is_dir, {
-        when_true = string.sub(target.display_name, 1, string.len(target.display_name) - 1),
+        when_true = u.trim_last_char(target.display_name),
         when_false = target.display_name
       })
       prompt = prompt .. '" as: '
       local response = vim.fn.trim(vim.fn.input(prompt))
-      if response and response ~= target.display_name then
+      if u.is_defined(response) and response ~= target.display_name then
         return target.dirname .. '/' .. response
       end
     end
@@ -388,8 +390,7 @@ local function copy(_target, _destination)
       override = false,
       interactive = true
     })
-    -- TODO: This an inefficient way of refreshing the view
-    nav_to(vim.g.tryptic_state.current.path)
+    refresh_view()
   end
 end
 
@@ -415,15 +416,19 @@ end
 
 local function rename()
   local target = get_target_under_cursor()
+  local display_name = u.cond(target.is_dir, {
+    when_true = u.trim_last_char(target.display_name),
+    when_false = target.display_name
+  })
   local response = vim.fn.trim(vim.fn.input(
-    'Enter new name for ' .. target.display_name .. ': '
+    'Enter new name for "' .. display_name .. '": '
   ))
-  if response and response ~= target.display_name then
+  if u.is_defined(response) and response ~= target.display_name then
     vim.fn.rename(target.path, target.basename .. '/' .. response)
-    -- TODO: This an inefficient way of refreshing the view
-    nav_to(vim.g.tryptic_state.current.path)
+    refresh_view()
   end
 end
+
 
 return {
   toggle_tryptic = toggle_tryptic,
