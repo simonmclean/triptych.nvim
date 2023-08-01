@@ -184,7 +184,7 @@ local function nav_to(target_dir, cursor_target)
   local parent_lines, parent_highlights = tree_to_lines(parent_contents)
 
   float.win_set_lines(parent_win, parent_lines)
-  float.win_set_lines(focused_win, focused_lines)
+  float.win_set_lines(focused_win, focused_lines, true)
 
   float.win_set_title(parent_win, parent_title, "", "Directory")
   float.win_set_title(focused_win, focused_title, "", "Directory")

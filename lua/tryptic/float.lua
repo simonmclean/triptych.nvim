@@ -29,9 +29,14 @@ local function buf_apply_highlights(buf, highlights)
   end
 end
 
-local function win_set_lines(win, lines)
+local function win_set_lines(win, lines, attempt_scroll_top)
   local buf = vim.api.nvim_win_get_buf(win)
   buf_set_lines(buf, lines)
+  if attempt_scroll_top then
+    vim.api.nvim_buf_call(buf, function ()
+      vim.api.nvim_exec2('normal! zb', {})
+    end)
+  end
 end
 
 local function win_set_title(win, title, icon, highlight)
