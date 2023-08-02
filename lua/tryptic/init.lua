@@ -74,6 +74,12 @@ local function tree_to_lines(tree)
   return lines, highlights
 end
 
+local function get_title_postfix(path)
+  if path == vim.fn.getcwd() then
+    return '(cwd)'
+  end
+end
+
 local function update_child_window(target)
   local buf = vim.api.nvim_win_get_buf(vim.g.tryptic_state.child.win)
 
@@ -95,7 +101,8 @@ local function update_child_window(target)
       vim.g.tryptic_state.child.win,
       target.basename,
       "",
-      "Directory"
+      "Directory",
+      get_title_postfix(target.path)
     )
     local lines, highlights = tree_to_lines(fs.list_dir_contents(target.path))
     float.buf_set_lines(buf, lines)
@@ -186,8 +193,8 @@ local function nav_to(target_dir, cursor_target)
   float.win_set_lines(parent_win, parent_lines)
   float.win_set_lines(focused_win, focused_lines, true)
 
-  float.win_set_title(parent_win, parent_title, "", "Directory")
-  float.win_set_title(focused_win, focused_title, "", "Directory")
+  float.win_set_title(parent_win, parent_title, "", "Directory", get_title_postfix(parent_path))
+  float.win_set_title(focused_win, focused_title, "", "Directory", get_title_postfix(target_dir))
 
   float.buf_apply_highlights(focused_buf, focused_highlights)
   float.buf_apply_highlights(parent_buf, parent_highlights)

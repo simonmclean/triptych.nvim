@@ -99,5 +99,5 @@ return {
   get_parent = get_parent,
   get_filetype_from_path = get_filetype_from_path,
   read_lines_from_file = read_lines_from_file,
-  get_file_size_in_kb = get_file_size_in_kb
+  get_file_size_in_kb = get_file_size_in_kb,
 }

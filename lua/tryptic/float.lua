@@ -39,7 +39,7 @@ local function win_set_lines(win, lines, attempt_scroll_top)
   end
 end
 
-local function win_set_title(win, title, icon, highlight)
+local function win_set_title(win, title, icon, highlight, postfix)
   vim.api.nvim_win_call(win, function()
     local maybe_icon = ''
     if icon then
@@ -50,6 +50,9 @@ local function win_set_title(win, title, icon, highlight)
       end
     end
     local safe_title = string.gsub(title, "%%", '')
+    if postfix then
+      safe_title = safe_title .. ' ' .. u.with_highlight_group('Comment', postfix)
+    end
     local title_with_hi = u.with_highlight_group("WinBar", safe_title)
     vim.wo.winbar = '%=' .. maybe_icon .. title_with_hi .. '%='
   end)
