@@ -9,6 +9,7 @@ end, { buffer = 0 })
 
 map('n', 'l', function()
   local target = t.get_target_under_cursor()
+  -- TODO: edit_file should be called from nav_to
   if vim.fn.isdirectory(target.path) == 1 then
     require 'tryptic'.nav_to(target.path)
   else

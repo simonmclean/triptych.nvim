@@ -8,6 +8,7 @@ require 'plenary.reload'.reload_module('tryptic')
 
 local path_to_line_map = {}
 local cut_list = {}
+local opening_win = nil
 
 vim.keymap.set('n', '<leader>-', ':lua require"tryptic".toggle_tryptic()<CR>')
 
@@ -29,6 +30,7 @@ local function initialise_state()
   vim.g.tryptic_autocmds = {}
   path_to_line_map = {}
   cut_list = {}
+  opening_win = nil
 end
 
 local function tree_to_lines(tree)
@@ -243,6 +245,7 @@ local function open_tryptic()
 
   initialise_state()
 
+  opening_win = vim.api.nvim_get_current_win()
   local buf = vim.api.nvim_buf_get_name(0)
   local buf_dir = vim.fs.dirname(buf)
 
@@ -265,7 +268,6 @@ local function open_tryptic()
   create_autocommands()
 
   vim.g.tryptic_close = function()
-    vim.print("CLOSE")
     vim.g.tryptic_is_open = false
 
     float.close_floats({
@@ -275,6 +277,9 @@ local function open_tryptic()
     })
 
     destroy_autocommands()
+
+    vim.api.nvim_set_current_win(opening_win)
+
     initialise_state()
   end
 
@@ -295,7 +300,7 @@ local function edit_file(path)
 end
 
 local function setup()
-  vim.print('SETUP')
+  -- vim.print('SETUP')
 end
 
 local function delete(_target, without_confirm)
