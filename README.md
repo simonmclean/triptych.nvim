@@ -1,4 +1,57 @@
-# tryptic
+# Tryptic
+
+Directory viewer inspired by [Ranger](https://github.com/ranger/ranger).
+
+The UI consists of 3 floating windows. In the center is the currently focused directory. On the left is the parent directory.
+The right window contains either a child directory, or a file preview.
+
+With default bindings use `j` and `k` (or any other motions like `G`,  `gg`, `/` etc) to navigate within the current directory.
+Use `h` and `l` to switch to the parent or child directories respectively.
+If the buffer on the right is a file, then pressing `l` will close Tryptic and open that file in the buffer you were just in.
+You only ever control or focus the middle window.
+
+The advantage of this over other plugins like Netrw and Dirvish is that it provides context, which is missing when you can only see one directory at a time.
+
+## Installation
+
+Example using [Lazy](https://github.com/folke/lazy.nvim)
+
+```lua
+{
+  'simonmclean/tryptic',
+  dependencies = {
+    'nvim-lua/plenary.nvim', -- required
+    'nvim-tree/nvim-web-devicons' -- optional
+  }
+}
+```
+
+## Configuration
+
+Below is the default config. Feel free to overwrite any of these.
+
+```lua
+require 'tryptic'.setup {
+  mappings = {
+    open_tryptic = '<leader>-',
+    -- Everything below is buffer-local, meaning it will only apply to Tryptic windows
+    show_help = 'g?',
+    jump_to_cwd = '.', -- Pressing again will toggle back
+    nav_left = 'h',
+    nav_right = { 'l', '<CR>' },
+    delete = 'd',
+    add = 'a',
+    copy = 'c',
+    rename = 'r',
+    cut = 'x', -- Pressing again will remove the item from the cut list
+    paste = 'p',
+    quit = 'q',
+    toggle_hidden = '<leader>.'
+  }
+}
+```
+
+Key mappings can either be a string, or a table of strings if you want multiple bindings.
 
 ## TODO
 - Bug
