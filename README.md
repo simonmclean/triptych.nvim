@@ -1,4 +1,4 @@
-# Tryptic
+# 📚 Tryptic
 
 Directory viewer inspired by [Ranger](https://github.com/ranger/ranger).
 
@@ -10,11 +10,20 @@ Use `h` and `l` to switch to the parent or child directories respectively.
 If the buffer on the right is a file, then pressing `l` will close Tryptic and open that file in the buffer you were just in.
 You only ever control or focus the middle window.
 
-The advantage of this over other plugins like Netrw and Dirvish is that it provides context, which is missing when you can only see one directory at a time.
+## ✨ Features
 
-## Installation
+- TODO
 
-Example using [Lazy](https://github.com/folke/lazy.nvim)
+## ⚡️ Requirements
+
+- Neovim >= 0.8.0
+- A [Nerd Font](https://www.nerdfonts.com/) (optional)
+- [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons) (optional)
+- [plenary.nvim](https://github.com/nvim-lua/plenary.nvim/tree/master) - Used to perform certain filesystem operations
+
+## 📦 Installation
+
+Example using [Lazy](https://github.com/folke/lazy.nvim).
 
 ```lua
 {
@@ -26,7 +35,7 @@ Example using [Lazy](https://github.com/folke/lazy.nvim)
 }
 ```
 
-## Configuration
+## ⚙️ Configuration
 
 Below is the default config. Feel free to overwrite any of these.
 
@@ -53,7 +62,7 @@ require 'tryptic'.setup {
 
 Key mappings can either be a string, or a table of strings if you want multiple bindings.
 
-## TODO
+## 🛠️ TODO
 - Bug
     - When doing cut-n-paste, cursor pos can change in unintuitive way
 - Code quality
