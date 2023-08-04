@@ -12,7 +12,16 @@ You only ever control or focus the middle window.
 
 ## ✨ Features
 
-- TODO
+- Rapid, intuitive directory browsing
+- File preview
+- Pretty icons
+- Git signs (TODO)
+- Diagnostic signs (TODO)
+- Create files and folders
+- Rename
+- Delete
+- Copy
+- Cut 'n' paste
 
 ## ⚡️ Requirements
 
