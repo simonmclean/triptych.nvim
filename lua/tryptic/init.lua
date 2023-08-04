@@ -10,8 +10,6 @@ local path_to_line_map = {}
 local cut_list = {}
 local opening_win = nil
 
-vim.keymap.set('n', '<leader>-', ':lua require"tryptic".toggle_tryptic()<CR>')
-
 local au_group = vim.api.nvim_create_augroup("TrypticAutoCmd", { clear = true })
 
 local function initialise_state()
@@ -33,6 +31,10 @@ local function initialise_state()
   opening_win = nil
 end
 
+local function close_tryptic()
+  vim.g.tryptic_close()
+end
+
 local function tree_to_lines(tree)
   local lines = {}
   local highlights = {}
@@ -40,20 +42,23 @@ local function tree_to_lines(tree)
   for _, child in ipairs(tree.children) do
     local line, highlight_name = u.cond(child.is_dir, {
       when_true = function()
-        local line = " " .. child.display_name
+        local line = ''
+        if devicons_installed then
+          line = line .. " "
+        end
+        line = line .. child.display_name
         return line, 'Directory'
       end,
       when_false = function()
-        local maybe_icon, highlight_name = devicons.get_icon_by_filetype(child.filetype)
-        local fallback = ""
-        local icon = u.cond(maybe_icon ~= nil, {
-          when_true = function()
-            return maybe_icon
-          end,
-          when_false = fallback
-        })
-        local line = icon .. ' ' .. child.display_name
-        return line, highlight_name or 'Comment'
+        if devicons_installed then
+          local maybe_icon, maybe_highlight = devicons.get_icon_by_filetype(child.filetype)
+          local highlight = maybe_highlight or 'Comment'
+          local fallback_icon = ""
+          local icon = maybe_icon or fallback_icon
+          local line = icon .. ' ' .. child.display_name
+          return line, highlight
+        end
+        return child.display_name
       end
     })
 
@@ -111,12 +116,19 @@ local function update_child_window(target)
     float.buf_apply_highlights(buf, highlights)
   else
     local filetype = fs.get_filetype_from_path(target.path) -- TODO: De-dupe this
-    local maybe_icon, maybe_highlight = devicons.get_icon_by_filetype(filetype)
+    local icon, highlight = u.cond(devicons_installed, {
+      when_true = function()
+        return devicons.get_icon_by_filetype(filetype)
+      end,
+      when_false = function ()
+        return nil, nil
+      end
+    })
     float.win_set_title(
       vim.g.tryptic_state.child.win,
       target.basename,
-      maybe_icon,
-      maybe_highlight
+      icon,
+      highlight
     )
     float.buf_set_lines_from_path(buf, target.path)
   end
@@ -221,6 +233,7 @@ local function nav_to(target_dir, cursor_target)
     },
     current = {
       path = target_dir,
+      previous_path = vim.g.tryptic_state.current.path,
       contents = focused_contents,
       win = focused_win,
     },
@@ -288,19 +301,40 @@ end
 
 local function toggle_tryptic()
   if vim.g.tryptic_is_open then
-    vim.g.tryptic_close()
+    close_tryptic()
   else
     open_tryptic()
   end
 end
 
 local function edit_file(path)
-  vim.g.tryptic_close()
+  close_tryptic()
   vim.cmd.edit(path)
 end
 
-local function setup()
-  -- vim.print('SETUP')
+local function setup(user_config)
+  local default_config = {
+    mappings = {
+      open_tryptic = '<leader>-',
+      show_help = 'g?',
+      jump_to_cwd = '.',
+      nav_left = 'h',
+      nav_right = { 'l', '<CR>' },
+      delete = 'd',
+      add = 'a',
+      copy = 'c',
+      rename = 'r',
+      cut = 'x',
+      paste = 'p',
+      quit = 'q',
+      toggle_hidden = '<leader>.' -- TODO implement this
+    }
+  }
+
+  local final_config = u.merge_tables(default_config, user_config or {})
+
+  vim.g.tryptic_config = final_config
+  vim.keymap.set('n', vim.g.tryptic_config.mappings.open_tryptic, ':lua require"tryptic".toggle_tryptic()<CR>')
 end
 
 local function delete(_target, without_confirm)
@@ -441,10 +475,32 @@ local function rename()
   end
 end
 
+local function jump_to_cwd()
+  local current = vim.g.tryptic_state.current
+  local cwd = vim.fn.getcwd()
+  if current.path == cwd and current.previous_path then
+    nav_to(current.previous_path)
+  else
+    nav_to(cwd)
+  end
+end
+
+local function help()
+  local win = vim.g.tryptic_state.child.win
+  float.win_set_title(
+    win,
+    'Help',
+    "󰋗",
+    "Directory"
+  )
+  float.win_set_lines(win, require 'tryptic.help'.help_lines())
+end
 
 return {
   toggle_tryptic = toggle_tryptic,
+  close_tryptic = close_tryptic,
   nav_to = nav_to,
+  jump_to_cwd = jump_to_cwd,
   get_target_under_cursor = get_target_under_cursor,
   edit_file = edit_file,
   setup = setup,
@@ -453,5 +509,6 @@ return {
   copy = copy,
   rename = rename,
   toggle_cut = toggle_cut,
-  paste = paste
+  paste = paste,
+  help = help
 }

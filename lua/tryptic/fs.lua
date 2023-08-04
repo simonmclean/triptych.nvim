@@ -1,4 +1,5 @@
 local u = require 'tryptic.utils'
+local plenary_filetype = require 'plenary.filetype'
 
 local function get_file_size_in_kb(path)
   local bytes = vim.fn.getfsize(path)
@@ -6,29 +7,7 @@ local function get_file_size_in_kb(path)
 end
 
 local function get_filetype_from_path(path)
-  local filename = vim.fs.basename(path)
-  local extension = vim.fn.fnamemodify(filename, ':e')
-  local ft = vim.filetype.match({ filename = filename })
-
-  -- TODO: This extension to filetype mapping is a hack
-  -- I should be able to use filetype.match but it isn't working
-  if ft == nil then
-    if extension == 'ts' then return 'typescript' end
-    if extension == 'txt' then return 'text' end
-  end
-
-  -- if ft == nil and get_file_size_in_kb(path) < 300 then
-  --   vim.print('getting thing for ' .. filename)
-  --   local lines = vim.fn.readfile(path)
-  --   if filename == 'config.ts' then
-  --     vim.print('lines', lines)
-  --   end
-  --   local x = vim.filetype.match({ filename = filename, contents = lines })
-  --   vim.print('ft = ' .. (x or ''))
-  --   return x
-  -- end
-
-  return ft
+  return plenary_filetype.detect(path)
 end
 
 local function list_dir_contents(_path)

@@ -5,15 +5,14 @@
     - When doing cut-n-paste, cursor pos can change in unintuitive way
 - Code quality
     - Organise the contents of init.lua into a separate module
-    - Make devicons optional
-- Expose config
-    - Key mappings
+    - Maximise loading efficiency
+    - Make devicons optional (and remove hard-coded icon literals)
 - Features
+    - When creating a file or dir, the cursor should move to it
+    - Docs
     - Toggle hidden
-    - Multi binding
     - Delete visual selection
     - Cut and paste (including visual selection)
     - Git signs
     - Diagnostics
-    - `g?` help window
 - tests

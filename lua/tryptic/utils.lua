@@ -56,6 +56,17 @@ local function trim_last_char(str)
   return string.sub(str, 1, string.len(str) - 1)
 end
 
+local function merge_tables(a, b)
+  for key, value in pairs(b) do
+    if type(value) == 'table' then
+      merge_tables(a[key], b[key])
+    elseif b[key] then
+      a[key] = value
+    end
+  end
+  return a
+end
+
 return {
   cond = cond,
   eval = eval,
@@ -64,5 +75,6 @@ return {
   with_highlight_group = with_highlight_group,
   is_empty = is_empty,
   is_defined = is_defined,
-  trim_last_char = trim_last_char
+  trim_last_char = trim_last_char,
+  merge_tables = merge_tables
 }
