@@ -26,9 +26,9 @@ You only ever control or focus the middle window.
 ## ⚡️ Requirements
 
 - Neovim >= 0.8.0
-- A [Nerd Font](https://www.nerdfonts.com/) (optional)
-- [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons) (optional)
-- [plenary.nvim](https://github.com/nvim-lua/plenary.nvim/tree/master) - Used to perform certain filesystem operations
+- A [Nerd Font](https://www.nerdfonts.com/) (optional, used for icons)
+- [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons) (optional, used for icons)
+- [nvim-lua/plenary.nvim](https://github.com/nvim-lua/plenary.nvim/tree/master)
 
 ## 📦 Installation
 
@@ -47,6 +47,8 @@ Example using [Lazy](https://github.com/folke/lazy.nvim).
 ## ⚙️ Configuration
 
 Below is the default config. Feel free to overwrite any of these.
+
+Key mappings can either be a string, or a table of strings if you want multiple bindings.
 
 ```lua
 require 'tryptic'.setup {
@@ -69,17 +71,17 @@ require 'tryptic'.setup {
 }
 ```
 
-Key mappings can either be a string, or a table of strings if you want multiple bindings.
-
 ## 🛠️ TODO
 - Bug
     - When doing cut-n-paste, cursor pos can change in unintuitive way
+    - Creating a file over a dir should put the file in that dir
 - Code quality
     - Organise the contents of init.lua into a separate module
     - Maximise loading efficiency
+    - View refreshing is kind of inefficient (especially in paste operations)
 - Features
+    - Ordering (folders first, alphabetical)
     - When creating a file or dir, the cursor should move to it
-    - Docs
     - Toggle hidden
     - Git signs
     - Diagnostics

@@ -2,6 +2,7 @@ local fs = require 'tryptic.fs'
 local float = require 'tryptic.float'
 local u = require 'tryptic.utils'
 local plenary_path = require 'plenary.path'
+local log = require 'tryptic.logger'
 local devicons_installed, devicons = pcall(require, 'nvim-web-devicons')
 
 require 'plenary.reload'.reload_module('tryptic')
@@ -120,7 +121,7 @@ local function update_child_window(target)
       when_true = function()
         return devicons.get_icon_by_filetype(filetype)
       end,
-      when_false = function ()
+      when_false = function()
         return nil, nil
       end
     })
@@ -430,34 +431,52 @@ local function copy(_target, _destination)
 
   if destination then
     local p = plenary_path:new(target.path)
-    p:copy({
+    local results = p:copy({
       destination = destination,
       recursive = true,
       override = false,
       interactive = true
     })
+    -- TODO: Check results
     refresh_view()
   end
 end
 
--- TODO: If the target and destination are the same, do nothing
--- Also, visual indicator of cut status
--- Also, visual selection
+local function jump_cursor_to(path)
+  local line_num
+  for index, item in ipairs(vim.g.tryptic_state.current.contents.children) do
+    if item.path == path then
+      line_num = index
+      break
+    end
+  end
+  if line_num then
+    vim.api.nvim_win_set_cursor(0, { line_num, 0 })
+  end
+end
+
 local function paste()
   local cursor_target = get_target_under_cursor()
   local destination_dir = u.cond(cursor_target.is_dir, {
     when_true = cursor_target.path,
     when_false = cursor_target.dirname
   })
-  -- Using pcall because we want to empty the cut_list, regardless of the outcome
-  pcall(function()
-    for _, cut_item in ipairs(cut_list) do
+  local success, result = pcall(function()
+    for index, cut_item in ipairs(cut_list) do
       local destination = destination_dir .. '/' .. cut_item.basename
-      copy(cut_item, destination)
-      delete(cut_item, true)
+      if cut_item.path ~= destination then
+        copy(cut_item, destination)
+        delete(cut_item, true)
+      end
     end
+    jump_cursor_to(destination_dir)
   end)
+  if not success then
+    -- TODO: Log this at warning level
+    log('Failed to paste: ' .. result, 'ERROR')
+  end
   cut_list = {}
+  refresh_view()
 end
 
 local function rename()
