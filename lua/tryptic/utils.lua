@@ -60,7 +60,7 @@ local function merge_tables(a, b)
   for key, value in pairs(b) do
     if type(value) == 'table' then
       merge_tables(a[key], b[key])
-    elseif b[key] then
+    elseif a and b[key] then
       a[key] = value
     end
   end

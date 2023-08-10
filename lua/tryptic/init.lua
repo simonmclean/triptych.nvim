@@ -329,7 +329,8 @@ local function setup(user_config)
       paste = 'p',
       quit = 'q',
       toggle_hidden = '<leader>.' -- TODO implement this
-    }
+    },
+    extension_mappings = {}
   }
 
   local final_config = u.merge_tables(default_config, user_config or {})

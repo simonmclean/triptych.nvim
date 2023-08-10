@@ -1,6 +1,10 @@
 local tryptic = require 'tryptic'
 
 local mappings = vim.g.tryptic_config.mappings
+local extension_mappings = vim.g.tryptic_config.extension_mappings
+
+-- TODO: The contents of this file get called a bunch of times
+-- Use autocmd to ensure this doesn't happen
 
 local function map(key_or_keys, fn, include_visual)
   if type(key_or_keys) == "string" then
@@ -10,7 +14,7 @@ local function map(key_or_keys, fn, include_visual)
         local buf = vim.api.nvim_win_get_buf(vim.g.tryptic_state.current.win)
         local a, b, c, d = vim.api.nvim_buf_get_mark(buf, "<")
         local e, f, g = vim.api.nvim_buf_get_mark(buf, ">")
-        vim.print({ a, b, c, d, e, f, g })
+        -- vim.print({ a, b, c, d, e, f, g })
         -- local vis_start = vim.api.nvim_buf_get_mark(buf, '<')[2]
         -- local vis_end = vim.api.nvim_buf_get_mark(buf, '>')[2]
         -- vim.print(vis_start, vis_end)
@@ -52,3 +56,9 @@ map(mappings.quit, tryptic.close_tryptic)
 map(mappings.cut, tryptic.toggle_cut, true)
 map(mappings.paste, tryptic.paste)
 map(mappings.show_help, tryptic.help)
+
+for key, fn in pairs(extension_mappings) do
+  map(key, function ()
+    fn(tryptic.get_target_under_cursor())
+  end)
+end

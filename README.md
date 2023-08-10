@@ -13,6 +13,7 @@ You only ever control or focus the middle window.
 ## ✨ Features
 
 - Rapid, intuitive directory browsing
+- Extensible
 - File preview
 - Pretty icons
 - Git signs (TODO)
@@ -67,6 +68,39 @@ require 'tryptic'.setup {
     paste = 'p',
     quit = 'q',
     toggle_hidden = '<leader>.'
+  }
+  extension_mappings = {}
+}
+```
+
+### Extending functionality
+
+The `extension_mappings` property allows you add any arbitrary functionality based on the current cursor target.
+You simply provide a key mapping and a function. When the mapping is pressed the function is invoked, and will receive a table containing the following:
+
+```lua
+{
+  path, -- e.g. /User/Name/foo/bar.js
+  display_name -- e.g. bar.js
+  basename, -- e.g. bar.js
+  dirname, -- e.g. /User/Name/foo/
+  is_dir, -- boolean indicating whether this is a directory
+  filetype, -- e.g. 'javascript'
+  cutting, -- whether this has been marked for cut 'n' paste
+  children, -- table containing directory contents (if applicable)
+}
+```
+
+For example, if you want to make `<c-f>` search the file or directory under the cursor using [Telescope](https://github.com/nvim-telescope/telescope.nvim).
+
+```lua
+{
+  extension_mappings = {
+    ['<c-f>'] = function(target)
+      require('telescope.builtin').live_grep({
+        search_dirs = { target.path }
+      })
+    end
   }
 }
 ```
