@@ -1,6 +1,6 @@
 # 📚 Tryptic
 
-Directory viewer inspired by [Ranger](https://github.com/ranger/ranger).
+Directory viewer for Neovim, inspired by [Ranger](https://github.com/ranger/ranger).
 
 The UI consists of 3 floating windows. In the center is the currently focused directory. On the left is the parent directory.
 The right window contains either a child directory, or a file preview.
@@ -26,10 +26,8 @@ You only ever control or focus the middle window.
 
 ## ⚡️ Requirements
 
-- Neovim >= 0.8.0
+- Neovim >= 0.9.0
 - A [Nerd Font](https://www.nerdfonts.com/) (optional, used for icons)
-- [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons) (optional, used for icons)
-- [nvim-lua/plenary.nvim](https://github.com/nvim-lua/plenary.nvim/tree/master)
 
 ## 📦 Installation
 
@@ -40,7 +38,7 @@ Example using [Lazy](https://github.com/folke/lazy.nvim).
   'simonmclean/tryptic',
   dependencies = {
     'nvim-lua/plenary.nvim', -- required
-    'nvim-tree/nvim-web-devicons' -- optional
+    'nvim-tree/nvim-web-devicons' -- optional, used for icons
   }
 }
 ```
@@ -97,9 +95,9 @@ For example, if you want to make `<c-f>` search the file or directory under the 
 {
   extension_mappings = {
     ['<c-f>'] = function(target)
-      require('telescope.builtin').live_grep({
+      require 'telescope.builtin'.live_grep {
         search_dirs = { target.path }
-      })
+      }
     end
   }
 }
@@ -114,10 +112,13 @@ For example, if you want to make `<c-f>` search the file or directory under the 
     - Maximise loading efficiency
     - View refreshing is kind of inefficient (especially in paste operations)
 - Features
+    - Double click mouse navigation
+        - Would have to include a ".." at the top to nav up
+    - Handle reaching top level of file system
     - Ordering (folders first, alphabetical)
     - When creating a file or dir, the cursor should move to it
     - Toggle hidden
     - Git signs
     - Diagnostics
     - Cut, copy and delete should work with visual selection
-- tests
+- Tests
