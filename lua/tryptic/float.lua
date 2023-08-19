@@ -1,5 +1,6 @@
 local u = require 'tryptic.utils'
 local fs = require 'tryptic.fs'
+local log = require 'tryptic.logger'
 
 local function modify_locked_buffer(buf, fn)
   vim.api.nvim_buf_set_option(buf, 'readonly', false)
