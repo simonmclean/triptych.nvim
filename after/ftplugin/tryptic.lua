@@ -1,7 +1,7 @@
 local tryptic = require 'tryptic'
 local state = require 'tryptic.state'
 local view = require 'tryptic.view'
-local actions= require 'tryptic.actions'
+local actions = require 'tryptic.actions'
 
 local mappings = vim.g.tryptic_config.mappings
 local extension_mappings = vim.g.tryptic_config.extension_mappings
@@ -10,7 +10,7 @@ local extension_mappings = vim.g.tryptic_config.extension_mappings
 -- Use autocmd to ensure this doesn't happen
 
 local function map(key_or_keys, fn)
-  if type(key_or_keys) == "string" then
+  if type(key_or_keys) == 'string' then
     vim.keymap.set('n', key_or_keys, fn, { buffer = 0 })
   else
     for _, key in pairs(key_or_keys) do
@@ -27,7 +27,9 @@ map(mappings.nav_left, function()
   local view_state = state.view_state.get()
   local focused_path = view_state.current.path
   local parent_path = view_state.parent.path
-  view.nav_to(parent_path, focused_path)
+  if parent_path ~= '/' then
+    view.nav_to(parent_path, focused_path)
+  end
 end)
 
 map(mappings.nav_right, function()
@@ -54,7 +56,7 @@ map(mappings.quit, tryptic.close_tryptic)
 ----------- Extension mappings ----------
 -----------------------------------------
 for key, fn in pairs(extension_mappings) do
-  map(key, function ()
+  map(key, function()
     fn(tryptic.get_target_under_cursor())
   end)
 end
