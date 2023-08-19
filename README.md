@@ -68,6 +68,9 @@ require 'tryptic'.setup {
     toggle_hidden = '<leader>.'
   }
   extension_mappings = {}
+  options = {
+    dirs_first = true
+  }
 }
 ```
 
@@ -114,7 +117,6 @@ For example, if you want to make `<c-f>` search the file or directory under the 
     - Double click mouse navigation
         - Would have to include a ".." at the top to nav up
     - Handle reaching top level of file system
-    - Ordering (folders first, alphabetical)
     - When creating a file or dir, the cursor should move to it
     - Toggle hidden
     - Git signs

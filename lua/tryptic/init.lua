@@ -77,6 +77,9 @@ local function setup(user_config)
       toggle_hidden = '<leader>.', -- TODO implement this
     },
     extension_mappings = {},
+    options = {
+      dirs_first = true
+    },
     debug = false,
   }
 

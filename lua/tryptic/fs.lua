@@ -24,10 +24,26 @@ local function list_dir_contents(_path)
     children = {},
   }
 
-  local index = 1
-
+  local children = {}
   for child_name, child_type in vim.fs.dir(path) do
-    local is_dir = child_type == 'directory'
+    table.insert(children, { child_name, child_type })
+  end
+
+  if vim.g.tryptic_config.options.dirs_first then
+    table.sort(children, function(a, b)
+      if a[2] == 'directory' and b[2] ~= 'directory' then
+        return true
+      end
+      if a[2] ~= 'directory' and b[2] == 'directory' then
+        return false
+      end
+      return a[1] < b[1]
+    end)
+  end
+
+  for index, name_and_type in ipairs(children) do
+    local child_name = name_and_type[1]
+    local is_dir = name_and_type[2] == 'directory'
     local child_path = path .. '/' .. child_name
 
     tree.children[index] = {
@@ -47,8 +63,6 @@ local function list_dir_contents(_path)
       is_dir = is_dir,
       children = {},
     }
-
-    index = index + 1
   end
 
   return tree
