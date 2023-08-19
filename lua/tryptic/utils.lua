@@ -1,5 +1,5 @@
 local function cond(value, handlers)
-  if (value) then
+  if value then
     if type(handlers.when_true) == 'function' then
       return handlers.when_true()
     end
@@ -39,14 +39,14 @@ local function list_includes(list, value)
 end
 
 local function is_empty(value)
-  if (value == nil or value == '') then
+  if value == nil or value == '' then
     return true
   end
   return false
 end
 
 local function is_defined(value)
-  if (value == nil or value == '') then
+  if value == nil or value == '' then
     return false
   end
   return true
@@ -76,5 +76,5 @@ return {
   is_empty = is_empty,
   is_defined = is_defined,
   trim_last_char = trim_last_char,
-  merge_tables = merge_tables
+  merge_tables = merge_tables,
 }

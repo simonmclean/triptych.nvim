@@ -108,7 +108,6 @@ For example, if you want to make `<c-f>` search the file or directory under the 
     - When doing cut-n-paste, cursor pos can change in unintuitive way
     - Creating a file over a dir should put the file in that dir
 - Code quality
-    - Organise the contents of init.lua into a separate module
     - Maximise loading efficiency
     - View refreshing is kind of inefficient (especially in paste operations)
 - Features

@@ -9,11 +9,11 @@ local function close_tryptic()
   -- Otherwise things blow up. Not sure why
   state.tryptic_open.set(false)
   local view_state = state.view_state.get()
-  float.close_floats({
+  float.close_floats {
     view_state.parent.win,
     view_state.current.win,
     view_state.child.win,
-  })
+  }
   autocommands.destroy_autocommands() -- should this be in initialise_state?
   vim.api.nvim_set_current_win(state.opening_win.get())
   state.initialise_state()
@@ -36,13 +36,13 @@ local function open_tryptic()
 
   state.view_state.set {
     parent = {
-      win = windows[1]
+      win = windows[1],
     },
     current = {
       win = windows[2],
     },
     child = {
-      win = windows[3]
+      win = windows[3],
     },
   }
 
@@ -74,10 +74,10 @@ local function setup(user_config)
       cut = 'x',
       paste = 'p',
       quit = 'q',
-      toggle_hidden = '<leader>.' -- TODO implement this
+      toggle_hidden = '<leader>.', -- TODO implement this
     },
     extension_mappings = {},
-    debug = false
+    debug = false,
   }
 
   local final_config = u.merge_tables(default_config, user_config or {})

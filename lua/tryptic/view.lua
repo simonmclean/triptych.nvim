@@ -13,7 +13,7 @@ local function tree_to_lines(tree)
       when_true = function()
         local line = ''
         if devicons_installed then
-          line = line .. " "
+          line = line .. ' '
         end
         line = line .. child.display_name
         return line, 'Directory'
@@ -22,13 +22,13 @@ local function tree_to_lines(tree)
         if devicons_installed then
           local maybe_icon, maybe_highlight = devicons.get_icon_by_filetype(child.filetype)
           local highlight = maybe_highlight or 'Comment'
-          local fallback_icon = ""
+          local fallback_icon = ''
           local icon = maybe_icon or fallback_icon
           local line = icon .. ' ' .. child.display_name
           return line, highlight
         end
         return child.display_name
-      end
+      end,
     })
 
     local cut_paths = u.eval(function()
@@ -39,7 +39,7 @@ local function tree_to_lines(tree)
       return paths
     end)
 
-    if (u.list_includes(cut_paths, child.path)) then
+    if u.list_includes(cut_paths, child.path) then
       line = line .. ' (cut)'
     end
 
@@ -93,8 +93,8 @@ local function nav_to(target_dir, cursor_target)
   float.win_set_lines(parent_win, parent_lines)
   float.win_set_lines(focused_win, focused_lines, true)
 
-  float.win_set_title(parent_win, parent_title, "", "Directory", get_title_postfix(parent_path))
-  float.win_set_title(focused_win, focused_title, "", "Directory", get_title_postfix(target_dir))
+  float.win_set_title(parent_win, parent_title, '', 'Directory', get_title_postfix(parent_path))
+  float.win_set_title(focused_win, focused_title, '', 'Directory', get_title_postfix(target_dir))
 
   float.buf_apply_highlights(focused_buf, focused_highlights)
   float.buf_apply_highlights(parent_buf, parent_highlights)
@@ -103,7 +103,7 @@ local function nav_to(target_dir, cursor_target)
     when_true = function()
       return index_of_path(cursor_target, focused_contents.children)
     end,
-    when_false = state.path_to_line_map.get(target_dir) or 1
+    when_false = state.path_to_line_map.get(target_dir) or 1,
   })
   local buf_line_count = vim.api.nvim_buf_line_count(focused_buf)
   vim.api.nvim_win_set_cursor(0, { math.min(focused_win_line_number, buf_line_count), 0 })
@@ -115,7 +115,7 @@ local function nav_to(target_dir, cursor_target)
     parent = {
       path = parent_path,
       contents = parent_contents,
-      win = parent_win
+      win = parent_win,
     },
     current = {
       path = target_dir,
@@ -127,8 +127,8 @@ local function nav_to(target_dir, cursor_target)
       path = nil,
       contents = nil,
       lines = nil,
-      win = child_win
-    }
+      win = child_win,
+    },
   }
 end
 
@@ -149,21 +149,18 @@ local function update_child_window(target)
     when_true = nil,
     when_false = function()
       return target.path
-    end
+    end,
   })
 
-  if (target == nil) then
-    float.win_set_title(
-      state.view_state.get().child.win,
-      '[empty directory]'
-    )
+  if target == nil then
+    float.win_set_title(state.view_state.get().child.win, '[empty directory]')
     float.buf_set_lines(buf, {})
   elseif target.is_dir then
     float.win_set_title(
       state.view_state.get().child.win,
       target.basename,
-      "",
-      "Directory",
+      '',
+      'Directory',
       get_title_postfix(target.path)
     )
     local lines, highlights = tree_to_lines(fs.list_dir_contents(target.path))
@@ -177,14 +174,9 @@ local function update_child_window(target)
       end,
       when_false = function()
         return nil, nil
-      end
+      end,
     })
-    float.win_set_title(
-      state.view_state.get().child.win,
-      target.basename,
-      icon,
-      highlight
-    )
+    float.win_set_title(state.view_state.get().child.win, target.basename, icon, highlight)
     float.buf_set_lines_from_path(buf, target.path)
   end
 end
@@ -202,7 +194,6 @@ local function jump_cursor_to(path)
   end
 end
 
-
 local function refresh_view()
   -- TODO: This an inefficient way of refreshing the view
   nav_to(state.view_state.get().current.path)
@@ -215,5 +206,5 @@ return {
   update_child_window = update_child_window,
   get_target_under_cursor = get_target_under_cursor,
   jump_to_cwd = jump_to_cwd,
-  nav_to = nav_to
+  nav_to = nav_to,
 }

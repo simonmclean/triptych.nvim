@@ -6,7 +6,7 @@ end
 -- TODO: Include tracing
 local function log(label, message, level)
   if level ~= 'INFO' and level ~= 'WARN' and level ~= 'ERROR' and level ~= 'DEBUG' then
-    log_err('echoerr Invalid log level')
+    log_err 'echoerr Invalid log level'
     return
   end
 
@@ -23,7 +23,6 @@ local function log(label, message, level)
       vim.print(prefix)
       vim.print(message)
     end
-
   else
     local final_message = prefix .. tostring(message)
     if level == 'ERROR' then
@@ -32,7 +31,6 @@ local function log(label, message, level)
       vim.print(final_message)
     end
   end
-
 end
 
 return log

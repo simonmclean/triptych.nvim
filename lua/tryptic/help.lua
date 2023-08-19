@@ -2,7 +2,7 @@ local function help_lines()
   local mappings = vim.g.tryptic_config.mappings
   local lines = {
     'Tryptic key bindings',
-    ''
+    '',
   }
 
   local left_col_length = 0
@@ -33,5 +33,5 @@ local function help_lines()
 end
 
 return {
-  help_lines = help_lines
+  help_lines = help_lines,
 }

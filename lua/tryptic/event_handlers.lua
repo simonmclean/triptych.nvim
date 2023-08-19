@@ -13,11 +13,11 @@ end
 
 local function handle_buf_leave()
   if state.tryptic_open.is_open() then
-    require 'tryptic'.close_tryptic()
+    require('tryptic').close_tryptic()
   end
 end
 
 return {
   handle_cursor_moved = handle_cursor_moved,
-  handle_buf_leave = handle_buf_leave
+  handle_buf_leave = handle_buf_leave,
 }

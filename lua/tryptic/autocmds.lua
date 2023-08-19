@@ -1,6 +1,6 @@
 local handlers = require 'tryptic.event_handlers'
 
-local au_group = vim.api.nvim_create_augroup("TrypticAutoCmd", { clear = true })
+local au_group = vim.api.nvim_create_augroup('TrypticAutoCmd', { clear = true })
 
 local __autocommands = {}
 
@@ -9,12 +9,12 @@ local function create_autocommands()
     group = au_group,
     callback = function()
       handlers.handle_cursor_moved()
-    end
+    end,
   })
 
   local b = vim.api.nvim_create_autocmd('BufLeave', {
     group = au_group,
-    callback = handlers.handle_buf_leave
+    callback = handlers.handle_buf_leave,
   })
 
   __autocommands = { a, b }
@@ -28,5 +28,5 @@ end
 
 return {
   create_autocommands = create_autocommands,
-  destroy_autocommands = destroy_autocommands
+  destroy_autocommands = destroy_autocommands,
 }

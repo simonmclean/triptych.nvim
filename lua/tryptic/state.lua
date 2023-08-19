@@ -3,29 +3,29 @@ local log = require 'tryptic.logger'
 
 local initial_view_state = {
   parent = {
-    win = nil
+    win = nil,
   },
   current = {
     win = nil,
   },
   child = {
-    win = nil
+    win = nil,
   },
 }
 local __view_state = initial_view_state
 local view_state = {
-  set = function (s)
+  set = function(s)
     log('view_state.set', s, 'DEBUG')
     __view_state = s
   end,
 
-  get = function ()
+  get = function()
     return __view_state
   end,
 
-  reset = function ()
+  reset = function()
     __view_state = initial_view_state
-  end
+  end,
 }
 
 local __cut_list = {}
@@ -55,43 +55,43 @@ local cut_list = {
 
 local __path_to_line_map = {}
 local path_to_line_map = {
-  set = function (path, line_number)
+  set = function(path, line_number)
     __path_to_line_map[path] = line_number
   end,
 
-  get = function (index)
+  get = function(index)
     return __path_to_line_map[index]
   end,
 
-  remove_all = function ()
+  remove_all = function()
     __path_to_line_map = {}
-  end
+  end,
 }
 
 local __opening_win = nil
 local opening_win = {
-  get = function ()
+  get = function()
     return __opening_win
   end,
 
-  set = function (win_id)
+  set = function(win_id)
     __opening_win = win_id
   end,
 
-  to_nil = function ()
+  to_nil = function()
     __opening_win = nil
-  end
+  end,
 }
 
 local __tryptic_open = false
 local tryptic_open = {
-  set = function (v)
+  set = function(v)
     __tryptic_open = v
   end,
 
-  is_open = function ()
+  is_open = function()
     return __tryptic_open == true
-  end
+  end,
 }
 
 local function initialise_state()
@@ -101,12 +101,11 @@ local function initialise_state()
   opening_win.to_nil()
 end
 
-
 return {
   cut_list = cut_list,
   path_to_line_map = path_to_line_map,
   initialise_state = initialise_state,
   opening_win = opening_win,
   view_state = view_state,
-  tryptic_open = tryptic_open
+  tryptic_open = tryptic_open,
 }

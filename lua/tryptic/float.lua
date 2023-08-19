@@ -19,14 +19,7 @@ end
 
 local function buf_apply_highlights(buf, highlights)
   for i, highlight in ipairs(highlights) do
-    vim.api.nvim_buf_add_highlight(
-      buf,
-      0,
-      highlight,
-      i - 1,
-      0,
-      3
-    )
+    vim.api.nvim_buf_add_highlight(buf, 0, highlight, i - 1, 0, 3)
   end
 end
 
@@ -34,7 +27,7 @@ local function win_set_lines(win, lines, attempt_scroll_top)
   local buf = vim.api.nvim_win_get_buf(win)
   buf_set_lines(buf, lines)
   if attempt_scroll_top then
-    vim.api.nvim_buf_call(buf, function ()
+    vim.api.nvim_buf_call(buf, function()
       vim.api.nvim_exec2('normal! zb', {})
     end)
   end
@@ -50,11 +43,11 @@ local function win_set_title(win, title, icon, highlight, postfix)
         maybe_icon = icon .. ' '
       end
     end
-    local safe_title = string.gsub(title, "%%", '')
+    local safe_title = string.gsub(title, '%%', '')
     if postfix then
       safe_title = safe_title .. ' ' .. u.with_highlight_group('Comment', postfix)
     end
-    local title_with_hi = u.with_highlight_group("WinBar", safe_title)
+    local title_with_hi = u.with_highlight_group('WinBar', safe_title)
     vim.wo.winbar = '%=' .. maybe_icon .. title_with_hi .. '%='
   end)
 end
@@ -98,7 +91,7 @@ local function create_new_buffer(lines)
 end
 
 local function create_floating_window(config)
-  local buf = create_new_buffer({})
+  local buf = create_new_buffer {}
   local win = vim.api.nvim_open_win(buf, true, {
     width = config.width,
     height = config.height,
@@ -122,24 +115,18 @@ local function create_three_floating_windows()
   local screen_width = vim.o.columns
   local padding = 4
   local max_float_width = math.floor(max_width / 3)
-  local float_width = math.min(
-    math.floor((screen_width / 3)) - padding,
-    max_float_width
-  )
-  local float_height = math.min(
-    screen_height - (padding * 3),
-    max_height
-  )
+  local float_width = math.min(math.floor((screen_width / 3)) - padding, max_float_width)
+  local float_height = math.min(screen_height - (padding * 3), max_height)
 
   local wins = {}
 
   local x_pos = u.cond(screen_width > (max_width + (padding * 2)), {
     when_true = math.floor((screen_width - max_width) / 2),
-    when_false = padding
+    when_false = padding,
   })
   local y_pos = u.cond(screen_height > (max_height + (padding * 2)), {
     when_true = math.floor((screen_height - max_height) / 2),
-    when_false = padding
+    when_false = padding,
   })
   for i = 1, 3, 1 do
     local is_parent = i == 1
@@ -150,7 +137,7 @@ local function create_three_floating_windows()
     elseif is_child then
       x_pos = x_pos + float_width + 2
     end
-    local win = create_floating_window({
+    local win = create_floating_window {
       width = float_width,
       height = float_height,
       y_pos = y_pos,
@@ -159,8 +146,8 @@ local function create_three_floating_windows()
       omit_right_border = is_parent or is_primary,
       enable_cursorline = is_parent or is_primary,
       is_focusable = is_primary,
-      show_numbers = is_primary
-    })
+      show_numbers = is_primary,
+    }
 
     table.insert(wins, win)
   end
@@ -186,5 +173,5 @@ return {
   buf_set_lines_from_path = buf_set_lines_from_path,
   win_set_lines = win_set_lines,
   win_set_title = win_set_title,
-  buf_apply_highlights = buf_apply_highlights
+  buf_apply_highlights = buf_apply_highlights,
 }

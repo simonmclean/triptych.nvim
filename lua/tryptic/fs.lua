@@ -21,7 +21,7 @@ local function list_dir_contents(_path)
     is_dir = nil,
     filetype = nil,
     cutting = false,
-    children = {}
+    children = {},
   }
 
   local index = 1
@@ -34,18 +34,18 @@ local function list_dir_contents(_path)
       path = child_path,
       display_name = u.cond(is_dir, {
         when_true = child_name .. '/',
-        when_false = child_name
+        when_false = child_name,
       }),
       filetype = u.cond(is_dir, {
         when_true = nil,
         when_false = function()
           return get_filetype_from_path(child_path)
-        end
+        end,
       }),
       basename = vim.fs.basename(child_path),
       dirname = vim.fs.dirname(child_path),
       is_dir = is_dir,
-      children = {}
+      children = {},
     }
 
     index = index + 1
