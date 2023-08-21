@@ -1,8 +1,9 @@
-local u = require 'tryptic.utils'
 local devicons_installed, devicons = pcall(require, 'nvim-web-devicons')
+local u = require 'tryptic.utils'
 local float = require 'tryptic.float'
 local state = require 'tryptic.state'
 local fs = require 'tryptic.fs'
+local git = require 'tryptic.git'
 
 local function tree_to_lines(tree)
   local lines = {}
@@ -72,6 +73,20 @@ local function get_title_postfix(path)
   end
 end
 
+local function set_sign_columns(buf, children)
+  local group = 'tryptic_gitsigns'
+  vim.fn.sign_unplace(group)
+  for index, entry in ipairs(children) do
+    if entry.git_status then
+      local sign_name = git.get_sign(entry.git_status)
+      -- If the sign isn't defined sign_getdefined will return an empty {}
+      if vim.fn.sign_getdefined(sign_name)[1] then
+        vim.fn.sign_place(0, group, sign_name, buf, { lnum = index })
+      end
+    end
+  end
+end
+
 local function nav_to(target_dir, cursor_target)
   local view_state = state.view_state.get()
 
@@ -92,6 +107,8 @@ local function nav_to(target_dir, cursor_target)
 
   float.win_set_lines(parent_win, parent_lines)
   float.win_set_lines(focused_win, focused_lines, true)
+  -- TODO: Also apply this to the other windows
+  set_sign_columns(focused_buf, focused_contents.children)
 
   float.win_set_title(parent_win, parent_title, '', 'Directory', get_title_postfix(parent_path))
   float.win_set_title(focused_win, focused_title, '', 'Directory', get_title_postfix(target_dir))

@@ -38,7 +38,8 @@ Example using [Lazy](https://github.com/folke/lazy.nvim).
   'simonmclean/tryptic',
   dependencies = {
     'nvim-lua/plenary.nvim', -- required
-    'nvim-tree/nvim-web-devicons' -- optional, used for icons
+    'nvim-tree/nvim-web-devicons', -- optional
+    'lewis6991/gitsigns.nvim' -- optional
   }
 }
 ```
@@ -70,6 +71,17 @@ require 'tryptic'.setup {
   extension_mappings = {}
   options = {
     dirs_first = true
+  },
+  git_signs = { -- TODO: Document this
+    enabled = true,
+    signs = {
+      add = 'GitSignsAdd',
+      add_modify = 'GitSignsAdd',
+      modify = 'GitSignsChange',
+      delete = 'GitSignsDelete',
+      rename = 'GitSignsRename',
+      untracked = 'GitSignsUntracked'
+    }
   }
 }
 ```
@@ -112,6 +124,7 @@ For example, if you want to make `<c-f>` search the file or directory under the 
     - Creating a file over a dir should put the file in that dir
 - Code quality
     - View refreshing is kind of inefficient (especially in paste operations)
+    - Figure out a way to add type definitions
 - Features
     - Double click mouse navigation
         - Would have to include a ".." at the top to nav up
@@ -120,4 +133,5 @@ For example, if you want to make `<c-f>` search the file or directory under the 
     - Git signs
     - Diagnostics
     - Cut, copy and delete should work with visual selection
+    - Make sure this works in Windows (particular sep chars)
 - Tests

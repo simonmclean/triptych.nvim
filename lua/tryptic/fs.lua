@@ -1,4 +1,5 @@
 local u = require 'tryptic.utils'
+local git = require 'tryptic.git'
 local plenary_filetype = require 'plenary.filetype'
 
 local function get_file_size_in_kb(path)
@@ -11,6 +12,7 @@ local function get_filetype_from_path(path)
 end
 
 local function list_dir_contents(_path)
+  local git_status = git.git_status.get()
   local path = vim.fs.normalize(_path)
 
   local tree = {
@@ -21,6 +23,7 @@ local function list_dir_contents(_path)
     is_dir = nil,
     filetype = nil,
     cutting = false,
+    git_status = nil,
     children = {},
   }
 
@@ -61,6 +64,12 @@ local function list_dir_contents(_path)
       basename = vim.fs.basename(child_path),
       dirname = vim.fs.dirname(child_path),
       is_dir = is_dir,
+      git_status = u.cond(git_status, {
+        when_true = function ()
+          return git_status[child_path]
+        end,
+        when_false = nil
+      }),
       children = {},
     }
   end

@@ -20,10 +20,16 @@ local function with_highlight_group(group_name, str)
   return '%#' .. group_name .. '#' .. str
 end
 
-local function list_index_of(list, fn)
+local function list_index_of(list, value_or_fn)
   for index, value in ipairs(list) do
-    if fn(value) then
-      return index
+    if type(value_or_fn) == 'function' then
+      if value_or_fn(value) then
+        return index
+      end
+    else
+      if value == value_or_fn then
+        return index
+      end
     end
   end
   return -1
@@ -56,6 +62,16 @@ local function trim_last_char(str)
   return string.sub(str, 1, string.len(str) - 1)
 end
 
+local function trim(str)
+  return string.gsub(str, '^%s*(.-)%s*$', '%1')
+end
+
+local function split_string_at_index(str, index)
+  local a = string.sub(str, 1, index)
+  local b = string.sub(str, index + 1, string.len(str))
+  return a, b
+end
+
 local function merge_tables(a, b)
   for key, value in pairs(b) do
     if type(value) == 'table' then
@@ -67,6 +83,14 @@ local function merge_tables(a, b)
   return a
 end
 
+local function multiline_str_to_table(str)
+  local lines = {}
+  for s in str:gmatch '[^\r\n]+' do
+    table.insert(lines, s)
+  end
+  return lines
+end
+
 return {
   cond = cond,
   eval = eval,
@@ -76,5 +100,8 @@ return {
   is_empty = is_empty,
   is_defined = is_defined,
   trim_last_char = trim_last_char,
+  trim = trim,
   merge_tables = merge_tables,
+  multiline_str_to_table = multiline_str_to_table,
+  split_string_at_index = split_string_at_index,
 }

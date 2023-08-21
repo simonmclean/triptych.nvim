@@ -3,6 +3,9 @@ local u = require 'tryptic.utils'
 local autocommands = require 'tryptic.autocmds'
 local state = require 'tryptic.state'
 local view = require 'tryptic.view'
+local git = require 'tryptic.git'
+
+-- require 'plenary.reload'.reload_module('tryptic')
 
 local function close_tryptic()
   -- Need to set tryptic_open to false before closing the floats
@@ -16,6 +19,7 @@ local function close_tryptic()
   }
   autocommands.destroy_autocommands() -- should this be in initialise_state?
   vim.api.nvim_set_current_win(state.opening_win.get())
+  git.git_status.reset()
   state.initialise_state()
 end
 
@@ -78,7 +82,25 @@ local function setup(user_config)
     },
     extension_mappings = {},
     options = {
-      dirs_first = true
+      dirs_first = true, -- TODO: Document this
+    },
+    line_numbers = {
+      enabled = true, -- TODO: Document this, and implement
+      relative = false
+    },
+    git_signs = {
+      enabled = true,
+      signs = {
+        add = 'GitSignsAdd',
+        add_modify = 'GitSignsAdd',
+        modify = 'GitSignsChange',
+        delete = 'GitSignsDelete',
+        rename = 'GitSignsRename',
+        untracked = 'GitSignsUntracked'
+      }
+    },
+    diagnostic_signs = {
+      enabled = true, -- TODO: Document this, and implement
     },
     debug = false,
   }
