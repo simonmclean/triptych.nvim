@@ -73,8 +73,7 @@ local function get_title_postfix(path)
   end
 end
 
-local function set_sign_columns(buf, children)
-  local group = 'tryptic_gitsigns'
+local function set_sign_columns(buf, children, group)
   vim.fn.sign_unplace(group)
   for index, entry in ipairs(children) do
     if entry.git_status then
@@ -107,8 +106,9 @@ local function nav_to(target_dir, cursor_target)
 
   float.win_set_lines(parent_win, parent_lines)
   float.win_set_lines(focused_win, focused_lines, true)
-  -- TODO: Also apply this to the other windows
-  set_sign_columns(focused_buf, focused_contents.children)
+
+  set_sign_columns(focused_buf, focused_contents.children, 'tryptic_gitsigns_focused')
+  set_sign_columns(parent_buf, parent_contents.children, 'tryptic_gitsigns_parent')
 
   float.win_set_title(parent_win, parent_title, '', 'Directory', get_title_postfix(parent_path))
   float.win_set_title(focused_win, focused_title, '', 'Directory', get_title_postfix(target_dir))
@@ -180,9 +180,11 @@ local function update_child_window(target)
       'Directory',
       get_title_postfix(target.path)
     )
-    local lines, highlights = tree_to_lines(fs.list_dir_contents(target.path))
+    local contents = fs.list_dir_contents(target.path)
+    local lines, highlights = tree_to_lines(contents)
     float.buf_set_lines(buf, lines)
     float.buf_apply_highlights(buf, highlights)
+    set_sign_columns(buf, contents.children, 'tryptic_gitsigns_child')
   else
     local filetype = fs.get_filetype_from_path(target.path) -- TODO: De-dupe this
     local icon, highlight = u.cond(devicons_installed, {

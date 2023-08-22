@@ -130,7 +130,6 @@ For example, if you want to make `<c-f>` search the file or directory under the 
         - Would have to include a ".." at the top to nav up
     - When creating a file or dir, the cursor should move to it
     - Toggle hidden
-    - Git signs
     - Diagnostics
     - Cut, copy and delete should work with visual selection
     - Make sure this works in Windows (particular sep chars)
