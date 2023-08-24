@@ -1,5 +1,28 @@
 local u = require 'tryptic.utils'
 
+---@enum GitFileStatus
+local git_statuses = {
+  ['add'] = 'A',
+  ['add_modify'] = 'AM',
+  ['delete'] = 'D',
+  ['modify'] = 'M',
+  ['rename'] = 'R',
+  ['untracked'] = '??',
+}
+
+-- Sorted by highest priority last, so that > comparison works intuitively
+---@enum GitFileStatusPriority
+local sign_priority = {
+  '??',
+  'R',
+  'D',
+  'M',
+  'A',
+  'AM',
+}
+
+---@param status GitFileStatus
+---@return string
 local function get_sign(status)
   local signs = vim.g.tryptic_config.git_signs.signs
   local map = {
@@ -13,18 +36,9 @@ local function get_sign(status)
   return map[status]
 end
 
--- Sorted by highest priority last, so that > comparison works intuitively
-local sign_priority = {
-  '??',
-  'R',
-  'D',
-  'M',
-  'A',
-  'AM',
-}
-
 local __git_status = nil
 local git_status = {
+  ---@return GitStatus
   get = function()
     if __git_status then
       return __git_status

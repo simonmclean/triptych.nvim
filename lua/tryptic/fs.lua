@@ -2,15 +2,21 @@ local u = require 'tryptic.utils'
 local git = require 'tryptic.git'
 local plenary_filetype = require 'plenary.filetype'
 
+---@param path string
+---@return number
 local function get_file_size_in_kb(path)
   local bytes = vim.fn.getfsize(path)
   return bytes / 1000
 end
 
+---@param path string
+---@return string
 local function get_filetype_from_path(path)
   return plenary_filetype.detect(path)
 end
 
+---@param _path string
+---@return DirContents
 local function list_dir_contents(_path)
   local git_status = git.git_status.get()
   local path = vim.fs.normalize(_path)
@@ -77,14 +83,18 @@ local function list_dir_contents(_path)
   return tree
 end
 
+---@return string
 local function get_dirname_of_current_buffer()
   return vim.fs.dirname(vim.api.nvim_buf_get_name(0))
 end
 
+---@return string
 local function get_parent(path)
   return vim.fs.dirname(path)
 end
 
+---@param path string
+---@return string[]
 local function read_lines_from_file(path)
   local temp_buf = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_call(temp_buf, function()

@@ -7,6 +7,7 @@ local git = require 'tryptic.git'
 
 -- require 'plenary.reload'.reload_module('tryptic')
 
+---@return nil
 local function close_tryptic()
   -- Need to set tryptic_open to false before closing the floats
   -- Otherwise things blow up. Not sure why
@@ -23,6 +24,7 @@ local function close_tryptic()
   state.initialise_state()
 end
 
+---@return nil
 local function open_tryptic()
   if state.tryptic_open.is_open() then
     return
@@ -55,6 +57,7 @@ local function open_tryptic()
   view.nav_to(buf_dir, buf)
 end
 
+---@return nil
 local function toggle_tryptic()
   if state.tryptic_open.is_open() then
     close_tryptic()
@@ -63,7 +66,9 @@ local function toggle_tryptic()
   end
 end
 
+---@param user_config TrypticConfig
 local function setup(user_config)
+  ---@type TrypticConfig
   local default_config = {
     mappings = {
       open_tryptic = '<leader>-',
@@ -105,6 +110,7 @@ local function setup(user_config)
     debug = false,
   }
 
+  ---@type TrypticConfig
   local final_config = u.merge_tables(default_config, user_config or {})
 
   vim.g.tryptic_config = final_config
