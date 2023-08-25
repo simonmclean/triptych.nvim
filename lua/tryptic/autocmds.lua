@@ -2,8 +2,10 @@ local handlers = require 'tryptic.event_handlers'
 
 local au_group = vim.api.nvim_create_augroup('TrypticAutoCmd', { clear = true })
 
+---@type number[]
 local __autocommands = {}
 
+---@return nil
 local function create_autocommands()
   local a = vim.api.nvim_create_autocmd('CursorMoved', {
     group = au_group,
@@ -20,6 +22,7 @@ local function create_autocommands()
   __autocommands = { a, b }
 end
 
+---@return nil
 local function destroy_autocommands()
   for _, autocmd in pairs(__autocommands) do
     vim.api.nvim_del_autocmd(autocmd)

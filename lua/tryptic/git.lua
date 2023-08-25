@@ -1,15 +1,5 @@
 local u = require 'tryptic.utils'
 
----@enum GitFileStatus
-local git_statuses = {
-  ['add'] = 'A',
-  ['add_modify'] = 'AM',
-  ['delete'] = 'D',
-  ['modify'] = 'M',
-  ['rename'] = 'R',
-  ['untracked'] = '??',
-}
-
 -- Sorted by highest priority last, so that > comparison works intuitively
 ---@enum GitFileStatusPriority
 local sign_priority = {
@@ -36,6 +26,7 @@ local function get_sign(status)
   return map[status]
 end
 
+---@type GitStatus | nil
 local __git_status = nil
 local git_status = {
   ---@return GitStatus

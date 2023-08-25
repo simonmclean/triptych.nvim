@@ -2,6 +2,10 @@ local u = require 'tryptic.utils'
 local fs = require 'tryptic.fs'
 local log = require 'tryptic.logger'
 
+---Modify a buffer which is readonly and not modifiable
+---@param buf number
+---@param fn fun(): nil
+---@return nil
 local function modify_locked_buffer(buf, fn)
   vim.api.nvim_buf_set_option(buf, 'readonly', false)
   vim.api.nvim_buf_set_option(buf, 'modifiable', true)
@@ -10,6 +14,9 @@ local function modify_locked_buffer(buf, fn)
   vim.api.nvim_buf_set_option(buf, 'modifiable', false)
 end
 
+---@param buf number
+---@param lines string[]
+---@return nil
 local function buf_set_lines(buf, lines)
   modify_locked_buffer(buf, function()
     vim.api.nvim_buf_set_option(buf, 'filetype', 'tryptic')
@@ -17,12 +24,18 @@ local function buf_set_lines(buf, lines)
   end)
 end
 
+---@param buf number
+---@param highlights string[]
+---@return nil
 local function buf_apply_highlights(buf, highlights)
   for i, highlight in ipairs(highlights) do
     vim.api.nvim_buf_add_highlight(buf, 0, highlight, i - 1, 0, 3)
   end
 end
 
+---@param win number
+---@param lines string[]
+---@param attempt_scroll_top? boolean
 local function win_set_lines(win, lines, attempt_scroll_top)
   local buf = vim.api.nvim_win_get_buf(win)
   buf_set_lines(buf, lines)
@@ -33,6 +46,12 @@ local function win_set_lines(win, lines, attempt_scroll_top)
   end
 end
 
+---@param win number
+---@param title string
+---@param icon? string
+---@param highlight? string
+---@param postfix? string
+---@return nil
 local function win_set_title(win, title, icon, highlight, postfix)
   vim.api.nvim_win_call(win, function()
     local maybe_icon = ''
@@ -44,7 +63,7 @@ local function win_set_title(win, title, icon, highlight, postfix)
       end
     end
     local safe_title = string.gsub(title, '%%', '')
-    if postfix then
+    if postfix and postfix ~= '' then
       safe_title = safe_title .. ' ' .. u.with_highlight_group('Comment', postfix)
     end
     local title_with_hi = u.with_highlight_group('WinBar', safe_title)
@@ -52,6 +71,9 @@ local function win_set_title(win, title, icon, highlight, postfix)
   end)
 end
 
+---@param buf number
+---@param path string
+---@return nil
 local function buf_set_lines_from_path(buf, path)
   modify_locked_buffer(buf, function()
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, {})
@@ -81,6 +103,8 @@ local function buf_set_lines_from_path(buf, path)
   end)
 end
 
+---@param lines string[]
+---@return number
 local function create_new_buffer(lines)
   local buf = vim.api.nvim_create_buf(false, true)
   modify_locked_buffer(buf, function()
@@ -90,6 +114,8 @@ local function create_new_buffer(lines)
   return buf
 end
 
+---@param config FloatingWindowConfig
+---@return number
 local function create_floating_window(config)
   local buf = create_new_buffer {}
   local win = vim.api.nvim_open_win(buf, true, {
@@ -108,6 +134,7 @@ local function create_floating_window(config)
   return win
 end
 
+---@return { [1]: number, [2]: number, [3]: number }
 local function create_three_floating_windows()
   local max_width = 220
   local max_height = 45
@@ -158,6 +185,8 @@ local function create_three_floating_windows()
   return wins
 end
 
+---@param wins number[]
+---@return nil
 local function close_floats(wins)
   for _, win in ipairs(wins) do
     local buf = vim.api.nvim_win_get_buf(win)

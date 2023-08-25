@@ -5,6 +5,7 @@
 ---@field line_numbers TrypticConfigLineNumbers
 ---@field git_signs TrypticConfigGitSigns
 ---@field diagnostic_signs TrypticConfigDiagnostic
+---@field debug boolean
 
 ---@class TrypticConfigMappings
 ---@field open_tryptic KeyMapping
@@ -45,14 +46,43 @@
 
 ---@alias KeyMapping (string | string[])
 
----@alias GitStatus { [string]: string }
+---@alias GitFileStatus ('A' | 'AM' | 'D' | 'M' | 'R' | '??')
+
+---@alias GitStatus { [string]: GitFileStatus }
 
 ---@class DirContents
 ---@field path string
 ---@field display_name string
+---@field dirname string # Parent directory path
 ---@field basename string
----@field dir_dir boolean
+---@field is_dir boolean
 ---@field filetype? string
 ---@field cutting boolean
 ---@field git_status? string
 ---@field children? DirContents
+
+---@class ViewState
+---@field parent ViewStateWindow
+---@field current ViewStateCurrentWindow
+---@field child ViewStateChildWindow
+
+---@class ViewStateWindow
+---@field path string
+---@field contents? DirContents
+---@field win number
+
+--- TODO: This inheritance isn't working properly
+---@class ViewStateCurrentWindow: ViewStateWindow
+---@field previous_path string
+
+---@class ViewStateChildWindow: ViewStateWindow
+---@field lines? string[]
+
+---@class FloatingWindowConfig
+---@field width number
+---@field height number
+---@field x_pos number
+---@field y_pos number
+---@field is_focusable boolean
+---@field enable_cursorline boolean
+---@field show_numbers boolean

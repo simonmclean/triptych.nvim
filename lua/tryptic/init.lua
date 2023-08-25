@@ -42,9 +42,12 @@ local function open_tryptic()
 
   state.view_state.set {
     parent = {
+      path = '',
       win = windows[1],
     },
     current = {
+      path = '',
+      previous_path = '',
       win = windows[2],
     },
     child = {

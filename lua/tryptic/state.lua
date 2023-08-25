@@ -1,60 +1,79 @@
 local u = require 'tryptic.utils'
 local log = require 'tryptic.logger'
 
+---@type ViewState
 local initial_view_state = {
   parent = {
-    win = nil,
+    path = '',
+    win = -1
   },
   current = {
-    win = nil,
+    previous_path = '',
+    win = -1,
   },
   child = {
-    win = nil,
+    win = -1,
   },
 }
 local __view_state = initial_view_state
 local view_state = {
+  ---@param s ViewState
+  ---@return nil
   set = function(s)
     log('view_state.set', s, 'DEBUG')
     __view_state = s
   end,
 
+  ---@return ViewState
   get = function()
     return __view_state
   end,
 
+  ---@return nil
   reset = function()
     __view_state = initial_view_state
   end,
 }
 
+---@type DirContents[]
 local __cut_list = {}
 local cut_list = {
+  ---@param item DirContents
+  ---@return nil
   add = function(item)
     table.insert(__cut_list, item)
   end,
 
+  ---@param index number
+  ---@return nil
   remove = function(index)
     table.remove(__cut_list, index)
   end,
 
+  ---@return nil
   remove_all = function()
     __cut_list = {}
   end,
 
+  ---@param needle string
   index_of = function(needle)
     return u.list_index_of(__cut_list, function(list_item)
       return needle == list_item.path
     end)
   end,
 
+  ---@return ViewState
   get = function()
     return __cut_list
   end,
 }
 
+---@type { [string]: integer }
 local __path_to_line_map = {}
 local path_to_line_map = {
+  ---@param path string
+  ---@param line_number number
+  ---@return nil
   set = function(path, line_number)
     __path_to_line_map[path] = line_number
   end,
@@ -63,21 +82,25 @@ local path_to_line_map = {
     return __path_to_line_map[index]
   end,
 
+  ---@return nil
   remove_all = function()
     __path_to_line_map = {}
   end,
 }
 
+---@type number | nil
 local __opening_win = nil
 local opening_win = {
   get = function()
     return __opening_win
   end,
 
+  ---@param win_id number
   set = function(win_id)
     __opening_win = win_id
   end,
 
+  ---@return nil
   to_nil = function()
     __opening_win = nil
   end,
@@ -85,6 +108,8 @@ local opening_win = {
 
 local __tryptic_open = false
 local tryptic_open = {
+  ---@param v boolean
+  ---@return nil
   set = function(v)
     __tryptic_open = v
   end,
@@ -94,6 +119,7 @@ local tryptic_open = {
   end,
 }
 
+---@return nil
 local function initialise_state()
   view_state.reset()
   path_to_line_map.remove_all()

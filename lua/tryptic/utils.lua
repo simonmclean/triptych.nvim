@@ -1,3 +1,15 @@
+---@alias CondFuncHandler1 fun(): any
+---@alias CondFuncHandler2 fun(): any, any
+---@class CondFuncHandlers
+---@field when_true any | CondFuncHandler1 | CondFuncHandler2
+---@field when_false any | CondFuncHandler1 | CondFuncHandler2
+---@class CondValueHandlers
+---@field when_true any
+---@field when_false any
+
+---@param value any # will be checked for truthiness
+---@param handlers CondFuncHandlers
+---@return any
 local function cond(value, handlers)
   if value then
     if type(handlers.when_true) == 'function' then
@@ -12,14 +24,21 @@ local function cond(value, handlers)
   return handlers.when_false
 end
 
+---@param fn function
 local function eval(fn)
   return fn()
 end
 
+---@param group_name string
+---@param str string
+---@return string
 local function with_highlight_group(group_name, str)
   return '%#' .. group_name .. '#' .. str
 end
 
+---@param list any[]
+---@param value_or_fn function | string | number | integer
+---@return integer
 local function list_index_of(list, value_or_fn)
   for index, value in ipairs(list) do
     if type(value_or_fn) == 'function' then
@@ -35,6 +54,9 @@ local function list_index_of(list, value_or_fn)
   return -1
 end
 
+---@param list any[]
+---@param value string | number | integer
+---@return boolean
 local function list_includes(list, value)
   for _, list_item in ipairs(list) do
     if list_item == value then
@@ -44,6 +66,8 @@ local function list_includes(list, value)
   return false
 end
 
+---@param value string | nil
+---@return boolean
 local function is_empty(value)
   if value == nil or value == '' then
     return true
@@ -51,6 +75,8 @@ local function is_empty(value)
   return false
 end
 
+---@param value string | nil
+---@return boolean
 local function is_defined(value)
   if value == nil or value == '' then
     return false
@@ -58,20 +84,31 @@ local function is_defined(value)
   return true
 end
 
+---@param str string
+---@return string
 local function trim_last_char(str)
   return string.sub(str, 1, string.len(str) - 1)
 end
 
+---@param str string
+---@return string
 local function trim(str)
-  return string.gsub(str, '^%s*(.-)%s*$', '%1')
+  return string.gsub(str, '^%s*(.-)%s*$', '%1')[1]
 end
 
+---@param str string
+---@param index integer
+---@return string
+---@return string
 local function split_string_at_index(str, index)
   local a = string.sub(str, 1, index)
   local b = string.sub(str, index + 1, string.len(str))
   return a, b
 end
 
+---@param a table
+---@param b table
+---@return table
 local function merge_tables(a, b)
   for key, value in pairs(b) do
     if type(value) == 'table' then
@@ -83,6 +120,8 @@ local function merge_tables(a, b)
   return a
 end
 
+---@param str string
+---@return string[]
 local function multiline_str_to_table(str)
   local lines = {}
   for s in str:gmatch '[^\r\n]+' do

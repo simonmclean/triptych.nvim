@@ -5,12 +5,16 @@ local state = require 'tryptic.state'
 local log = require 'tryptic.logger'
 local plenary_path = require 'plenary.path'
 
+---@return nil
 local function help()
   local win = state.view_state.get().child.win
   float.win_set_title(win, 'Help', '󰋗', 'Directory')
   float.win_set_lines(win, require('tryptic.help').help_lines())
 end
 
+---@param _target? DirContents
+---@param without_confirm boolean whether to show a confirmation prompt
+---@return nil
 local function delete(_target, without_confirm)
   local target = _target or view.get_target_under_cursor()
 
@@ -27,6 +31,7 @@ local function delete(_target, without_confirm)
   end
 end
 
+---@return nil
 local function add_file_or_dir()
   local current_directory = state.view_state.get().current.path
   local response = vim.fn.trim(vim.fn.input 'Enter name for new file or directory (dirs end with a "/"): ')
@@ -56,6 +61,7 @@ local function add_file_or_dir()
   view.refresh_view()
 end
 
+---@return nil
 local function toggle_cut()
   local target = view.get_target_under_cursor()
   local index = state.cut_list.index_of(target.path)
@@ -69,6 +75,9 @@ local function toggle_cut()
   float.buf_apply_highlights(0, highlights)
 end
 
+---@param _target? DirContents
+---@param _destination string
+---@return nil
 local function copy(_target, _destination)
   local target = _target or view.get_target_under_cursor()
 
@@ -107,6 +116,7 @@ local function copy(_target, _destination)
   end
 end
 
+---@return nil
 local function rename()
   local target = view.get_target_under_cursor()
   local display_name = u.cond(target.is_dir, {
@@ -120,6 +130,7 @@ local function rename()
   end
 end
 
+---@return nil
 local function paste()
   local cursor_target = view.get_target_under_cursor()
   local destination_dir = u.cond(cursor_target.is_dir, {
@@ -127,7 +138,7 @@ local function paste()
     when_false = cursor_target.dirname,
   })
   local success, result = pcall(function()
-    for _, cut_item in ipairs(state.cut_list) do
+    for _, cut_item in ipairs(state.cut_list.get()) do
       local destination = destination_dir .. '/' .. cut_item.basename
       if cut_item.path ~= destination then
         copy(cut_item, destination)
@@ -144,6 +155,8 @@ local function paste()
   view.refresh_view()
 end
 
+---@param path string
+---@return nil
 local function edit_file(path)
   require('tryptic').close_tryptic()
   vim.cmd.edit(path)

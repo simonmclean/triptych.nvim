@@ -1,9 +1,13 @@
+---@param message string | table
+---@return nil
 local function log_err(message)
   -- TODO: Figure out how to properly log errors
   vim.print(message)
 end
 
--- TODO: Include tracing
+---@param label string
+---@param message string | table
+---@param level 'INFO' | 'WARN' | 'ERROR' | 'DEBUG'
 local function log(label, message, level)
   if level ~= 'INFO' and level ~= 'WARN' and level ~= 'ERROR' and level ~= 'DEBUG' then
     log_err 'echoerr Invalid log level'

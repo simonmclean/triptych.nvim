@@ -5,6 +5,12 @@ local state = require 'tryptic.state'
 local fs = require 'tryptic.fs'
 local git = require 'tryptic.git'
 
+-- TODO: Rename tree_to_lines as it doesn't take a tree
+
+---Take a DirContents and return lines and highlights for an nvim buffer
+---@param tree DirContents
+---@return string[] # Lines including icons
+---@return string[] # Highlights for icons
 local function tree_to_lines(tree)
   local lines = {}
   local highlights = {}
@@ -51,11 +57,19 @@ local function tree_to_lines(tree)
   return lines, highlights
 end
 
+---Get the DirContents that correspond to the path under the cursor
+---@return DirContents
 local function get_target_under_cursor()
   local line_number = vim.api.nvim_win_get_cursor(0)[1]
   return state.view_state.get().current.contents.children[line_number]
 end
 
+-- TODO: Rename to line number? Also the params
+
+---Get the line number of a particular path in the buffer
+---@param path string
+---@param paths_list DirContents
+---@return integer
 local function index_of_path(path, paths_list)
   local num = 1
   for i, child in ipairs(paths_list) do
@@ -67,12 +81,19 @@ local function index_of_path(path, paths_list)
   return num
 end
 
+---Currently just return "(cwd)" if the path == cwd
+---@param path string
+---@return string?
 local function get_title_postfix(path)
   if path == vim.fn.getcwd() then
     return '(cwd)'
   end
 end
 
+---@param buf integer
+---@param children DirContents
+---@param group string # see :h sign-group
+---@return nil
 local function set_sign_columns(buf, children, group)
   vim.fn.sign_unplace(group)
   for index, entry in ipairs(children) do
@@ -86,6 +107,9 @@ local function set_sign_columns(buf, children, group)
   end
 end
 
+---@param target_dir string full path
+---@param cursor_target? string full path
+---@return nil
 local function nav_to(target_dir, cursor_target)
   local view_state = state.view_state.get()
 
@@ -116,9 +140,10 @@ local function nav_to(target_dir, cursor_target)
   float.buf_apply_highlights(focused_buf, focused_highlights)
   float.buf_apply_highlights(parent_buf, parent_highlights)
 
+  ---@type integer
   local focused_win_line_number = u.cond(cursor_target, {
     when_true = function()
-      return index_of_path(cursor_target, focused_contents.children)
+      return index_of_path(cursor_target --[[@as string]], focused_contents.children)
     end,
     when_false = state.path_to_line_map.get(target_dir) or 1,
   })
@@ -141,7 +166,7 @@ local function nav_to(target_dir, cursor_target)
       win = focused_win,
     },
     child = {
-      path = nil,
+      path = '',
       contents = nil,
       lines = nil,
       win = child_win,
@@ -149,6 +174,7 @@ local function nav_to(target_dir, cursor_target)
   }
 end
 
+---@return nil
 local function jump_to_cwd()
   local current = state.view_state.get().current
   local cwd = vim.fn.getcwd()
@@ -159,6 +185,8 @@ local function jump_to_cwd()
   end
 end
 
+---@param target DirContents
+---@return nil
 local function update_child_window(target)
   local buf = vim.api.nvim_win_get_buf(state.view_state.get().child.win)
 
@@ -200,6 +228,8 @@ local function update_child_window(target)
   end
 end
 
+---@param path DirContents
+---@return nil
 local function jump_cursor_to(path)
   local line_num
   for index, item in ipairs(state.view_state.get().current.contents.children) do
@@ -213,6 +243,7 @@ local function jump_cursor_to(path)
   end
 end
 
+---@return nil
 local function refresh_view()
   -- TODO: This an inefficient way of refreshing the view
   nav_to(state.view_state.get().current.path)

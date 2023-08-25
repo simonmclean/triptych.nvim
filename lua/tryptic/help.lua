@@ -1,3 +1,4 @@
+---@return string[]
 local function help_lines()
   local mappings = vim.g.tryptic_config.mappings
   local lines = {
