@@ -16,8 +16,8 @@ You only ever control or focus the middle window.
 - Extensible
 - File preview
 - Pretty icons
-- Git signs (TODO)
-- Diagnostic signs (TODO)
+- Git signs
+- Diagnostic signs
 - Create files and folders
 - Rename
 - Delete
@@ -124,13 +124,11 @@ For example, if you want to make `<c-f>` search the file or directory under the 
     - Creating a file over a dir should put the file in that dir
 - Code quality
     - View refreshing is kind of inefficient (especially in paste operations)
-    - Figure out a way to add type definitions
 - Features
     - Double click mouse navigation
         - Would have to include a ".." at the top to nav up
     - When creating a file or dir, the cursor should move to it
     - Toggle hidden
-    - Diagnostics
     - Cut, copy and delete should work with visual selection
     - Make sure this works in Windows (particular sep chars)
 - Tests

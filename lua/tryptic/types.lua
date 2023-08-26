@@ -59,6 +59,7 @@
 ---@field filetype? string
 ---@field cutting boolean
 ---@field git_status? string
+---@field diagnostic_status? integer
 ---@field children? DirContents
 
 ---@class ViewState
@@ -86,3 +87,5 @@
 ---@field is_focusable boolean
 ---@field enable_cursorline boolean
 ---@field show_numbers boolean
+
+---@alias Diagnostics { [string]: integer }

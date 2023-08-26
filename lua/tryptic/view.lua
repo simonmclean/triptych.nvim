@@ -4,6 +4,7 @@ local float = require 'tryptic.float'
 local state = require 'tryptic.state'
 local fs = require 'tryptic.fs'
 local git = require 'tryptic.git'
+local diagnostics = require 'tryptic.diagnostics'
 
 -- TODO: Rename tree_to_lines as it doesn't take a tree
 
@@ -97,8 +98,17 @@ end
 local function set_sign_columns(buf, children, group)
   vim.fn.sign_unplace(group)
   for index, entry in ipairs(children) do
+    -- TODO: De-dupe code below
     if entry.git_status then
       local sign_name = git.get_sign(entry.git_status)
+      -- If the sign isn't defined sign_getdefined will return an empty {}
+      if vim.fn.sign_getdefined(sign_name)[1] then
+        vim.fn.sign_place(0, group, sign_name, buf, { lnum = index })
+      end
+    end
+
+    if entry.diagnostic_status then
+      local sign_name = diagnostics.get_sign(entry.diagnostic_status)
       -- If the sign isn't defined sign_getdefined will return an empty {}
       if vim.fn.sign_getdefined(sign_name)[1] then
         vim.fn.sign_place(0, group, sign_name, buf, { lnum = index })
@@ -131,8 +141,8 @@ local function nav_to(target_dir, cursor_target)
   float.win_set_lines(parent_win, parent_lines)
   float.win_set_lines(focused_win, focused_lines, true)
 
-  set_sign_columns(focused_buf, focused_contents.children, 'tryptic_gitsigns_focused')
-  set_sign_columns(parent_buf, parent_contents.children, 'tryptic_gitsigns_parent')
+  set_sign_columns(focused_buf, focused_contents.children, 'tryptic_sign_col_focused')
+  set_sign_columns(parent_buf, parent_contents.children, 'tryptic_sign_col_parent')
 
   float.win_set_title(parent_win, parent_title, '', 'Directory', get_title_postfix(parent_path))
   float.win_set_title(focused_win, focused_title, '', 'Directory', get_title_postfix(target_dir))
@@ -212,7 +222,7 @@ local function update_child_window(target)
     local lines, highlights = tree_to_lines(contents)
     float.buf_set_lines(buf, lines)
     float.buf_apply_highlights(buf, highlights)
-    set_sign_columns(buf, contents.children, 'tryptic_gitsigns_child')
+    set_sign_columns(buf, contents.children, 'tryptic_sign_col_child')
   else
     local filetype = fs.get_filetype_from_path(target.path) -- TODO: De-dupe this
     local icon, highlight = u.cond(devicons_installed, {

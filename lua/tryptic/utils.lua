@@ -1,3 +1,6 @@
+-- TODO: The cond function seems to require a more sophisticated type
+-- system than LuaCATS allows
+
 ---@alias CondFuncHandler1 fun(): any
 ---@alias CondFuncHandler2 fun(): any, any
 ---@class CondFuncHandlers
@@ -66,18 +69,24 @@ local function list_includes(list, value)
   return false
 end
 
----@param value string | nil
+---@param value nil | string | table
 ---@return boolean
 local function is_empty(value)
+  if type(value) == 'table' then
+    return next(value) == nil
+  end
   if value == nil or value == '' then
     return true
   end
   return false
 end
 
----@param value string | nil
+---@param value nil | string | table
 ---@return boolean
 local function is_defined(value)
+  if type(value) == 'table' then
+    return next(value) ~= nil
+  end
   if value == nil or value == '' then
     return false
   end
@@ -93,7 +102,7 @@ end
 ---@param str string
 ---@return string
 local function trim(str)
-  return string.gsub(str, '^%s*(.-)%s*$', '%1')[1]
+  return string.gsub(str, '^%s*(.-)%s*$', '%1')
 end
 
 ---@param str string

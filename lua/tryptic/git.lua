@@ -26,12 +26,14 @@ local function get_sign(status)
   return map[status]
 end
 
----@type GitStatus | nil
-local __git_status = nil
+---Dictionary of path to status
+---@type GitStatus
+local __git_status = {}
+
 local git_status = {
   ---@return GitStatus
   get = function()
-    if __git_status then
+    if u.is_defined(__git_status) then
       return __git_status
     end
 
@@ -67,7 +69,7 @@ local git_status = {
   end,
 
   reset = function()
-    __git_status = nil
+    __git_status = {}
   end,
 }
 

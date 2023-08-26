@@ -1,5 +1,6 @@
 local u = require 'tryptic.utils'
 local git = require 'tryptic.git'
+local diagnostics = require 'tryptic.diagnostics'
 local plenary_filetype = require 'plenary.filetype'
 
 ---@param path string
@@ -18,6 +19,7 @@ end
 ---@param _path string
 ---@return DirContents
 local function list_dir_contents(_path)
+  local diagnostics_status = diagnostics.diagnostics.get()
   local git_status = git.git_status.get()
   local path = vim.fs.normalize(_path)
 
@@ -30,6 +32,7 @@ local function list_dir_contents(_path)
     filetype = nil,
     cutting = false,
     git_status = nil,
+    diagnostic_status = nil,
     children = {},
   }
 
@@ -70,11 +73,17 @@ local function list_dir_contents(_path)
       basename = vim.fs.basename(child_path),
       dirname = vim.fs.dirname(child_path),
       is_dir = is_dir,
-      git_status = u.cond(git_status, {
-        when_true = function ()
+      git_status = u.cond(u.is_defined(git_status), {
+        when_true = function()
           return git_status[child_path]
         end,
-        when_false = nil
+        when_false = nil,
+      }),
+      diagnostic_status = u.cond(u.is_defined(diagnostics_status), {
+        when_true = function()
+          return diagnostics_status[child_path]
+        end,
+        when_false = nil,
       }),
       children = {},
     }
