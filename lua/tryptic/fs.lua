@@ -56,7 +56,7 @@ local function list_dir_contents(_path)
   for index, name_and_type in ipairs(children) do
     local child_name = name_and_type[1]
     local is_dir = name_and_type[2] == 'directory'
-    local child_path = path .. '/' .. child_name
+    local child_path = u.path_join(path, child_name)
 
     tree.children[index] = {
       path = child_path,

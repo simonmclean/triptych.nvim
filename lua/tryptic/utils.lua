@@ -32,6 +32,17 @@ local function eval(fn)
   return fn()
 end
 
+---@param ... string
+---@return string
+local function path_join(...)
+  local args = { ... }
+  local path = ''
+  for i = 1, #args, 1 do
+    path = path .. '/' .. args[i]
+  end
+  return path
+end
+
 ---@param group_name string
 ---@param str string
 ---@return string
@@ -152,4 +163,5 @@ return {
   merge_tables = merge_tables,
   multiline_str_to_table = multiline_str_to_table,
   split_string_at_index = split_string_at_index,
+  path_join = path_join
 }

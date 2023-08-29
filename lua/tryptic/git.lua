@@ -45,7 +45,7 @@ local git_status = {
     for _, value in ipairs(git_status) do
       local status, file = u.split_string_at_index(value, 3)
       local status_trimmed = u.trim(status)
-      local file_path = cwd .. '/' .. file
+      local file_path = u.path_join(cwd, file)
       result[file_path] = status_trimmed
 
       for dir in vim.fs.parents(file_path) do

@@ -47,15 +47,15 @@ local function add_file_or_dir()
       local length_of_filename = string.find(string.reverse(response), '/') - 1
       local filename = string.sub(response, response_length - length_of_filename + 1, response_length)
       local dirs_to_create = string.sub(response, 1, response_length - length_of_filename)
-      local absolute_dir_path = current_directory .. '/' .. dirs_to_create
+      local absolute_dir_path = u.path_join(current_directory, dirs_to_create)
       vim.fn.mkdir(absolute_dir_path, 'p')
       -- TODO: writefile is destructive. Add checking
       vim.fn.writefile({}, absolute_dir_path .. filename)
     else
-      vim.fn.writefile({}, current_directory .. '/' .. response)
+      vim.fn.writefile({}, u.path_join(current_directory, response))
     end
   else
-    vim.fn.mkdir(current_directory .. '/' .. response, 'p')
+    vim.fn.mkdir(u.path_join(current_directory, response), 'p')
   end
 
   view.refresh_view()
@@ -98,7 +98,7 @@ local function copy(_target, _destination)
       prompt = prompt .. '" as: '
       local response = vim.fn.trim(vim.fn.input(prompt))
       if u.is_defined(response) and response ~= target.display_name then
-        return target.dirname .. '/' .. response
+        return u.path_join(target.dirname, response)
       end
     end,
   })
@@ -125,7 +125,7 @@ local function rename()
   })
   local response = vim.fn.trim(vim.fn.input('Enter new name for "' .. display_name .. '": '))
   if u.is_defined(response) and response ~= target.display_name then
-    vim.fn.rename(target.path, target.basename .. '/' .. response)
+    vim.fn.rename(target.path,  u.path_join(target.dirname, response))
     view.refresh_view()
   end
 end
@@ -139,7 +139,7 @@ local function paste()
   })
   local success, result = pcall(function()
     for _, cut_item in ipairs(state.cut_list.get()) do
-      local destination = destination_dir .. '/' .. cut_item.basename
+      local destination = u.path_join(destination_dir, cut_item.basename)
       if cut_item.path ~= destination then
         copy(cut_item, destination)
         delete(cut_item, true)

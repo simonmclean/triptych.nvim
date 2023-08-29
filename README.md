@@ -92,7 +92,7 @@ The `extension_mappings` property allows you add any arbitrary functionality bas
 You simply provide a key mapping and a function. When the mapping is pressed the function is invoked, and will receive a table containing the following:
 
 ```lua
-{
+{ -- TODO: Update this
   path, -- e.g. /User/Name/foo/bar.js
   display_name -- e.g. bar.js
   basename, -- e.g. bar.js
@@ -125,10 +125,8 @@ For example, if you want to make `<c-f>` search the file or directory under the 
 - Code quality
     - View refreshing is kind of inefficient (especially in paste operations)
 - Features
-    - Double click mouse navigation
-        - Would have to include a ".." at the top to nav up
     - When creating a file or dir, the cursor should move to it
     - Toggle hidden
     - Cut, copy and delete should work with visual selection
-    - Make sure this works in Windows (particular sep chars)
+    - Make sure this works in Windows
 - Tests

@@ -56,6 +56,7 @@ local diagnostics = {
     return result
   end,
 
+  ---@return nil
   reset = function()
     __diagnostics = {}
   end,
