@@ -44,9 +44,15 @@ Example using [Lazy](https://github.com/folke/lazy.nvim).
 }
 ```
 
+Then call the `setup` function somewhere in your Neovim config to initialise it with the default options.
+
+```lua
+require 'tryptic'.setup()
+```
+
 ## ⚙️ Configuration
 
-Below is the default config. Feel free to overwrite any of these.
+Below is the default configuration. Feel free to overwrite any of these.
 
 Key mappings can either be a string, or a table of strings if you want multiple bindings.
 
