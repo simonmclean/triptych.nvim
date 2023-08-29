@@ -70,9 +70,7 @@ local function toggle_cut()
   else
     state.cut_list.add(target)
   end
-  local lines, highlights = view.tree_to_lines(state.view_state.get().current.contents)
-  float.win_set_lines(state.view_state.get().current.win, lines)
-  float.buf_apply_highlights(0, highlights)
+  view.refresh_view()
 end
 
 ---@param _target? DirContents
