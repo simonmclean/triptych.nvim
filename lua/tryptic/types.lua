@@ -1,6 +1,6 @@
 ---@class TrypticConfig
 ---@field mappings TrypticConfigMappings
----@field extension_mappings { [string]: fun(contents: DirContents): nil }
+---@field extension_mappings { [string]: ExtensionMapping }
 ---@field options TrypticConfigOptions
 ---@field line_numbers TrypticConfigLineNumbers
 ---@field git_signs TrypticConfigGitSigns
@@ -21,6 +21,10 @@
 ---@field paste KeyMapping
 ---@field quit KeyMapping
 ---@field toggle_hidden KeyMapping
+
+---@class ExtensionMapping
+---@field mode string
+---@field fn fun(contents: DirContents): nil
 
 ---@class TrypticConfigOptions
 ---@field dirs_first boolean

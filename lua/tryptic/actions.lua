@@ -73,6 +73,30 @@ local function toggle_cut()
   view.refresh_view()
 end
 
+---@return nil
+local function bulk_toggle_cut()
+  local targets = view.get_targets_in_selection()
+  local contains_cut_items = false
+  local contains_uncut_items = false
+  for _, target in ipairs(targets) do
+    if state.cut_list.index_of(target.path) > -1 then
+      contains_cut_items = true
+    else
+      contains_uncut_items = true
+    end
+  end
+  local is_mixed = contains_cut_items and contains_uncut_items
+  for _, target in ipairs(targets) do
+    local cut_list_index = state.cut_list.index_of(target.path)
+    if is_mixed or cut_list_index == -1 then
+      state.cut_list.add(target)
+    else
+      state.cut_list.remove(cut_list_index)
+    end
+  end
+  view.refresh_view()
+end
+
 ---@param _target? DirContents
 ---@param _destination string
 ---@return nil
@@ -123,7 +147,7 @@ local function rename()
   })
   local response = vim.fn.trim(vim.fn.input('Enter new name for "' .. display_name .. '": '))
   if u.is_defined(response) and response ~= target.display_name then
-    vim.fn.rename(target.path,  u.path_join(target.dirname, response))
+    vim.fn.rename(target.path, u.path_join(target.dirname, response))
     view.refresh_view()
   end
 end
@@ -167,6 +191,7 @@ return {
   delete = delete,
   copy = copy,
   toggle_cut = toggle_cut,
+  bulk_toggle_cut = bulk_toggle_cut,
   add_file_or_dir = add_file_or_dir,
   edit_file = edit_file,
 }

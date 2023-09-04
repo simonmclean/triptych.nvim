@@ -5,7 +5,7 @@ local log = require 'tryptic.logger'
 local initial_view_state = {
   parent = {
     path = '',
-    win = -1
+    win = -1,
   },
   current = {
     previous_path = '',
@@ -38,13 +38,19 @@ local view_state = {
 ---@type DirContents[]
 local __cut_list = {}
 local cut_list = {
-  ---@param item DirContents
+  ---@param item_to_add DirContents
   ---@return nil
-  add = function(item)
-    table.insert(__cut_list, item)
+  add = function(item_to_add)
+    local index = u.list_index_of(__cut_list, function(item)
+      return item_to_add.path == item.path
+    end)
+    if index == -1 then
+      table.insert(__cut_list, item_to_add)
+    end
   end,
 
-  ---@param index number
+  -- TODO: Maybe have remove take a DirContents instead of index?
+  ---@param index number index within the cut_list
   ---@return nil
   remove = function(index)
     table.remove(__cut_list, index)
@@ -55,10 +61,11 @@ local cut_list = {
     __cut_list = {}
   end,
 
-  ---@param needle string
-  index_of = function(needle)
+  ---@param path string
+  ---@return integer -1 if not found
+  index_of = function(path)
     return u.list_index_of(__cut_list, function(list_item)
-      return needle == list_item.path
+      return path == list_item.path
     end)
   end,
 

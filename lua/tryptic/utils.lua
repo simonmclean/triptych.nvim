@@ -37,7 +37,7 @@ end
 local function path_join(...)
   local args = { ... }
   local path = ''
-  for i = 1, #args, 1 do
+  for i = 2, #args, 1 do
     path = path .. '/' .. args[i]
   end
   return path
@@ -54,7 +54,7 @@ end
 ---@param value_or_fn function | string | number | integer
 ---@return integer
 local function list_index_of(list, value_or_fn)
-  for index, value in ipairs(list) do
+  for index, value in pairs(list) do
     if type(value_or_fn) == 'function' then
       if value_or_fn(value) then
         return index

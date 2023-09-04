@@ -65,6 +65,22 @@ local function get_target_under_cursor()
   return state.view_state.get().current.contents.children[line_number]
 end
 
+---Get a list of DirContents that correspond to all the paths under the visual selection
+---@return DirContents[]
+local function get_targets_in_selection()
+  local from = vim.fn.getpos('v')[2]
+  local to = vim.api.nvim_win_get_cursor(0)[1]
+  local results = {}
+  local paths = state.view_state.get().current.contents.children
+  if paths then
+    -- need to check min and max to account for the directionality of the visual selection
+    for i = math.min(to, from), math.max(to, from), 1 do
+      table.insert(results, paths[i])
+    end
+  end
+  return results
+end
+
 -- TODO: Rename to line number? Also the params
 
 ---Get the line number of a particular path in the buffer
@@ -265,6 +281,7 @@ return {
   jump_cursor_to = jump_cursor_to,
   update_child_window = update_child_window,
   get_target_under_cursor = get_target_under_cursor,
+  get_targets_in_selection = get_targets_in_selection,
   jump_to_cwd = jump_to_cwd,
   nav_to = nav_to,
 }

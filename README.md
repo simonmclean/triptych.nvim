@@ -52,7 +52,7 @@ require 'tryptic'.setup()
 
 ## ⚙️ Configuration
 
-Below is the default configuration. Feel free to overwrite any of these.
+Below is the default configuration. Feel free to override any of these.
 
 Key mappings can either be a string, or a table of strings if you want multiple bindings.
 
@@ -95,7 +95,7 @@ require 'tryptic'.setup {
 ### Extending functionality
 
 The `extension_mappings` property allows you add any arbitrary functionality based on the current cursor target.
-You simply provide a key mapping and a function. When the mapping is pressed the function is invoked, and will receive a table containing the following:
+You simply provide a key mapping and a function. When the mapped keys are pressed the function is invoked, and will receive a table containing the following:
 
 ```lua
 { -- TODO: Update this
