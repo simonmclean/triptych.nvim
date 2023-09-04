@@ -75,6 +75,7 @@ end
 ---@param path string
 ---@return nil
 local function buf_set_lines_from_path(buf, path)
+	vim.print(path)
   modify_locked_buffer(buf, function()
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, {})
     local ft = fs.get_filetype_from_path(path)
@@ -85,7 +86,7 @@ local function buf_set_lines_from_path(buf, path)
     vim.api.nvim_buf_call(buf, function()
       local file_size = fs.get_file_size_in_kb(path)
       if file_size < 300 then
-        local success = pcall(function()
+        local success, err = pcall(function()
           vim.cmd.read(path)
         end)
         if success then
@@ -94,6 +95,10 @@ local function buf_set_lines_from_path(buf, path)
         else
           local msg = '[Unable to preview file contents]'
           vim.api.nvim_buf_set_lines(buf, 0, -1, false, { '', msg })
+          if err then
+            -- TODO: Maybe bring some sctructure to the labels?
+            log('FILE_PREVIEW', err, 'WARN')
+          end
         end
       else
         local msg = '[File size too large to preview]'

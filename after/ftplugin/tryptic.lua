@@ -47,6 +47,7 @@ end)
 
 map('n', mappings.jump_to_cwd, view.jump_to_cwd)
 map('n', mappings.delete, actions.delete)
+map('v', mappings.delete, actions.bulk_delete)
 map('n', mappings.add, actions.add_file_or_dir)
 map('n', mappings.copy, actions.copy)
 map('n', mappings.rename, actions.rename)

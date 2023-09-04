@@ -37,8 +37,13 @@ end
 local function path_join(...)
   local args = { ... }
   local path = ''
-  for i = 2, #args, 1 do
-    path = path .. '/' .. args[i]
+  for i = 1, #args, 1 do
+    local part = args[i]
+    if i == 1 and string.sub(part, 1, 1) == '/' then
+      path = path .. part
+    else
+      path = path .. '/' .. part
+    end
   end
   return path
 end
@@ -163,5 +168,5 @@ return {
   merge_tables = merge_tables,
   multiline_str_to_table = multiline_str_to_table,
   split_string_at_index = split_string_at_index,
-  path_join = path_join
+  path_join = path_join,
 }

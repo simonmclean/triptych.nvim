@@ -31,6 +31,22 @@ local function delete(_target, without_confirm)
   end
 end
 
+local function bulk_delete()
+  local targets = view.get_targets_in_selection()
+  local response = vim.fn.confirm('Are you sure you want to delete the ' .. #targets .. ' selected files/folders?', '&y\n&n', 'Question')
+  if u.is_defined(response) and response == 1 then
+    for _, target in ipairs(targets) do
+      local success, result = pcall(function()
+        vim.fn.delete(target.path, 'rf')
+      end)
+      if not success then
+        log('DELETE', result or 'Error deleting item', 'ERROR')
+      end
+    end
+    view.refresh_view()
+  end
+end
+
 ---@return nil
 local function add_file_or_dir()
   local current_directory = state.view_state.get().current.path
@@ -189,6 +205,7 @@ return {
   rename = rename,
   paste = paste,
   delete = delete,
+  bulk_delete = bulk_delete,
   copy = copy,
   toggle_cut = toggle_cut,
   bulk_toggle_cut = bulk_toggle_cut,
