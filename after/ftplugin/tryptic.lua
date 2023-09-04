@@ -55,6 +55,7 @@ map('v', mappings.cut, actions.bulk_toggle_cut)
 map('n', mappings.paste, actions.paste)
 map('n', mappings.show_help, actions.help)
 map('n', mappings.quit, tryptic.close_tryptic)
+map('v', mappings.quit, tryptic.close_tryptic)
 
 -----------------------------------------
 ----------- Extension mappings ----------
