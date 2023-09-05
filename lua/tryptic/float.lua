@@ -75,7 +75,6 @@ end
 ---@param path string
 ---@return nil
 local function buf_set_lines_from_path(buf, path)
-	vim.print(path)
   modify_locked_buffer(buf, function()
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, {})
     local ft = fs.get_filetype_from_path(path)

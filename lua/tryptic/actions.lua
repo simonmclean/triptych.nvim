@@ -12,38 +12,42 @@ local function help()
   float.win_set_lines(win, require('tryptic.help').help_lines())
 end
 
----@param _target? DirContents
----@param without_confirm boolean whether to show a confirmation prompt
 ---@return nil
-local function delete(_target, without_confirm)
-  local target = _target or view.get_target_under_cursor()
-
-  if without_confirm then
+local function delete()
+  local target = view.get_target_under_cursor()
+  local response =
+    vim.fn.confirm('Are you sure you want to delete "' .. target.display_name .. '"?', '&y\n&n', 'Question')
+  if u.is_defined(response) and response == 1 then
     vim.fn.delete(target.path, 'rf')
     view.refresh_view()
-  else
-    local response =
-      vim.fn.confirm('Are you sure you want to delete "' .. target.display_name .. '"?', '&y\n&n', 'Question')
-    if u.is_defined(response) and response == 1 then
-      vim.fn.delete(target.path, 'rf')
-      view.refresh_view()
-    end
   end
 end
 
-local function bulk_delete()
-  local targets = view.get_targets_in_selection()
-  local response = vim.fn.confirm('Are you sure you want to delete the ' .. #targets .. ' selected files/folders?', '&y\n&n', 'Question')
-  if u.is_defined(response) and response == 1 then
+local function bulk_delete(_targets, skip_confirm)
+  local targets = _targets or view.get_targets_in_selection()
+
+  if skip_confirm then
     for _, target in ipairs(targets) do
-      local success, result = pcall(function()
-        vim.fn.delete(target.path, 'rf')
-      end)
-      if not success then
-        log('DELETE', result or 'Error deleting item', 'ERROR')
-      end
+      vim.fn.delete(target.path, 'rf')
     end
     view.refresh_view()
+  else
+    local response = vim.fn.confirm(
+      'Are you sure you want to delete the ' .. #targets .. ' selected files/folders?',
+      '&y\n&n',
+      'Question'
+    )
+    if u.is_defined(response) and response == 1 then
+      for _, target in ipairs(targets) do
+        local success, result = pcall(function()
+          vim.fn.delete(target.path, 'rf')
+        end)
+        if not success then
+          log('DELETE', result or 'Error deleting item', 'ERROR')
+        end
+      end
+      view.refresh_view()
+    end
   end
 end
 
@@ -80,12 +84,15 @@ end
 ---@return nil
 local function toggle_cut()
   local target = view.get_target_under_cursor()
-  local index = state.cut_list.index_of(target.path)
-  if index > -1 then
-    state.cut_list.remove(index)
-  else
-    state.cut_list.add(target)
-  end
+  state.copy_list.remove(target)
+  state.cut_list.toggle(target)
+  view.refresh_view()
+end
+
+local function toggle_copy()
+  local target = view.get_target_under_cursor()
+  state.cut_list.remove(target)
+  state.copy_list.toggle(target)
   view.refresh_view()
 end
 
@@ -95,7 +102,7 @@ local function bulk_toggle_cut()
   local contains_cut_items = false
   local contains_uncut_items = false
   for _, target in ipairs(targets) do
-    if state.cut_list.index_of(target.path) > -1 then
+    if state.cut_list.contains(target) then
       contains_cut_items = true
     else
       contains_uncut_items = true
@@ -103,55 +110,48 @@ local function bulk_toggle_cut()
   end
   local is_mixed = contains_cut_items and contains_uncut_items
   for _, target in ipairs(targets) do
-    local cut_list_index = state.cut_list.index_of(target.path)
-    if is_mixed or cut_list_index == -1 then
+    if is_mixed or not state.cut_list.contains(target) then
       state.cut_list.add(target)
     else
-      state.cut_list.remove(cut_list_index)
+      state.cut_list.remove(target)
     end
   end
   view.refresh_view()
 end
 
----@param _target? DirContents
----@param _destination string
+---@param target DirContents
+---@param destination string
 ---@return nil
-local function copy(_target, _destination)
-  local target = _target or view.get_target_under_cursor()
+local function duplicate_file_or_dir(target, destination)
+  local p = plenary_path:new(target.path)
+  p:copy {
+    destination = destination,
+    recursive = true,
+    override = false,
+    interactive = true,
+  }
+end
 
-  local destination = u.cond(_destination, {
-    when_true = _destination,
-    when_false = function()
-      local prompt = 'Copy '
-      prompt = prompt
-        .. u.cond(target.is_dir, {
-          when_true = 'directory "',
-          when_false = 'file "',
-        })
-      prompt = prompt
-        .. u.cond(target.is_dir, {
-          when_true = u.trim_last_char(target.display_name),
-          when_false = target.display_name,
-        })
-      prompt = prompt .. '" as: '
-      local response = vim.fn.trim(vim.fn.input(prompt))
-      if u.is_defined(response) and response ~= target.display_name then
-        return u.path_join(target.dirname, response)
-      end
-    end,
-  })
-
-  if destination then
-    local p = plenary_path:new(target.path)
-    local results = p:copy {
-      destination = destination,
-      recursive = true,
-      override = false,
-      interactive = true,
-    }
-    -- TODO: Check results
-    view.refresh_view()
+local function bulk_toggle_copy(_targets)
+  local targets = view.get_targets_in_selection()
+  local contains_copy_items = false
+  local contains_noncopy_items = false
+  for _, target in ipairs(targets) do
+    if state.copy_list.contains(target) then
+      contains_copy_items = true
+    else
+      contains_noncopy_items = true
+    end
   end
+  local is_mixed = contains_copy_items and contains_noncopy_items
+  for _, target in ipairs(targets) do
+    if is_mixed or not state.copy_list.contains(target) then
+      state.copy_list.add(target)
+    else
+      state.copy_list.remove(target)
+    end
+  end
+  view.refresh_view()
 end
 
 ---@return nil
@@ -175,14 +175,27 @@ local function paste()
     when_true = cursor_target.path,
     when_false = cursor_target.dirname,
   })
+  ---@type DirContents[]
+  local delete_list = {}
+
   local success, result = pcall(function()
-    for _, cut_item in ipairs(state.cut_list.get()) do
-      local destination = u.path_join(destination_dir, cut_item.basename)
-      if cut_item.path ~= destination then
-        copy(cut_item, destination)
-        delete(cut_item, true)
+    -- Handle cut items
+    for _, item in ipairs(state.cut_list.get()) do
+      local destination = u.path_join(destination_dir, item.basename)
+      if item.path ~= destination then
+        -- TODO: Don't add to delete list unless the copy was successful
+        duplicate_file_or_dir(item, destination)
+        table.insert(delete_list, item)
       end
     end
+    -- Handle copy items
+    for _, item in ipairs(state.copy_list.get()) do
+      local destination = u.path_join(destination_dir, item.basename)
+      if item.path ~= destination then
+        duplicate_file_or_dir(item, destination)
+      end
+    end
+    bulk_delete(delete_list, true)
     view.jump_cursor_to(destination_dir)
   end)
   if not success then
@@ -190,6 +203,7 @@ local function paste()
     log('PASTE', 'Failed to paste: ' .. result, 'ERROR')
   end
   state.cut_list.remove_all()
+  state.copy_list.remove_all()
   view.refresh_view()
 end
 
@@ -206,9 +220,10 @@ return {
   paste = paste,
   delete = delete,
   bulk_delete = bulk_delete,
-  copy = copy,
   toggle_cut = toggle_cut,
   bulk_toggle_cut = bulk_toggle_cut,
+  toggle_copy = toggle_copy,
+  bulk_toggle_copy = bulk_toggle_copy,
   add_file_or_dir = add_file_or_dir,
   edit_file = edit_file,
 }

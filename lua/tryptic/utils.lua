@@ -145,6 +145,18 @@ local function merge_tables(a, b)
   return a
 end
 
+---@generic K, A, B
+---@param tbl table<K, A>
+---@param fn fun(value: A): B
+---@return table<K, B>
+local function map(tbl, fn)
+  local result = {}
+  for _, value in ipairs(tbl) do
+    table.insert(result, fn(value))
+  end
+  return result
+end
+
 ---@param str string
 ---@return string[]
 local function multiline_str_to_table(str)
@@ -166,6 +178,7 @@ return {
   trim_last_char = trim_last_char,
   trim = trim,
   merge_tables = merge_tables,
+  map = map,
   multiline_str_to_table = multiline_str_to_table,
   split_string_at_index = split_string_at_index,
   path_join = path_join,

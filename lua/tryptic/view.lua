@@ -39,16 +39,20 @@ local function tree_to_lines(tree)
       end,
     })
 
-    local cut_paths = u.eval(function()
-      local paths = {}
-      for _, cut_item in ipairs(state.cut_list.get()) do
-        table.insert(paths, cut_item.path)
-      end
-      return paths
+    local cut_paths = u.map(state.cut_list.get(), function(value)
+      return value.path
+    end)
+
+    local copy_paths = u.map(state.copy_list.get(), function(value)
+      return value.path
     end)
 
     if u.list_includes(cut_paths, child.path) then
       line = line .. ' (cut)'
+    end
+
+    if u.list_includes(copy_paths, child.path) then
+      line = line .. ' (copy)'
     end
 
     table.insert(lines, line)

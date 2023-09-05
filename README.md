@@ -131,9 +131,11 @@ For example, if you want to make `<c-f>` search the file or directory under the 
 - Code quality
     - View refreshing is kind of inefficient (especially in paste operations)
     - Consider an IO abstraction that wraps sides effects and provides uniform error handling
+    - Abstraction for user input which handles trim etc
 - Features
     - When creating a file or dir, the cursor should move to it
-    - Toggle hidden
-    - Cut, copy and delete should work with visual selection
+    - Toggle hidden (from gitignore)
+    - Copy should work with visual selection
     - Make sure this works in Windows
+    - After an action, go back to normal mode
 - Tests

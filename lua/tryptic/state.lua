@@ -35,45 +35,70 @@ local view_state = {
   end,
 }
 
----@type DirContents[]
-local __cut_list = {}
-local cut_list = {
-  ---@param item_to_add DirContents
-  ---@return nil
-  add = function(item_to_add)
-    local index = u.list_index_of(__cut_list, function(item)
-      return item_to_add.path == item.path
-    end)
-    if index == -1 then
-      table.insert(__cut_list, item_to_add)
-    end
-  end,
+local function dir_contents_list_factory()
+  ---@type DirContents[]
+  local list = {}
+  local this = {}
+  this = {
+    ---@param item_to_add DirContents
+    ---@return nil
+    add = function(item_to_add)
+      local index = u.list_index_of(list, function(item)
+        return item_to_add.path == item.path
+      end)
+      if index == -1 then
+        table.insert(list, item_to_add)
+      end
+    end,
 
-  -- TODO: Maybe have remove take a DirContents instead of index?
-  ---@param index number index within the cut_list
-  ---@return nil
-  remove = function(index)
-    table.remove(__cut_list, index)
-  end,
+    ---@param target DirContents
+    ---@return nil
+    remove = function(target)
+      local index = u.list_index_of(list, function(list_item)
+        return target.path == list_item.path
+      end)
+      if index > -1 then
+        table.remove(list, index)
+      end
+    end,
 
-  ---@return nil
-  remove_all = function()
-    __cut_list = {}
-  end,
+    ---@return nil
+    remove_all = function()
+      list = {}
+    end,
 
-  ---@param path string
-  ---@return integer -1 if not found
-  index_of = function(path)
-    return u.list_index_of(__cut_list, function(list_item)
-      return path == list_item.path
-    end)
-  end,
+    ---@param item DirContents
+    ---@return nil
+    toggle = function(item)
+      if this.contains(item) then
+        this.remove(item)
+      else
+        this.add(item)
+      end
+    end,
 
-  ---@return ViewState
-  get = function()
-    return __cut_list
-  end,
-}
+    ---@param item DirContents
+    ---@return boolean
+    contains = function(item)
+      for _, value in ipairs(list) do
+        if value.path == item.path then
+          return true
+        end
+      end
+      return false
+    end,
+
+    ---@return DirContents[]
+    get = function()
+      return list
+    end,
+  }
+  return this
+end
+
+local cut_list = dir_contents_list_factory()
+
+local copy_list = dir_contents_list_factory()
 
 ---@type { [string]: integer }
 local __path_to_line_map = {}
@@ -131,11 +156,13 @@ local function initialise_state()
   view_state.reset()
   path_to_line_map.remove_all()
   cut_list.remove_all()
+  copy_list.remove_all()
   opening_win.to_nil()
 end
 
 return {
   cut_list = cut_list,
+  copy_list = copy_list,
   path_to_line_map = path_to_line_map,
   initialise_state = initialise_state,
   opening_win = opening_win,
