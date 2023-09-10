@@ -48,6 +48,17 @@ local function path_join(...)
   return path
 end
 
+---@param path string
+---@return string[]
+local function path_split(path)
+  local result = {}
+  local parts = string.gmatch(path, '([^/]+)')
+  for part in parts do
+    table.insert(result, part)
+  end
+  return result
+end
+
 ---@param group_name string
 ---@param str string
 ---@return string
@@ -157,6 +168,20 @@ local function map(tbl, fn)
   return result
 end
 
+---@generic K, A
+---@param tbl table<K, A>
+---@param fn fun(value: A): A
+---@return table<K, A>
+local function filter(tbl, fn)
+  local result = {}
+  for _, value in ipairs(tbl) do
+    if fn(value) then
+      table.insert(result, value)
+    end
+  end
+  return result
+end
+
 ---@param str string
 ---@return string[]
 local function multiline_str_to_table(str)
@@ -179,7 +204,9 @@ return {
   trim = trim,
   merge_tables = merge_tables,
   map = map,
+  filter = filter,
   multiline_str_to_table = multiline_str_to_table,
   split_string_at_index = split_string_at_index,
   path_join = path_join,
+  path_split = path_split,
 }

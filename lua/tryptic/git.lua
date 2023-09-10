@@ -1,4 +1,5 @@
 local u = require 'tryptic.utils'
+local fs = require 'tryptic.fs'
 
 -- Sorted by highest priority last, so that > comparison works intuitively
 ---@enum GitFileStatusPriority
@@ -24,6 +25,52 @@ local function get_sign(status)
     ['??'] = signs.untracked,
   }
   return map[status]
+end
+
+---@type string[]
+local __git_ignore = {}
+local __git_ignore_checked = false
+
+---@return GitIgnore
+local git_ignore = function()
+  if not __git_ignore_checked then
+    local lines = fs.read_lines_from_file './.gitignore'
+    for _, line in pairs(lines) do
+      table.insert(__git_ignore, line)
+    end
+    __git_ignore_checked = true
+  end
+
+  ---@return string[]
+  local function get()
+    return __git_ignore
+  end
+
+  ---@param path string
+  ---@return boolean
+  local is_ignored = function(path)
+    local parts = u.path_split(path)
+    local is_dir = vim.fn.isdirectory(path) == 1
+    for index, part in ipairs(parts) do
+      local is_part_dir = is_dir or index < #parts
+      if u.list_includes(__git_ignore, part) or (is_part_dir and u.list_includes(__git_ignore, part .. '/')) then
+        return true
+      end
+    end
+    return false
+  end
+
+  ---@return nil
+  local function reset()
+    __git_ignore = {}
+    __git_ignore_checked = false
+  end
+
+  return {
+    get = get,
+    is_ignored = is_ignored,
+    reset = reset
+  }
 end
 
 ---Dictionary of path to status
@@ -75,5 +122,6 @@ local git_status = {
 
 return {
   git_status = git_status,
-  get_sign = get_sign
+  get_sign = get_sign,
+  git_ignore = git_ignore,
 }

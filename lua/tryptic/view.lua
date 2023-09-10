@@ -10,13 +10,23 @@ local diagnostics = require 'tryptic.diagnostics'
 
 ---Take a DirContents and return lines and highlights for an nvim buffer
 ---@param tree DirContents
+---@param show_hidden boolean
 ---@return string[] # Lines including icons
 ---@return string[] # Highlights for icons
-local function tree_to_lines(tree)
+local function tree_to_lines(tree, show_hidden)
   local lines = {}
   local highlights = {}
 
-  for _, child in ipairs(tree.children) do
+  local children = u.cond(show_hidden, {
+    when_true = tree.children,
+    when_false = function()
+      return u.filter(tree.children, function(child)
+        return not child.is_git_ignored and (string.sub(child.display_name, 1, 1) ~= '.')
+      end)
+    end,
+  })
+
+  for _, child in ipairs(children) do
     local line, highlight_name = u.cond(child.is_dir, {
       when_true = function()
         local line = ''
@@ -142,21 +152,23 @@ end
 ---@return nil
 local function nav_to(target_dir, cursor_target)
   local view_state = state.view_state.get()
+  local git_status = git.git_status.get()
+  local git_ignore = git.git_ignore()
 
   local focused_win = view_state.current.win
   local parent_win = view_state.parent.win
   local child_win = view_state.child.win
 
   local focused_buf = vim.api.nvim_win_get_buf(focused_win)
-  local focused_contents = fs.list_dir_contents(target_dir)
+  local focused_contents = fs.list_dir_contents(target_dir, git_status, git_ignore)
   local focused_title = vim.fs.basename(target_dir)
-  local focused_lines, focused_highlights = tree_to_lines(focused_contents)
+  local focused_lines, focused_highlights = tree_to_lines(focused_contents, vim.g.tryptic_config.options.show_hidden)
 
   local parent_buf = vim.api.nvim_win_get_buf(parent_win)
   local parent_path = fs.get_parent(target_dir)
   local parent_title = vim.fs.basename(parent_path)
-  local parent_contents = fs.list_dir_contents(parent_path)
-  local parent_lines, parent_highlights = tree_to_lines(parent_contents)
+  local parent_contents = fs.list_dir_contents(parent_path, git_status, git_ignore)
+  local parent_lines, parent_highlights = tree_to_lines(parent_contents, vim.g.tryptic_config.options.show_hidden)
 
   float.win_set_lines(parent_win, parent_lines)
   float.win_set_lines(focused_win, focused_lines, true)
@@ -216,8 +228,9 @@ local function jump_to_cwd()
 end
 
 ---@param target DirContents
+---@param git_ignore GitIgnore
 ---@return nil
-local function update_child_window(target)
+local function update_child_window(target, git_ignore)
   local buf = vim.api.nvim_win_get_buf(state.view_state.get().child.win)
 
   state.view_state.get().child.path = u.cond(target == nil, {
@@ -238,8 +251,9 @@ local function update_child_window(target)
       'Directory',
       get_title_postfix(target.path)
     )
-    local contents = fs.list_dir_contents(target.path)
-    local lines, highlights = tree_to_lines(contents)
+    local git_status = git.git_status.get()
+    local contents = fs.list_dir_contents(target.path, git_status, git_ignore)
+    local lines, highlights = tree_to_lines(contents, vim.g.tryptic_config.options.show_hidden)
     float.buf_set_lines(buf, lines)
     float.buf_apply_highlights(buf, highlights)
     set_sign_columns(buf, contents.children, 'tryptic_sign_col_child')
@@ -280,7 +294,6 @@ local function refresh_view()
 end
 
 return {
-  tree_to_lines = tree_to_lines,
   refresh_view = refresh_view,
   jump_cursor_to = jump_cursor_to,
   update_child_window = update_child_window,

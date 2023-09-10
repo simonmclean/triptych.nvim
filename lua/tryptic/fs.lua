@@ -1,5 +1,4 @@
 local u = require 'tryptic.utils'
-local git = require 'tryptic.git'
 local diagnostics = require 'tryptic.diagnostics'
 local plenary_filetype = require 'plenary.filetype'
 
@@ -16,11 +15,14 @@ local function get_filetype_from_path(path)
   return plenary_filetype.detect(path)
 end
 
+-- TODO: Passing in the is_git_ignored is not in keeping with the rest of the code-base
+-- Might need to re-evaluate patterns
 ---@param _path string
+---@param git_status GitStatus
+---@param git_ignore GitIgnore
 ---@return DirContents
-local function list_dir_contents(_path)
+local function list_dir_contents(_path, git_status, git_ignore)
   local diagnostics_status = diagnostics.diagnostics.get()
-  local git_status = git.git_status.get()
   local path = vim.fs.normalize(_path)
 
   local tree = {
@@ -29,8 +31,8 @@ local function list_dir_contents(_path)
     basename = nil, -- i.e file or folder name
     dirname = nil, -- i.e. parent
     is_dir = nil,
+    is_git_ignored = nil,
     filetype = nil,
-    cutting = false,
     git_status = nil,
     diagnostic_status = nil,
     children = {},
@@ -73,6 +75,7 @@ local function list_dir_contents(_path)
       basename = vim.fs.basename(child_path),
       dirname = vim.fs.dirname(child_path),
       is_dir = is_dir,
+      is_git_ignored = git_ignore.is_ignored(child_path),
       git_status = u.cond(u.is_defined(git_status), {
         when_true = function()
           return git_status[child_path]

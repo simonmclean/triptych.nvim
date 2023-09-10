@@ -1,5 +1,6 @@
 local state = require 'tryptic.state'
 local view = require 'tryptic.view'
+local git = require 'tryptic.git'
 
 ---@return nil
 local function handle_cursor_moved()
@@ -9,7 +10,7 @@ local function handle_cursor_moved()
     local line_number = vim.api.nvim_win_get_cursor(0)[1]
     if current_dir then
       state.path_to_line_map.set(current_dir, line_number)
-      view.update_child_window(target)
+      view.update_child_window(target, git.git_ignore())
     end
   end
 end

@@ -21,6 +21,7 @@ local function close_tryptic()
   autocommands.destroy_autocommands() -- should this be in initialise_state?
   vim.api.nvim_set_current_win(state.opening_win.get())
   git.git_status.reset()
+  git.git_ignore().reset()
   state.initialise_state()
 end
 
@@ -86,15 +87,16 @@ local function setup(user_config)
       cut = 'x',
       paste = 'p',
       quit = 'q',
-      toggle_hidden = '<leader>.', -- TODO implement this
+      toggle_hidden = '<leader>,',
     },
     extension_mappings = {},
     options = {
-      dirs_first = true, -- TODO: Document this
+      dirs_first = true,
+      show_hidden = false
     },
     line_numbers = {
       enabled = true, -- TODO: Document this, and implement
-      relative = false
+      relative = false -- TODO: Document and implement
     },
     git_signs = {
       enabled = true,
