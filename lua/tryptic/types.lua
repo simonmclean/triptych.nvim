@@ -7,6 +7,25 @@
 ---@field diagnostic_signs TrypticConfigDiagnostic
 ---@field debug boolean
 
+---@class TrypticState
+---@field new fun(config: TrypticConfig, opening_win: integer): TrypticState
+---@field reset fun(): nil
+---@field list_add fun(self: TrypticState, list_type: 'cut' | 'copy', item: DirContents): nil
+---@field list_remove fun(self: TrypticState, list_type: 'cut' | 'copy', item: DirContents): nil
+---@field list_remove_all fun(self: TrypticState, list_type: 'cut' | 'copy'): nil
+---@field list_toggle fun(self: TrypticState, list_type: 'cut' | 'copy', item: DirContents): nil
+---@field list_contains fun(self: TrypticState, list_type: 'cut' | 'copy', item: DirContents): nil
+---@field windows ViewState
+---@field cut_list DirContents[]
+---@field copy_list DirContents[]
+---@field path_to_line_map { [string]: integer }
+---@field opening_win integer
+
+---@class AutoCommands
+---@field new fun(state: TrypticState): AutoCommands
+---@field destroy_autocommands fun(): nil
+---@field autocmds integer[]
+
 ---@class TrypticConfigMappings
 ---@field open_tryptic KeyMapping
 ---@field show_help KeyMapping
@@ -28,6 +47,7 @@
 
 ---@class TrypticConfigOptions
 ---@field dirs_first boolean
+---@field show_hidden boolean
 
 ---@class TrypticConfigLineNumbers
 ---@field enabled boolean
@@ -54,12 +74,18 @@
 
 ---@alias GitStatus { [string]: GitFileStatus }
 
+---@class GitIgnore
+---@field get fun(): string[]
+---@field is_ignored fun(path: string): boolean
+---@field reset fun(): nil
+
 ---@class DirContents
 ---@field path string
 ---@field display_name string
 ---@field dirname string # Parent directory path
 ---@field basename string
 ---@field is_dir boolean
+---@field is_git_ignored boolean
 ---@field filetype? string
 ---@field cutting boolean
 ---@field git_status? string

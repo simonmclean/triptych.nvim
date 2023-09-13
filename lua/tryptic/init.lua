@@ -1,47 +1,27 @@
 local float = require 'tryptic.float'
 local u = require 'tryptic.utils'
-local autocommands = require 'tryptic.autocmds'
-local state = require 'tryptic.state'
+local create_autocmds = require('tryptic.autocmds').new
+local create_state = require('tryptic.state').new
+local create_mappings = require 'tryptic.mappings'.new
+local create_actions = require 'tryptic.actions'.new
 local view = require 'tryptic.view'
 local git = require 'tryptic.git'
 
 -- require 'plenary.reload'.reload_module('tryptic')
 
 ---@return nil
-local function close_tryptic()
-  -- Need to set tryptic_open to false before closing the floats
-  -- Otherwise things blow up. Not sure why
-  state.tryptic_open.set(false)
-  local view_state = state.view_state.get()
-  float.close_floats {
-    view_state.parent.win,
-    view_state.current.win,
-    view_state.child.win,
-  }
-  autocommands.destroy_autocommands() -- should this be in initialise_state?
-  vim.api.nvim_set_current_win(state.opening_win.get())
-  git.git_status.reset()
-  git.git_ignore().reset()
-  state.initialise_state()
-end
-
----@return nil
 local function open_tryptic()
-  if state.tryptic_open.is_open() then
-    return
-  end
+  local state = create_state(vim.g.tryptic_config, vim.api.nvim_get_current_win())
+  vim.g.tryptic_get_state = function()
+    return state
+  end -- TODO: Can I get away without such globals?
 
-  state.initialise_state()
-
-  state.opening_win.set(vim.api.nvim_get_current_win())
   local buf = vim.api.nvim_buf_get_name(0)
   local buf_dir = vim.fs.dirname(buf)
 
-  state.tryptic_open.set(true)
-
   local windows = float.create_three_floating_windows()
 
-  state.view_state.set {
+  state.windows = {
     parent = {
       path = '',
       win = windows[1],
@@ -56,18 +36,32 @@ local function open_tryptic()
     },
   }
 
-  autocommands.create_autocommands()
+  -- Autocmds need to be created after the above state is set
+  local autocmds = create_autocmds(state)
+  local actions = create_actions(state)
+  create_mappings(state, actions)
 
-  view.nav_to(buf_dir, buf)
+  vim.g.tryptic_close = function()
+    -- Need to destroy autocmds before the floating windows
+    autocmds:destroy_autocommands()
+    local wins = state.windows
+    float.close_floats {
+      wins.parent.win,
+      wins.current.win,
+      wins.child.win,
+    }
+    vim.api.nvim_set_current_win(state.opening_win)
+    git.git_status.reset()
+    git.git_ignore().reset()
+    state:reset() -- TODO: Maybe we don't need this anymore because a new instance is created each time
+  end
+
+  view.nav_to(state, buf_dir, buf)
 end
 
 ---@return nil
 local function toggle_tryptic()
-  if state.tryptic_open.is_open() then
-    close_tryptic()
-  else
-    open_tryptic()
-  end
+  open_tryptic()
 end
 
 ---@param user_config TrypticConfig
@@ -92,11 +86,11 @@ local function setup(user_config)
     extension_mappings = {},
     options = {
       dirs_first = true,
-      show_hidden = false
+      show_hidden = false,
     },
     line_numbers = {
       enabled = true, -- TODO: Document this, and implement
-      relative = false -- TODO: Document and implement
+      relative = false, -- TODO: Document and implement
     },
     git_signs = {
       enabled = true,
@@ -106,8 +100,8 @@ local function setup(user_config)
         modify = 'GitSignsChange',
         delete = 'GitSignsDelete',
         rename = 'GitSignsRename',
-        untracked = 'GitSignsUntracked'
-      }
+        untracked = 'GitSignsUntracked',
+      },
     },
     diagnostic_signs = {
       enabled = true, -- TODO: Document this, and implement
@@ -124,6 +118,5 @@ end
 
 return {
   toggle_tryptic = toggle_tryptic,
-  close_tryptic = close_tryptic,
   setup = setup,
 }

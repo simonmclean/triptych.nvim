@@ -1,35 +1,37 @@
-local handlers = require 'tryptic.event_handlers'
-
 local au_group = vim.api.nvim_create_augroup('TrypticAutoCmd', { clear = true })
+local event_handlers = require 'tryptic.event_handlers'
 
----@type number[]
-local __autocommands = {}
+local AutoCommands = {}
 
----@return nil
-local function create_autocommands()
-  local a = vim.api.nvim_create_autocmd('CursorMoved', {
-    group = au_group,
-    callback = function()
-      handlers.handle_cursor_moved()
-    end,
-  })
+---@return AutoCommands
+function AutoCommands.new(state)
+  local instance = {}
+  setmetatable(instance, { __index = AutoCommands })
+  instance.state = state
+  instance.autocmds = {
+    vim.api.nvim_create_autocmd('CursorMoved', {
+      group = au_group,
+      callback = function()
+        event_handlers.handle_cursor_moved(instance.state)
+      end,
+    }),
 
-  local b = vim.api.nvim_create_autocmd('BufLeave', {
-    group = au_group,
-    callback = handlers.handle_buf_leave,
-  })
-
-  __autocommands = { a, b }
+    vim.api.nvim_create_autocmd('BufLeave', {
+      group = au_group,
+      callback = event_handlers.handle_buf_leave,
+    }),
+  }
+  return instance
 end
 
----@return nil
-local function destroy_autocommands()
-  for _, autocmd in pairs(__autocommands) do
+function AutoCommands:create_autocommands() end
+
+function AutoCommands:destroy_autocommands()
+  for _, autocmd in pairs(self.autocmds) do
     vim.api.nvim_del_autocmd(autocmd)
   end
 end
 
 return {
-  create_autocommands = create_autocommands,
-  destroy_autocommands = destroy_autocommands,
+  new = AutoCommands.new,
 }

@@ -135,7 +135,8 @@ For example, if you want to make `<c-f>` search the file or directory under the 
 - Features
     - When creating a file or dir, the cursor should move to it
     - Toggle hidden (from gitignore)
-    - Copy should work with visual selection
     - Make sure this works in Windows
     - After an action, go back to normal mode
+    - Print out result of actions (in case file is git ignored and hidden for example)
+    - Fixed inconsistency between copy overwrite prompt and delete prompt
 - Tests
