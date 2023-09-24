@@ -18,9 +18,10 @@ Diagnostics.new = function()
 
   ---@type { [string]: integer }
   instance.diagnostics = {}
-  for _, entry in ipairs(vim.diagnostic.get()) do
-    local path = vim.api.nvim_buf_get_name(entry.bufnr)
-    -- TODO: De-dupe the code below
+
+  ---@param entry { severity: integer }
+  ---@param path string
+  local function set_diagnostic(entry, path)
     if instance.diagnostics[path] then
       -- Highest severity is 1, which is why we're using the < operator
       if entry.severity < instance.diagnostics[path] then
@@ -29,20 +30,18 @@ Diagnostics.new = function()
     else
       instance.diagnostics[path] = entry.severity
     end
+  end
 
-    -- Propagate the status up through the parent directories
-    for dir in vim.fs.parents(path) do
+  for _, entry in ipairs(vim.diagnostic.get()) do
+    local path = vim.api.nvim_buf_get_name(entry.bufnr)
+    set_diagnostic(entry, path)
+
+    -- Propagate the status p through the parent directories
+    for dir in vim.fs.parent(path) do
       if dir == vim.fn.getcwd() then
         break
       end
-      if instance.diagnostics[dir] then
-        -- Highest severity is 1, which is why we're using the < operator
-        if entry.severity < instance.diagnostics[dir] then
-          instance.diagnostics[dir] = entry.severity
-        end
-      else
-        instance.diagnostics[dir] = entry.severity
-      end
+      set_diagnostic(entry, dir)
     end
   end
 
