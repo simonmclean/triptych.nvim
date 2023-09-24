@@ -48,7 +48,6 @@ local function open_tryptic()
       wins.child.win,
     }
     vim.api.nvim_set_current_win(State.opening_win)
-    State:reset() -- TODO: Maybe we don't need this anymore because a new instance is created each time
   end
 
   view.nav_to(State, buf_dir, Diagnostics, GitIgnore, GitStatus, buf)

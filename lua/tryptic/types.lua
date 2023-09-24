@@ -9,7 +9,6 @@
 
 ---@class TrypticState
 ---@field new fun(config: TrypticConfig, opening_win: integer): TrypticState
----@field reset fun(): nil
 ---@field list_add fun(self: TrypticState, list_type: 'cut' | 'copy', item: DirContents): nil
 ---@field list_remove fun(self: TrypticState, list_type: 'cut' | 'copy', item: DirContents): nil
 ---@field list_remove_all fun(self: TrypticState, list_type: 'cut' | 'copy'): nil
