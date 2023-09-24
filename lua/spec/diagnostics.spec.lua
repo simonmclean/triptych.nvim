@@ -52,9 +52,6 @@ describe('Diagnostics', function()
           return ''
         end,
       },
-      print = function(v)
-        vim.print(v)
-      end,
     }
     _G.tryptic_mock_vim = v
     local Diagnostics = diagnostics.new()
