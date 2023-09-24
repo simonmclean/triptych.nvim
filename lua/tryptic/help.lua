@@ -1,5 +1,6 @@
 ---@return string[]
 local function help_lines()
+  local vim = _G.tryptic_mock_vim or vim
   local mappings = vim.g.tryptic_config.mappings
   local lines = {
     'Tryptic key bindings',

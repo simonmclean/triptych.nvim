@@ -29,12 +29,12 @@ function TrypticState.new(config, opening_win)
   return instance
 end
 
+-- TODO: We maybe don't need this anymore since we're creating instances
 function TrypticState:reset()
   self.copy_list = {}
   self.cut_list = {}
   self.opening_win = -1
   self.path_to_line_map = {}
-  vim.g.tryptic_state = nil
 end
 
 ---Add to either cut or copy list

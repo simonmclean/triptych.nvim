@@ -132,6 +132,7 @@ For example, if you want to make `<c-f>` search the file or directory under the 
     - View refreshing is kind of inefficient (especially in paste operations)
     - Consider an IO abstraction that wraps sides effects and provides uniform error handling
     - Abstraction for user input which handles trim etc
+    - Performance profiling
 - Features
     - When creating a file or dir, the cursor should move to it
     - Toggle hidden (from gitignore)

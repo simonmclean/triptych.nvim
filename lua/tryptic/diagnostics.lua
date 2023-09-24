@@ -1,8 +1,8 @@
-local u = require 'tryptic.utils'
+local Diagnostics = {}
 
 ---@param severity 1 | 2 | 3 | 4
 ---@return string
-local function get_sign(severity)
+Diagnostics.get_sign = function(severity)
   local map = {
     [1] = 'DiagnosticSignError',
     [2] = 'DiagnosticSignWarn',
@@ -12,56 +12,50 @@ local function get_sign(severity)
   return map[severity]
 end
 
----Dictionary of path to severity
----@type Diagnostics
-local __diagnostics = {}
+Diagnostics.new = function()
+  local instance = {}
+  setmetatable(instance, { __index = Diagnostics })
 
-local diagnostics = {
-  ---@return Diagnostics
-  get = function()
-    if u.is_defined(__diagnostics) then
-      return __diagnostics
+  ---@type { [string]: integer }
+  instance.diagnostics = {}
+  for _, entry in ipairs(vim.diagnostic.get()) do
+    local path = vim.api.nvim_buf_get_name(entry.bufnr)
+    -- TODO: De-dupe the code below
+    if instance.diagnostics[path] then
+      -- Highest severity is 1, which is why we're using the < operator
+      if entry.severity < instance.diagnostics[path] then
+        instance.diagnostics[path] = entry.severity
+      end
+    else
+      instance.diagnostics[path] = entry.severity
     end
 
-    local result = {}
-
-    for _, entry in ipairs(vim.diagnostic.get()) do
-      local path = vim.api.nvim_buf_get_name(entry.bufnr)
-      -- TODO: De-dupe the code below
-      if result[path] then
+    -- Propagate the status up through the parent directories
+    for dir in vim.fs.parents(path) do
+      if dir == vim.fn.getcwd() then
+        break
+      end
+      if instance.diagnostics[dir] then
         -- Highest severity is 1, which is why we're using the < operator
-        if entry.severity < result[path] then
-          result[path] = entry.severity
+        if entry.severity < instance.diagnostics[dir] then
+          instance.diagnostics[dir] = entry.severity
         end
       else
-        result[path] = entry.severity
-      end
-
-      -- Propagate the status up through the parent directories
-      for dir in vim.fs.parents(path) do
-        if dir == vim.fn.getcwd() then
-          break
-        end
-        if result[dir] then
-          -- Highest severity is 1, which is why we're using the < operator
-          if entry.severity < result[dir] then
-            result[dir] = entry.severity
-          end
-        else
-          result[dir] = entry.severity
-        end
+        instance.diagnostics[dir] = entry.severity
       end
     end
+  end
 
-    return result
-  end,
+  return instance
+end
 
-  ---@return nil
-  reset = function()
-    __diagnostics = {}
-  end,
-}
+---@param path string
+---@return integer | nil
+function Diagnostics:get(path)
+  return self.diagnostics[path]
+end
+
 return {
-  diagnostics = diagnostics,
-  get_sign = get_sign
+  new = Diagnostics.new,
+  get_sign = Diagnostics.get_sign,
 }

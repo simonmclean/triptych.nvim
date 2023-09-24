@@ -1,6 +1,7 @@
 ---@param message string | table
 ---@return nil
 local function log_err(message)
+  local vim = _G.tryptic_mock_vim or vim
   -- TODO: Figure out how to properly log errors
   vim.print(message)
 end
@@ -9,6 +10,7 @@ end
 ---@param message string | table
 ---@param level 'INFO' | 'WARN' | 'ERROR' | 'DEBUG'
 local function log(label, message, level)
+  local vim = _G.tryptic_mock_vim or vim
   if level ~= 'INFO' and level ~= 'WARN' and level ~= 'ERROR' and level ~= 'DEBUG' then
     log_err 'echoerr Invalid log level'
     return

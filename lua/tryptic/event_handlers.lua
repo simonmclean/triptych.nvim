@@ -1,15 +1,18 @@
 local view = require 'tryptic.view'
-local git = require 'tryptic.git'
 
----@param state TrypticState
+---@param State TrypticState
+---@param Diagnostics Diagnostics
+---@param GitStatus GitStatus
+---@param GitIgnore GitIgnore
 ---@return nil
-local function handle_cursor_moved(state)
-  local target = view.get_target_under_cursor(state)
-  local current_dir = state.windows.current.path
+local function handle_cursor_moved(State, Diagnostics, GitStatus, GitIgnore)
+  local vim = _G.tryptic_mock_vim or vim
+  local target = view.get_target_under_cursor(State)
+  local current_dir = State.windows.current.path
   local line_number = vim.api.nvim_win_get_cursor(0)[1]
   if current_dir then
-    state.path_to_line_map[current_dir] = line_number
-    view.update_child_window(state, target, git.git_ignore())
+    State.path_to_line_map[current_dir] = line_number
+    view.update_child_window(State, target, Diagnostics, GitStatus, GitIgnore)
   end
 end
 

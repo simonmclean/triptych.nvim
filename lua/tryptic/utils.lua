@@ -192,6 +192,23 @@ local function multiline_str_to_table(str)
   return lines
 end
 
+--- Functional setter. Creates new copy. Only works on shallow tables
+---@param tbl table
+---@param k any
+---@param v any
+---@return table
+local function set(tbl, k, v)
+  local result = {}
+  for key, value in pairs(tbl) do
+    if key == k then
+      result[k] = v
+    else
+      result[key] = value
+    end
+  end
+  return result
+end
+
 return {
   cond = cond,
   eval = eval,
@@ -209,4 +226,5 @@ return {
   split_string_at_index = split_string_at_index,
   path_join = path_join,
   path_split = path_split,
+  set = set
 }

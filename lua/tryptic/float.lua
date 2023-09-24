@@ -7,6 +7,7 @@ local log = require 'tryptic.logger'
 ---@param fn fun(): nil
 ---@return nil
 local function modify_locked_buffer(buf, fn)
+  local vim = _G.tryptic_mock_vim or vim
   vim.api.nvim_buf_set_option(buf, 'readonly', false)
   vim.api.nvim_buf_set_option(buf, 'modifiable', true)
   fn()
@@ -18,6 +19,7 @@ end
 ---@param lines string[]
 ---@return nil
 local function buf_set_lines(buf, lines)
+  local vim = _G.tryptic_mock_vim or vim
   modify_locked_buffer(buf, function()
     vim.api.nvim_buf_set_option(buf, 'filetype', 'tryptic')
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
@@ -28,6 +30,7 @@ end
 ---@param highlights string[]
 ---@return nil
 local function buf_apply_highlights(buf, highlights)
+  local vim = _G.tryptic_mock_vim or vim
   for i, highlight in ipairs(highlights) do
     vim.api.nvim_buf_add_highlight(buf, 0, highlight, i - 1, 0, 3)
   end
@@ -37,6 +40,7 @@ end
 ---@param lines string[]
 ---@param attempt_scroll_top? boolean
 local function win_set_lines(win, lines, attempt_scroll_top)
+  local vim = _G.tryptic_mock_vim or vim
   local buf = vim.api.nvim_win_get_buf(win)
   buf_set_lines(buf, lines)
   if attempt_scroll_top then
@@ -53,6 +57,7 @@ end
 ---@param postfix? string
 ---@return nil
 local function win_set_title(win, title, icon, highlight, postfix)
+  local vim = _G.tryptic_mock_vim or vim
   vim.api.nvim_win_call(win, function()
     local maybe_icon = ''
     if icon then
@@ -75,6 +80,7 @@ end
 ---@param path string
 ---@return nil
 local function buf_set_lines_from_path(buf, path)
+  local vim = _G.tryptic_mock_vim or vim
   modify_locked_buffer(buf, function()
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, {})
     local ft = fs.get_filetype_from_path(path)
@@ -110,6 +116,7 @@ end
 ---@param lines string[]
 ---@return number
 local function create_new_buffer(lines)
+  local vim = _G.tryptic_mock_vim or vim
   local buf = vim.api.nvim_create_buf(false, true)
   modify_locked_buffer(buf, function()
     buf_set_lines(buf, lines)
@@ -121,6 +128,7 @@ end
 ---@param config FloatingWindowConfig
 ---@return number
 local function create_floating_window(config)
+  local vim = _G.tryptic_mock_vim or vim
   local buf = create_new_buffer {}
   local win = vim.api.nvim_open_win(buf, true, {
     width = config.width,
@@ -140,6 +148,7 @@ end
 
 ---@return { [1]: number, [2]: number, [3]: number }
 local function create_three_floating_windows()
+  local vim = _G.tryptic_mock_vim or vim
   local max_width = 220
   local max_height = 45
   local screen_height = vim.o.lines
@@ -192,6 +201,7 @@ end
 ---@param wins number[]
 ---@return nil
 local function close_floats(wins)
+  local vim = _G.tryptic_mock_vim or vim
   for _, win in ipairs(wins) do
     local buf = vim.api.nvim_win_get_buf(win)
     vim.api.nvim_buf_delete(buf, { force = true })

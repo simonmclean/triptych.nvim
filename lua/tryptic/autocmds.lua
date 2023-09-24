@@ -3,16 +3,20 @@ local event_handlers = require 'tryptic.event_handlers'
 
 local AutoCommands = {}
 
+---@param State TrypticState
+---@param Diagnostics Diagnostics
+---@param GitStatus GitStatus
+---@param GitIgnore GitIgnore
 ---@return AutoCommands
-function AutoCommands.new(state)
+function AutoCommands.new(State, Diagnostics, GitStatus, GitIgnore)
+  local vim = _G.tryptic_mock_vim or vim
   local instance = {}
   setmetatable(instance, { __index = AutoCommands })
-  instance.state = state
   instance.autocmds = {
     vim.api.nvim_create_autocmd('CursorMoved', {
       group = au_group,
       callback = function()
-        event_handlers.handle_cursor_moved(instance.state)
+        event_handlers.handle_cursor_moved(State, Diagnostics, GitStatus, GitIgnore)
       end,
     }),
 

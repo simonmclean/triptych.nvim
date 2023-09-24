@@ -2,8 +2,14 @@ local view = require 'tryptic.view'
 
 local Mappings = {}
 
----@param state TrypticState
-function Mappings.new(state, actions)
+-- TODO: Type actions
+---@param State TrypticState
+---@param actions unknown
+---@param Diagnostics Diagnostics
+---@param GitStatus GitStatus
+---@param GitIgnore GitIgnore
+function Mappings.new(State, actions, Diagnostics, GitStatus, GitIgnore)
+  local vim = _G.tryptic_mock_vim or vim
   local mappings = vim.g.tryptic_config.mappings
   local extension_mappings = vim.g.tryptic_config.extension_mappings
 
@@ -25,18 +31,18 @@ function Mappings.new(state, actions)
   -----------------------------------------
 
   map('n', mappings.nav_left, function()
-    local focused_path = state.windows.current.path
-    local parent_path = state.windows.parent.path
+    local focused_path = State.windows.current.path
+    local parent_path = State.windows.parent.path
     if parent_path ~= '/' then
-      view.nav_to(state, parent_path, focused_path)
+      view.nav_to(State, parent_path, Diagnostics, GitIgnore, GitStatus, focused_path)
     end
   end)
 
   map('n', mappings.nav_right, function()
-    local target = view.get_target_under_cursor(state)
+    local target = view.get_target_under_cursor(State)
     -- TODO: edit_file should be called from nav_to
     if vim.fn.isdirectory(target.path) == 1 then
-      view.nav_to(state, target.path)
+      view.nav_to(State, target.path, Diagnostics, GitIgnore, GitStatus)
     else
       actions.edit_file(target.path)
     end
@@ -68,7 +74,7 @@ function Mappings.new(state, actions)
   -----------------------------------------
   for key, ext_mapping in pairs(extension_mappings) do
     map(ext_mapping.mode, key, function()
-      ext_mapping.fn(view.get_target_under_cursor(state))
+      ext_mapping.fn(view.get_target_under_cursor(State))
     end)
   end
 end

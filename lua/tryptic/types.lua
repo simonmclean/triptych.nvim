@@ -1,11 +1,11 @@
 ---@class TrypticConfig
----@field mappings TrypticConfigMappings
----@field extension_mappings { [string]: ExtensionMapping }
----@field options TrypticConfigOptions
----@field line_numbers TrypticConfigLineNumbers
----@field git_signs TrypticConfigGitSigns
----@field diagnostic_signs TrypticConfigDiagnostic
----@field debug boolean
+---@field mappings? TrypticConfigMappings
+---@field extension_mappings? { [string]: ExtensionMapping }
+---@field options? TrypticConfigOptions
+---@field line_numbers? TrypticConfigLineNumbers
+---@field git_signs? TrypticConfigGitSigns
+---@field diagnostic_signs? TrypticConfigDiagnostic
+---@field debug? boolean
 
 ---@class TrypticState
 ---@field new fun(config: TrypticConfig, opening_win: integer): TrypticState
@@ -20,6 +20,7 @@
 ---@field copy_list DirContents[]
 ---@field path_to_line_map { [string]: integer }
 ---@field opening_win integer
+---@field show_hidden boolean
 
 ---@class AutoCommands
 ---@field new fun(state: TrypticState): AutoCommands
@@ -72,12 +73,13 @@
 
 ---@alias GitFileStatus ('A' | 'AM' | 'D' | 'M' | 'R' | '??')
 
----@alias GitStatus { [string]: GitFileStatus }
+---@class GitStatus
+---@field new fun(): GitStatus
+---@field get fun(self: GitStatus, path: string): GitFileStatus | nil
 
 ---@class GitIgnore
----@field get fun(): string[]
----@field is_ignored fun(path: string): boolean
----@field reset fun(): nil
+---@field new fun(): GitIgnore
+---@field is_ignored fun(self: GitIgnore, path: string): boolean
 
 ---@class DirContents
 ---@field path string
@@ -118,4 +120,6 @@
 ---@field enable_cursorline boolean
 ---@field show_numbers boolean
 
----@alias Diagnostics { [string]: integer }
+---@class Diagnostics
+---@field new fun(): Diagnostics
+---@field get fun(self: Diagnostics, path: string): integer | nil
