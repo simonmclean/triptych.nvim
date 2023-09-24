@@ -36,8 +36,8 @@ Diagnostics.new = function()
     local path = vim.api.nvim_buf_get_name(entry.bufnr)
     set_diagnostic(entry, path)
 
-    -- Propagate the status p through the parent directories
-    for dir in vim.fs.parent(path) do
+    -- Propagate the status up through the parent directories
+    for dir in vim.fs.parents(path) do
       if dir == vim.fn.getcwd() then
         break
       end
