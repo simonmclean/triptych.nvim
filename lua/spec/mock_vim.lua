@@ -1,8 +1,13 @@
+local u = require 'tryptic.utils'
+
 --- @class FunctionCallLog
 --- @field func_name string
 --- @field args any ...
 
-return function()
+---@param overrides? table
+---@return table
+---@return FunctionCallLog[]
+return function(overrides)
   ---@type FunctionCallLog[]
   local call_log = {}
 
@@ -192,5 +197,7 @@ return function()
     },
   }
 
-  return mock_vim, call_log
+  local mock_vim_with_overrides = u.merge_tables(mock_vim, overrides or {})
+
+  return mock_vim_with_overrides, call_log
 end
