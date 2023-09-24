@@ -143,6 +143,17 @@ local function get_title_postfix(path)
 end
 
 ---@param buf integer
+---@param sign_name string
+---@param group string
+---@param line_num integer
+local function place_sign(buf, sign_name, group, line_num)
+  -- If the sign isn't defined sign_getdefined will return an empty {}
+  if vim.fn.sign_getdefined(sign_name)[1] then
+    vim.fn.sign_place(0, group, sign_name, buf, { lnum = line_num })
+  end
+end
+
+---@param buf integer
 ---@param children PathDetails
 ---@param group string # see :h sign-group
 ---@return nil
@@ -150,21 +161,14 @@ local function set_sign_columns(buf, children, group)
   local vim = _G.tryptic_mock_vim or vim
   vim.fn.sign_unplace(group)
   for index, entry in ipairs(children) do
-    -- TODO: De-dupe code below
     if entry.git_status then
       local sign_name = git.get_sign(entry.git_status)
-      -- If the sign isn't defined sign_getdefined will return an empty {}
-      if vim.fn.sign_getdefined(sign_name)[1] then
-        vim.fn.sign_place(0, group, sign_name, buf, { lnum = index })
-      end
+      place_sign(buf, sign_name, group, index)
     end
 
     if entry.diagnostic_status then
       local sign_name = diagnostics.get_sign(entry.diagnostic_status)
-      -- If the sign isn't defined sign_getdefined will return an empty {}
-      if vim.fn.sign_getdefined(sign_name)[1] then
-        vim.fn.sign_place(0, group, sign_name, buf, { lnum = index })
-      end
+      place_sign(buf, sign_name, group, index)
     end
   end
 end
@@ -289,7 +293,13 @@ local function update_child_window(State, path_details, Diagnostics, GitStatus, 
     float.win_set_title(State.windows.child.win, '[empty directory]')
     float.buf_set_lines(buf, {})
   elseif path_details.is_dir then
-    float.win_set_title(State.windows.child.win, path_details.basename, '', 'Directory', get_title_postfix(path_details.path))
+    float.win_set_title(
+      State.windows.child.win,
+      path_details.basename,
+      '',
+      'Directory',
+      get_title_postfix(path_details.path)
+    )
     local contents = get_dir_contents(Diagnostics, GitIgnore, GitStatus, path_details.path)
     local lines, highlights = path_details_to_lines(State, contents)
     float.buf_set_lines(buf, lines)

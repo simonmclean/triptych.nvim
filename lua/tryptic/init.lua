@@ -35,7 +35,9 @@ local function open_tryptic()
 
   -- Autocmds need to be created after the above state is set
   local AutoCmds = autocmds.new(State, Diagnostics, GitStatus, GitIgnore)
-  local Actions = actions.new(State, Diagnostics, GitStatus, GitIgnore)
+  local Actions = actions.new(State, function ()
+    view.refresh_view(State, Diagnostics, GitStatus, GitIgnore)
+  end)
   mappings.new(State, Actions, Diagnostics, GitStatus, GitIgnore)
 
   vim.g.tryptic_close = function()

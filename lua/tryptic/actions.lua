@@ -6,14 +6,10 @@ local plenary_path = require 'plenary.path'
 
 local Actions = {}
 
--- TODO: DRY up all the refresh_view calls
-
 --- TODO: Return type
 ---@param State TrypticState
----@param Diagnostics Diagnostics
----@param GitStatus GitStatus
----@param GitIgnore GitIgnore
-function Actions.new(State, Diagnostics, GitStatus, GitIgnore)
+---@param refresh_view fun(): nil
+function Actions.new(State, refresh_view)
   local vim = _G.tryptic_mock_vim or vim
 
   ---@return nil
@@ -30,7 +26,7 @@ function Actions.new(State, Diagnostics, GitStatus, GitIgnore)
       vim.fn.confirm('Are you sure you want to delete "' .. target.display_name .. '"?', '&y\n&n', 'Question')
     if u.is_defined(response) and response == 1 then
       vim.fn.delete(target.path, 'rf')
-      view.refresh_view(State, Diagnostics, GitStatus, GitIgnore)
+      refresh_view()
     end
   end
 
@@ -41,7 +37,7 @@ function Actions.new(State, Diagnostics, GitStatus, GitIgnore)
       for _, target in ipairs(targets) do
         vim.fn.delete(target.path, 'rf')
       end
-      view.refresh_view(State, Diagnostics, GitStatus, GitIgnore)
+      refresh_view()
     else
       local response = vim.fn.confirm(
         'Are you sure you want to delete the ' .. #targets .. ' selected files/folders?',
@@ -57,7 +53,7 @@ function Actions.new(State, Diagnostics, GitStatus, GitIgnore)
             log('DELETE', result or 'Error deleting item', 'ERROR')
           end
         end
-        view.refresh_view(State, Diagnostics, GitStatus, GitIgnore)
+        refresh_view()
       end
     end
   end
@@ -89,7 +85,7 @@ function Actions.new(State, Diagnostics, GitStatus, GitIgnore)
       vim.fn.mkdir(u.path_join(current_directory, response), 'p')
     end
 
-    view.refresh_view(State, Diagnostics, GitStatus, GitIgnore)
+    refresh_view()
   end
 
   ---@return nil
@@ -97,14 +93,14 @@ function Actions.new(State, Diagnostics, GitStatus, GitIgnore)
     local target = view.get_target_under_cursor(State)
     State:list_remove('copy', target)
     State:list_toggle('cut', target)
-    view.refresh_view(State, Diagnostics, GitStatus, GitIgnore)
+    refresh_view()
   end
 
   local function toggle_copy()
     local target = view.get_target_under_cursor(State)
     State:list_remove('cut', target)
     State:list_toggle('copy', target)
-    view.refresh_view(State, Diagnostics, GitStatus, GitIgnore)
+    refresh_view()
   end
 
   ---@return nil
@@ -127,7 +123,7 @@ function Actions.new(State, Diagnostics, GitStatus, GitIgnore)
         State:list_remove('cut', target)
       end
     end
-    view.refresh_view(State, Diagnostics, GitStatus, GitIgnore)
+    refresh_view()
   end
 
   ---@param target PathDetails
@@ -162,7 +158,7 @@ function Actions.new(State, Diagnostics, GitStatus, GitIgnore)
         State:list_add('copy', target)
       end
     end
-    view.refresh_view(State, Diagnostics, GitStatus, GitIgnore)
+    refresh_view()
   end
 
   ---@return nil
@@ -175,7 +171,7 @@ function Actions.new(State, Diagnostics, GitStatus, GitIgnore)
     local response = vim.fn.trim(vim.fn.input('Enter new name for "' .. display_name .. '": '))
     if u.is_defined(response) and response ~= target.display_name then
       vim.fn.rename(target.path, u.path_join(target.dirname, response))
-      view.refresh_view(State, Diagnostics, GitStatus, GitIgnore)
+      refresh_view()
     end
   end
 
@@ -215,7 +211,7 @@ function Actions.new(State, Diagnostics, GitStatus, GitIgnore)
     end
     State:list_remove_all 'cut'
     State:list_remove_all 'copy'
-    view.refresh_view(State, Diagnostics, GitStatus, GitIgnore)
+    refresh_view()
   end
 
   ---@param path string
@@ -231,7 +227,7 @@ function Actions.new(State, Diagnostics, GitStatus, GitIgnore)
       when_true = false,
       when_false = true,
     })
-    view.refresh_view(State, Diagnostics, GitStatus, GitIgnore)
+    refresh_view()
   end
 
   return {
