@@ -16,8 +16,8 @@ local function get_filetype_from_path(path)
 end
 
 ---@param _path string
----@return DirContents
-local function list_dir_contents(_path)
+---@return PathDetails
+local function get_path_details(_path)
   local vim = _G.tryptic_mock_vim or vim
   local path = vim.fs.normalize(_path)
 
@@ -101,7 +101,7 @@ local function read_lines_from_file(path)
 end
 
 return {
-  list_dir_contents = list_dir_contents,
+  list_dir_contents = get_path_details,
   get_dirname_of_current_buffer = get_dirname_of_current_buffer,
   get_parent = get_parent,
   get_filetype_from_path = get_filetype_from_path,

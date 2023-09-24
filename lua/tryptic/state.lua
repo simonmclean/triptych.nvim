@@ -31,7 +31,7 @@ end
 
 ---Add to either cut or copy list
 ---@param list_type 'cut' | 'copy'
----@param item_to_add DirContents
+---@param item_to_add PathDetails
 ---@return nil
 function TrypticState:list_add(list_type, item_to_add)
   local list = u.cond(list_type == 'cut', {
@@ -47,7 +47,7 @@ function TrypticState:list_add(list_type, item_to_add)
 end
 
 ---@param list_type 'cut' | 'copy'
----@param item_to_remove DirContents
+---@param item_to_remove PathDetails
 ---@return nil
 function TrypticState:list_remove(list_type, item_to_remove)
   -- TODO: Do we need to set self.cut or copy list at the end?
@@ -74,7 +74,7 @@ function TrypticState:list_remove_all(list_type)
 end
 
 ---@param list_type 'cut' | 'copy'
----@param item DirContents
+---@param item PathDetails
 ---@return boolean
 function TrypticState:list_contains(list_type, item)
   local list = u.cond(list_type == 'cut', {
@@ -90,7 +90,7 @@ function TrypticState:list_contains(list_type, item)
 end
 
 ---@param list_type 'cut' | 'copy'
----@param item DirContents
+---@param item PathDetails
 ---@return nil
 function TrypticState:list_toggle(list_type, item)
   if self:list_contains(list_type, item) then

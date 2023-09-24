@@ -9,43 +9,41 @@ local diagnostics = require 'tryptic.diagnostics'
 ---@param Diagnostics Diagnostics
 ---@param GitIgnore GitIgnore
 ---@param GitStatus GitStatus
----@param contents DirContents
----@return DirContents
-local function filter_and_encrich_dir_contents(Diagnostics, GitIgnore, GitStatus, contents)
+---@param path_details PathDetails
+---@return PathDetails
+local function filter_and_encrich_dir_contents(Diagnostics, GitIgnore, GitStatus, path_details)
   local vim = _G.tryptic_mock_vim or vim
 
   local filter_children = u.cond(vim.g.tryptic_config.options.show_hidden, {
-    when_true = contents.children,
+    when_true = path_details.children,
     when_false = function()
-      return u.filter(contents.children, function(child)
+      return u.filter(path_details.children, function(child)
         return not GitIgnore:is_ignored(child.path) and (string.sub(child.display_name, 1, 1) ~= '.')
       end)
     end,
   })
 
-  contents.children = filter_children
-  contents.git_status = GitStatus:get(contents.path)
-  contents.diagnostic_status = Diagnostics:get(contents.path)
+  path_details.children = filter_children
+  path_details.git_status = GitStatus:get(path_details.path)
+  path_details.diagnostic_status = Diagnostics:get(path_details.path)
 
-  for index, child in ipairs(contents.children) do
-    contents.children[index].git_status = GitStatus:get(child.path)
-    contents.children[index].diagnostic_status = Diagnostics:get(child.path)
+  for index, child in ipairs(path_details.children) do
+    path_details.children[index].git_status = GitStatus:get(child.path)
+    path_details.children[index].diagnostic_status = Diagnostics:get(child.path)
   end
-  return contents
+  return path_details
 end
 
--- TODO: Rename tree_to_lines as it doesn't take a tree
-
----Take a DirContents and return lines and highlights for an nvim buffer
+---Take a PathDetails and return lines and highlights for an nvim buffer
 ---@param State TrypticState
----@param tree DirContents
+---@param path_details PathDetails
 ---@return string[] # Lines including icons
 ---@return string[] # Highlights for icons
-local function tree_to_lines(State, tree)
+local function path_details_to_lines(State, path_details)
   local lines = {}
   local highlights = {}
 
-  for _, child in ipairs(tree.children) do
+  for _, child in ipairs(path_details.children) do
     local line, highlight_name = u.cond(child.is_dir, {
       when_true = function()
         local line = ''
@@ -92,18 +90,18 @@ local function tree_to_lines(State, tree)
   return lines, highlights
 end
 
----Get the DirContents that correspond to the path under the cursor
+---Get the PathDetails that correspond to the path under the cursor
 ---@param State TrypticState
----@return DirContents
+---@return PathDetails
 local function get_target_under_cursor(State)
   local vim = _G.tryptic_mock_vim or vim
   local line_number = vim.api.nvim_win_get_cursor(0)[1]
   return State.windows.current.contents.children[line_number]
 end
 
----Get a list of DirContents that correspond to all the paths under the visual selection
+---Get a list of PathDetails that correspond to all the paths under the visual selection
 ---@param State TrypticState
----@return DirContents[]
+---@return PathDetails[]
 local function get_targets_in_selection(State)
   local vim = _G.tryptic_mock_vim or vim
   local from = vim.fn.getpos('v')[2]
@@ -119,15 +117,13 @@ local function get_targets_in_selection(State)
   return results
 end
 
--- TODO: Rename to line number? Also the params
-
 ---Get the line number of a particular path in the buffer
 ---@param path string
----@param paths_list DirContents
+---@param path_details PathDetails
 ---@return integer
-local function index_of_path(path, paths_list)
+local function line_number_of_path(path, path_details)
   local num = 1
-  for i, child in ipairs(paths_list) do
+  for i, child in ipairs(path_details) do
     if child.path == path then
       num = i
       break
@@ -147,7 +143,7 @@ local function get_title_postfix(path)
 end
 
 ---@param buf integer
----@param children DirContents
+---@param children PathDetails
 ---@param group string # see :h sign-group
 ---@return nil
 local function set_sign_columns(buf, children, group)
@@ -178,7 +174,7 @@ end
 ---@param GitIgnore GitIgnore
 ---@param GitStatus GitStatus
 ---@param path string
----@return DirContents
+---@return PathDetails
 local function get_dir_contents(Diagnostics, GitIgnore, GitStatus, path)
   local contents = fs.list_dir_contents(path)
   return filter_and_encrich_dir_contents(Diagnostics, GitIgnore, GitStatus, contents)
@@ -201,13 +197,13 @@ local function nav_to(State, target_dir, Diagnostics, GitIgnore, GitStatus, curs
   local focused_buf = vim.api.nvim_win_get_buf(focused_win)
   local focused_contents = get_dir_contents(Diagnostics, GitIgnore, GitStatus, target_dir)
   local focused_title = vim.fs.basename(target_dir)
-  local focused_lines, focused_highlights = tree_to_lines(State, focused_contents)
+  local focused_lines, focused_highlights = path_details_to_lines(State, focused_contents)
 
   local parent_buf = vim.api.nvim_win_get_buf(parent_win)
   local parent_path = fs.get_parent(target_dir)
   local parent_title = vim.fs.basename(parent_path)
   local parent_contents = get_dir_contents(Diagnostics, GitIgnore, GitStatus, parent_path)
-  local parent_lines, parent_highlights = tree_to_lines(State, parent_contents)
+  local parent_lines, parent_highlights = path_details_to_lines(State, parent_contents)
 
   float.win_set_lines(parent_win, parent_lines)
   float.win_set_lines(focused_win, focused_lines, true)
@@ -224,14 +220,14 @@ local function nav_to(State, target_dir, Diagnostics, GitIgnore, GitStatus, curs
   ---@type integer
   local focused_win_line_number = u.cond(cursor_target, {
     when_true = function()
-      return index_of_path(cursor_target --[[@as string]], focused_contents.children)
+      return line_number_of_path(cursor_target --[[@as string]], focused_contents.children)
     end,
     when_false = State.path_to_line_map[target_dir] or 1,
   })
   local buf_line_count = vim.api.nvim_buf_line_count(focused_buf)
   vim.api.nvim_win_set_cursor(0, { math.min(focused_win_line_number, buf_line_count), 0 })
 
-  local parent_win_line_number = index_of_path(target_dir, parent_contents.children)
+  local parent_win_line_number = line_number_of_path(target_dir, parent_contents.children)
   vim.api.nvim_win_set_cursor(parent_win, { parent_win_line_number, 0 })
 
   State.windows = {
@@ -273,34 +269,34 @@ local function jump_to_cwd(State, Diagnostics, GitStatus, GitIgnore)
 end
 
 ---@param State TrypticState
----@param target DirContents
+---@param path_details PathDetails
 ---@param Diagnostics Diagnostics
 ---@param GitStatus GitStatus
 ---@param GitIgnore GitIgnore
 ---@return nil
-local function update_child_window(State, target, Diagnostics, GitStatus, GitIgnore)
+local function update_child_window(State, path_details, Diagnostics, GitStatus, GitIgnore)
   local vim = _G.tryptic_mock_vim or vim
   local buf = vim.api.nvim_win_get_buf(State.windows.child.win)
 
-  State.windows.child.path = u.cond(target == nil, {
+  State.windows.child.path = u.cond(path_details == nil, {
     when_true = nil,
     when_false = function()
-      return target.path
+      return path_details.path
     end,
   })
 
-  if target == nil then
+  if path_details == nil then
     float.win_set_title(State.windows.child.win, '[empty directory]')
     float.buf_set_lines(buf, {})
-  elseif target.is_dir then
-    float.win_set_title(State.windows.child.win, target.basename, '', 'Directory', get_title_postfix(target.path))
-    local contents = get_dir_contents(Diagnostics, GitIgnore, GitStatus, target.path)
-    local lines, highlights = tree_to_lines(State, contents)
+  elseif path_details.is_dir then
+    float.win_set_title(State.windows.child.win, path_details.basename, '', 'Directory', get_title_postfix(path_details.path))
+    local contents = get_dir_contents(Diagnostics, GitIgnore, GitStatus, path_details.path)
+    local lines, highlights = path_details_to_lines(State, contents)
     float.buf_set_lines(buf, lines)
     float.buf_apply_highlights(buf, highlights)
     set_sign_columns(buf, contents.children, 'tryptic_sign_col_child')
   else
-    local filetype = fs.get_filetype_from_path(target.path) -- TODO: De-dupe this
+    local filetype = fs.get_filetype_from_path(path_details.path) -- TODO: De-dupe this
     local icon, highlight = u.cond(devicons_installed, {
       when_true = function()
         return devicons.get_icon_by_filetype(filetype)
@@ -309,13 +305,13 @@ local function update_child_window(State, target, Diagnostics, GitStatus, GitIgn
         return nil, nil
       end,
     })
-    float.win_set_title(State.windows.child.win, target.basename, icon, highlight)
-    float.buf_set_lines_from_path(buf, target.path)
+    float.win_set_title(State.windows.child.win, path_details.basename, icon, highlight)
+    float.buf_set_lines_from_path(buf, path_details.path)
   end
 end
 
 ---@param State TrypticState
----@param path DirContents
+---@param path PathDetails
 ---@return nil
 local function jump_cursor_to(State, path)
   local vim = _G.tryptic_mock_vim or vim

@@ -130,7 +130,7 @@ function Actions.new(State, Diagnostics, GitStatus, GitIgnore)
     view.refresh_view(State, Diagnostics, GitStatus, GitIgnore)
   end
 
-  ---@param target DirContents
+  ---@param target PathDetails
   ---@param destination string
   ---@return nil
   local function duplicate_file_or_dir(target, destination)
@@ -186,7 +186,7 @@ function Actions.new(State, Diagnostics, GitStatus, GitIgnore)
       when_true = cursor_target.path,
       when_false = cursor_target.dirname,
     })
-    ---@type DirContents[]
+    ---@type PathDetails[]
     local delete_list = {}
 
     local success, result = pcall(function()

@@ -9,14 +9,14 @@
 
 ---@class TrypticState
 ---@field new fun(config: TrypticConfig, opening_win: integer): TrypticState
----@field list_add fun(self: TrypticState, list_type: 'cut' | 'copy', item: DirContents): nil
----@field list_remove fun(self: TrypticState, list_type: 'cut' | 'copy', item: DirContents): nil
+---@field list_add fun(self: TrypticState, list_type: 'cut' | 'copy', item: PathDetails): nil
+---@field list_remove fun(self: TrypticState, list_type: 'cut' | 'copy', item: PathDetails): nil
 ---@field list_remove_all fun(self: TrypticState, list_type: 'cut' | 'copy'): nil
----@field list_toggle fun(self: TrypticState, list_type: 'cut' | 'copy', item: DirContents): nil
----@field list_contains fun(self: TrypticState, list_type: 'cut' | 'copy', item: DirContents): nil
+---@field list_toggle fun(self: TrypticState, list_type: 'cut' | 'copy', item: PathDetails): nil
+---@field list_contains fun(self: TrypticState, list_type: 'cut' | 'copy', item: PathDetails): nil
 ---@field windows ViewState
----@field cut_list DirContents[]
----@field copy_list DirContents[]
+---@field cut_list PathDetails[]
+---@field copy_list PathDetails[]
 ---@field path_to_line_map { [string]: integer }
 ---@field opening_win integer
 ---@field show_hidden boolean
@@ -43,7 +43,7 @@
 
 ---@class ExtensionMapping
 ---@field mode string
----@field fn fun(contents: DirContents): nil
+---@field fn fun(contents: PathDetails): nil
 
 ---@class TrypticConfigOptions
 ---@field dirs_first boolean
@@ -80,7 +80,7 @@
 ---@field new fun(): GitIgnore
 ---@field is_ignored fun(self: GitIgnore, path: string): boolean
 
----@class DirContents
+---@class PathDetails
 ---@field path string
 ---@field display_name string
 ---@field dirname string # Parent directory path
@@ -91,7 +91,7 @@
 ---@field cutting boolean
 ---@field git_status? string
 ---@field diagnostic_status? integer
----@field children? DirContents
+---@field children? PathDetails
 
 ---@class ViewState
 ---@field parent ViewStateWindow
@@ -100,7 +100,7 @@
 
 ---@class ViewStateWindow
 ---@field path string
----@field contents? DirContents
+---@field contents? PathDetails
 ---@field win number
 
 --- TODO: This inheritance isn't working properly
