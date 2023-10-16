@@ -1,0 +1,295 @@
+local float = require 'tryptic.float'
+local fs = require 'tryptic.fs'
+local stub = require 'luassert.stub'
+local spy = require 'luassert.spy'
+local mock = require 'luassert.mock'
+local tu = require 'spec.test_utils'
+
+describe('create_three_floating_windows', function()
+  it('makes the expected nvim api calls', function()
+    -- spies
+    local nvim_open_win_spy = {}
+    local nvim_win_set_option_spy = {}
+    local nvim_create_buf_spy = {}
+    local nvim_set_current_win_spy = {}
+    local nvim_buf_set_lines_spy = {}
+    local nvim_buf_set_option_spy = {}
+
+    -- incrementing indexes used for window and buffer ids
+    local bufid = 0
+    local winid = 0
+
+    -- mocks
+    _G.tryptic_mock_vim = {
+      o = {
+        lines = 40,
+        columns = 60,
+      },
+      api = {
+        nvim_create_buf = function(listed, scratch)
+          table.insert(nvim_create_buf_spy, { listed, scratch })
+          bufid = bufid + 1
+          return bufid
+        end,
+        nvim_buf_set_lines = function(bid, from, to, strict, lines)
+          table.insert(nvim_buf_set_lines_spy, { bid, from, to, strict, lines })
+        end,
+        nvim_buf_set_option = function(bid, opt, value)
+          table.insert(nvim_buf_set_option_spy, { bid, opt, value })
+        end,
+        nvim_open_win = function(bif, enter, config)
+          table.insert(nvim_open_win_spy, { bif, enter, config })
+          winid = winid + 1
+          return winid
+        end,
+        nvim_win_set_option = function(wid, opt, value)
+          table.insert(nvim_win_set_option_spy, { wid, opt, value })
+        end,
+        nvim_set_current_win = function(wid)
+          table.insert(nvim_set_current_win_spy, wid)
+        end,
+      },
+    }
+
+    float.create_three_floating_windows()
+
+    assert.same({
+      { false, true },
+      { false, true },
+      { false, true },
+    }, nvim_create_buf_spy)
+
+    assert.same({
+      { 1, 'filetype', 'tryptic' },
+      { 2, 'filetype', 'tryptic' },
+      { 3, 'filetype', 'tryptic' },
+    }, nvim_buf_set_option_spy)
+
+    assert.same({
+      {
+        1,
+        true,
+        {
+          width = 16,
+          height = 28,
+          relative = 'editor',
+          col = 4,
+          row = 4,
+          border = 'single',
+          style = 'minimal',
+          noautocmd = true,
+          focusable = false,
+        },
+      },
+      {
+        2,
+        true,
+        {
+          width = 16,
+          height = 28,
+          relative = 'editor',
+          col = 22,
+          row = 4,
+          border = 'single',
+          style = 'minimal',
+          noautocmd = true,
+          focusable = true,
+        },
+      },
+      {
+        3,
+        true,
+        {
+          width = 16,
+          height = 28,
+          relative = 'editor',
+          col = 40,
+          row = 4,
+          border = 'single',
+          style = 'minimal',
+          noautocmd = true,
+          focusable = false,
+        },
+      },
+    }, nvim_open_win_spy)
+
+    assert.same({
+      -- first win
+      { 1, 'cursorline', true },
+      { 1, 'number', false },
+      -- second win
+      { 2, 'cursorline', true },
+      { 2, 'number', true },
+      -- third win
+      { 3, 'cursorline', false },
+      { 3, 'number', false },
+    }, nvim_win_set_option_spy)
+
+    assert.same({ 2 }, nvim_set_current_win_spy)
+  end)
+end)
+
+describe('close_floats', function()
+  it('closes a list of floating windows', function()
+    local nvim_win_get_buf_spy = {}
+    local nvim_buf_delete_spy = {}
+
+    local bufindex = 0
+    _G.tryptic_mock_vim = {
+      api = {
+        nvim_win_get_buf = function(winid)
+          table.insert(nvim_win_get_buf_spy, winid)
+          bufindex = bufindex + 1
+          return bufindex
+        end,
+        nvim_buf_delete = function(bufid, config)
+          table.insert(nvim_buf_delete_spy, { bufid, config })
+        end,
+      },
+    }
+
+    float.close_floats { 3, 4, 5 }
+
+    assert.same({ 3, 4, 5 }, nvim_win_get_buf_spy)
+    assert.same({
+      { 1, { force = true } },
+      { 2, { force = true } },
+      { 3, { force = true } },
+    }, nvim_buf_delete_spy)
+  end)
+end)
+
+describe('buf_set_lines', function()
+  it('sets lines for a buffer', function()
+    local nvim_buf_set_lines_spy = {}
+    local nvim_buf_set_option_spy = {}
+
+    _G.tryptic_mock_vim = {
+      api = {
+        nvim_buf_set_lines = function(bufid, from, to, strict, lines)
+          table.insert(nvim_buf_set_lines_spy, { bufid, from, to, strict, lines })
+        end,
+        nvim_buf_set_option = function(bufid, opt, value)
+          table.insert(nvim_buf_set_option_spy, { bufid, opt, value })
+        end,
+      },
+    }
+
+    float.buf_set_lines(3, { 'hello', 'world', 'wow' })
+
+    assert.same({
+      {
+        3,
+        0,
+        -1,
+        false,
+        { 'hello', 'world', 'wow' },
+      },
+    }, nvim_buf_set_lines_spy)
+
+    assert.same({
+      { 3, 'readonly', false },
+      { 3, 'modifiable', true },
+      { 3, 'readonly', true },
+      { 3, 'modifiable', false },
+    }, nvim_buf_set_option_spy)
+  end)
+end)
+
+-- TODO: Test error scenarios and messages etc
+describe('buf_set_lines_from_path', function()
+  it('reads from a file and puts its contents into a buffer', function()
+    local nvim_buf_set_lines_spy = {}
+    local nvim_buf_set_option_spy = {}
+    local nvim_buf_call_spy = {}
+    local cmd_read_spy = {}
+    local nvim_exec2_spy = {}
+
+    _G.tryptic_mock_vim = {
+      cmd = {
+        read = function(path)
+          table.insert(cmd_read_spy, path)
+        end,
+      },
+      api = {
+        nvim_exec2 = function(cmd, config)
+          table.insert(nvim_exec2_spy, { cmd, config })
+        end,
+        nvim_buf_set_lines = function(bufid, from, to, strict, lines)
+          table.insert(nvim_buf_set_lines_spy, { bufid, from, to, strict, lines })
+        end,
+        nvim_buf_set_option = function(bufid, opt, value)
+          table.insert(nvim_buf_set_option_spy, { bufid, opt, value })
+        end,
+        nvim_buf_call = function(bufid, fn)
+          table.insert(nvim_buf_call_spy, { bufid, fn })
+          fn()
+        end,
+      },
+    }
+
+    fs.get_file_size_in_kb = function(_)
+      return 66
+    end
+    mock(fs)
+
+    float.buf_set_lines_from_path(4, './hello/world.txt')
+
+    assert.stub(fs.get_filetype_from_path).was_called_with './hello/world.txt'
+    assert.spy(fs.get_file_size_in_kb).was_called_with './hello/world.txt'
+    assert.same({
+      { 4, 'readonly', false },
+      { 4, 'modifiable', true },
+      { 4, 'filetype', 'text' },
+      { 4, 'readonly', true },
+      { 4, 'modifiable', false },
+    }, nvim_buf_set_option_spy)
+    assert.same({
+      { 4, 0, -1, false, {} },
+    }, nvim_buf_set_lines_spy)
+    assert.same({ { 'normal! 1G0dd', {} } }, nvim_exec2_spy)
+  end)
+end)
+
+-- TODO This test
+describe('win_set_lines', function()
+  it('sets lines for a buffer by window id', function()
+    local nvim_buf_set_lines_spy = {}
+    local nvim_buf_set_option_spy = {}
+    local nvim_win_get_buf_spy = {}
+
+    _G.tryptic_mock_vim = {
+      api = {
+        nvim_buf_set_lines = function(bufid, from, to, strict, lines)
+          table.insert(nvim_buf_set_lines_spy, { bufid, from, to, strict, lines })
+        end,
+        nvim_buf_set_option = function(bufid, opt, value)
+          table.insert(nvim_buf_set_option_spy, { bufid, opt, value })
+        end,
+        nvim_win_get_buf = function (winid)
+          table.insert(nvim_win_get_buf_spy, winid)
+          return 12
+        end,
+      },
+    }
+
+    float.win_set_lines(3, { 'hello', 'world', 'wow' })
+
+    assert.same({
+      {
+        3,
+        0,
+        -1,
+        false,
+        { 'hello', 'world', 'wow' },
+      },
+    }, nvim_buf_set_lines_spy)
+
+    assert.same({
+      { 3, 'readonly', false },
+      { 3, 'modifiable', true },
+      { 3, 'readonly', true },
+      { 3, 'modifiable', false },
+    }, nvim_buf_set_option_spy)
+  end)
+end)

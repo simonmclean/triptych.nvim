@@ -21,7 +21,6 @@ end
 local function buf_set_lines(buf, lines)
   local vim = _G.tryptic_mock_vim or vim
   modify_locked_buffer(buf, function()
-    vim.api.nvim_buf_set_option(buf, 'filetype', 'tryptic')
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
   end)
 end
@@ -113,15 +112,11 @@ local function buf_set_lines_from_path(buf, path)
   end)
 end
 
----@param lines string[]
 ---@return number
-local function create_new_buffer(lines)
+local function create_new_buffer()
   local vim = _G.tryptic_mock_vim or vim
   local buf = vim.api.nvim_create_buf(false, true)
-  modify_locked_buffer(buf, function()
-    buf_set_lines(buf, lines)
-    vim.api.nvim_buf_set_option(buf, 'filetype', 'tryptic')
-  end)
+  vim.api.nvim_buf_set_option(buf, 'filetype', 'tryptic')
   return buf
 end
 
@@ -129,7 +124,7 @@ end
 ---@return number
 local function create_floating_window(config)
   local vim = _G.tryptic_mock_vim or vim
-  local buf = create_new_buffer {}
+  local buf = create_new_buffer()
   local win = vim.api.nvim_open_win(buf, true, {
     width = config.width,
     height = config.height,
@@ -209,7 +204,6 @@ local function close_floats(wins)
 end
 
 return {
-  create_floating_window = create_floating_window,
   create_three_floating_windows = create_three_floating_windows,
   close_floats = close_floats,
   buf_set_lines = buf_set_lines,

@@ -6,9 +6,8 @@ local Mappings = {}
 ---@param State TrypticState
 ---@param actions unknown
 ---@param Diagnostics Diagnostics
----@param GitStatus GitStatus
----@param GitIgnore GitIgnore
-function Mappings.new(State, actions, Diagnostics, GitStatus, GitIgnore)
+---@param Git Git
+function Mappings.new(State, actions, Diagnostics, Git)
   local vim = _G.tryptic_mock_vim or vim
   local mappings = vim.g.tryptic_config.mappings
   local extension_mappings = vim.g.tryptic_config.extension_mappings
@@ -34,7 +33,7 @@ function Mappings.new(State, actions, Diagnostics, GitStatus, GitIgnore)
     local focused_path = State.windows.current.path
     local parent_path = State.windows.parent.path
     if parent_path ~= '/' then
-      view.nav_to(State, parent_path, Diagnostics, GitIgnore, GitStatus, focused_path)
+      view.nav_to(State, parent_path, Diagnostics, Git, focused_path)
     end
   end)
 
@@ -42,7 +41,7 @@ function Mappings.new(State, actions, Diagnostics, GitStatus, GitIgnore)
     local target = view.get_target_under_cursor(State)
     -- TODO: edit_file should be called from nav_to
     if vim.fn.isdirectory(target.path) == 1 then
-      view.nav_to(State, target.path, Diagnostics, GitIgnore, GitStatus)
+      view.nav_to(State, target.path, Diagnostics, Git)
     else
       actions.edit_file(target.path)
     end

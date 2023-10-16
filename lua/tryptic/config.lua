@@ -43,12 +43,12 @@ local default_config = {
   debug = false,
 }
 
----@param user_config TrypticConfig
+---@param user_config? TrypticConfig
 ---@return TrypticConfig
 local create_merged_config = function(user_config)
   return u.merge_tables(default_config, user_config or {})
 end
 
 return {
-  create_merged_config = create_merged_config
+  create_merged_config = create_merged_config,
 }

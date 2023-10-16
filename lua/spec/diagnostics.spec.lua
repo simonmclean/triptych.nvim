@@ -1,5 +1,5 @@
 local diagnostics = require 'tryptic.diagnostics'
-local mock_vim = require 'spec.mock_vim'
+local tu = require 'spec.test_utils'
 
 describe('get_sign', function()
   it('returns the sign name for a diagnostic severity', function()
@@ -16,7 +16,7 @@ end)
 
 describe('Diagnostics', function()
   it('exposes diagnostics per path', function()
-    local v, _ = mock_vim {
+    local mock_vim = {
       diagnostic = {
         get = function()
           return {
@@ -38,14 +38,7 @@ describe('Diagnostics', function()
         end,
       },
       fs = {
-        parents = function(_)
-          local i = 0
-          local values = { '/a/b/', '/a/', '/' }
-          return function()
-            i = i + 1
-            return values[i]
-          end
-        end,
+        parents = tu.iterator({ '/a/b/', '/a/', '/' })
       },
       fn = {
         getcwd = function()
@@ -53,7 +46,6 @@ describe('Diagnostics', function()
         end,
       },
     }
-    _G.tryptic_mock_vim = v
     local Diagnostics = diagnostics.new()
     assert.are.same(1, Diagnostics:get '/a/b/foo.js')
     assert.are.same(3, Diagnostics:get '/a/b/bar.js')

@@ -6,13 +6,13 @@ local actions = require 'tryptic.actions'
 local view = require 'tryptic.view'
 local git = require 'tryptic.git'
 local diagnostics = require 'tryptic.diagnostics'
+local event_handlers = require 'tryptic.event_handlers'
 
 ---@return nil
 local function open_tryptic()
   local vim = _G.tryptic_mock_vim or vim
   local State = state.new(vim.g.tryptic_config, vim.api.nvim_get_current_win())
-  local GitIgnore = git.GitIgnore.new()
-  local GitStatus = git.GitStatus.new()
+  local Git = git.Git.new()
   local Diagnostics = diagnostics.new()
   local buf = vim.api.nvim_buf_get_name(0)
   local buf_dir = vim.fs.dirname(buf)
@@ -34,11 +34,11 @@ local function open_tryptic()
   }
 
   -- Autocmds need to be created after the above state is set
-  local AutoCmds = autocmds.new(State, Diagnostics, GitStatus, GitIgnore)
+  local AutoCmds = autocmds.new(event_handlers, State, Diagnostics, Git)
   local Actions = actions.new(State, function ()
-    view.refresh_view(State, Diagnostics, GitStatus, GitIgnore)
+    view.refresh_view(State, Diagnostics, Git)
   end)
-  mappings.new(State, Actions, Diagnostics, GitStatus, GitIgnore)
+  mappings.new(State, Actions, Diagnostics, Git)
 
   vim.g.tryptic_close = function()
     -- Need to destroy autocmds before the floating windows
@@ -52,7 +52,7 @@ local function open_tryptic()
     vim.api.nvim_set_current_win(State.opening_win)
   end
 
-  view.nav_to(State, buf_dir, Diagnostics, GitIgnore, GitStatus, buf)
+  view.nav_to(State, buf_dir, Diagnostics, Git, buf)
 end
 
 ---@param user_config? TrypticConfig

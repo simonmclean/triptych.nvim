@@ -52,9 +52,27 @@ end
 ---@return string[]
 local function path_split(path)
   local result = {}
+  local first_char = string.sub(path, 1, 1)
+  if first_char == '/' then
+    table.insert(result, '/')
+  end
   local parts = string.gmatch(path, '([^/]+)')
   for part in parts do
     table.insert(result, part)
+  end
+  return result
+end
+
+---@param sep string
+---@param str_list string[]
+---@return string
+local function string_join(sep, str_list)
+  local result = ''
+  for index, str in ipairs(str_list) do
+    result = result .. str
+    if index < #str_list then
+      result = result .. sep
+    end
   end
   return result
 end
@@ -149,11 +167,22 @@ local function merge_tables(a, b)
   for key, value in pairs(b) do
     if type(value) == 'table' then
       merge_tables(a[key], b[key])
-    elseif a and b[key] then
+    else
       a[key] = value
     end
   end
   return a
+end
+
+local function list_concat(a, b)
+  local result = {}
+  for _, value in ipairs(a) do
+    table.insert(result, value)
+  end
+  for _, value in ipairs(b) do
+    table.insert(result, value)
+  end
+  return result
 end
 
 ---@generic K, A, B
@@ -209,11 +238,30 @@ local function set(tbl, k, v)
   return result
 end
 
+---Curried function for getting index from a table
+---@param index any
+---@return function
+local function get(index)
+  ---@param tbl table
+  ---@return any
+  return function(tbl)
+    return tbl[index]
+  end
+end
+
+---@param str string
+---@param search string
+---@return boolean
+local function string_contains(str, search)
+  return string.find(str, search, 1, true) ~= nil
+end
+
 return {
   cond = cond,
   eval = eval,
   list_includes = list_includes,
   list_index_of = list_index_of,
+  list_concat = list_concat,
   with_highlight_group = with_highlight_group,
   is_empty = is_empty,
   is_defined = is_defined,
@@ -224,7 +272,10 @@ return {
   filter = filter,
   multiline_str_to_table = multiline_str_to_table,
   split_string_at_index = split_string_at_index,
+  string_join = string_join,
+  string_contains = string_contains,
   path_join = path_join,
   path_split = path_split,
-  set = set
+  set = set,
+  get = get,
 }

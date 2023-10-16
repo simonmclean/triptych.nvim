@@ -5,30 +5,32 @@ local fs = require 'tryptic.fs'
 local git = require 'tryptic.git'
 local diagnostics = require 'tryptic.diagnostics'
 
---- Add git status, git ignore etc.
 ---@param Diagnostics Diagnostics
----@param GitIgnore GitIgnore
----@param GitStatus GitStatus
+---@param Git Git
 ---@param path_details PathDetails
 ---@return PathDetails
-local function filter_and_encrich_dir_contents(Diagnostics, GitIgnore, GitStatus, path_details)
+local function filter_and_encrich_dir_contents(Diagnostics, Git, path_details)
   local vim = _G.tryptic_mock_vim or vim
 
-  local filter_children = u.cond(vim.g.tryptic_config.options.show_hidden, {
+  local filtered_children = u.cond(vim.g.tryptic_config.options.show_hidden, {
     when_true = path_details.children,
     when_false = function()
+      local child_paths = u.map(path_details.children, u.get('path'))
+      local paths_not_ignored = Git:filter_ignored(child_paths)
       return u.filter(path_details.children, function(child)
-        return not GitIgnore:is_ignored(child.path) and (string.sub(child.display_name, 1, 1) ~= '.')
+	local is_git_ignored = not u.list_includes(paths_not_ignored, child.path)
+        local is_dot_file = string.sub(child.display_name, 1, 1) == '.'
+	return not is_git_ignored and not is_dot_file
       end)
     end,
   })
 
-  path_details.children = filter_children
-  path_details.git_status = GitStatus:get(path_details.path)
+  path_details.children = filtered_children
+  path_details.git_status = Git:status_of(path_details.path)
   path_details.diagnostic_status = Diagnostics:get(path_details.path)
 
   for index, child in ipairs(path_details.children) do
-    path_details.children[index].git_status = GitStatus:get(child.path)
+    path_details.children[index].git_status = Git:status_of(child.path)
     path_details.children[index].diagnostic_status = Diagnostics:get(child.path)
   end
   return path_details
@@ -175,23 +177,21 @@ end
 
 -- TODO: This function is probably pointless
 ---@param Diagnostics Diagnostics
----@param GitIgnore GitIgnore
----@param GitStatus GitStatus
+---@param Git Git
 ---@param path string
 ---@return PathDetails
-local function get_dir_contents(Diagnostics, GitIgnore, GitStatus, path)
+local function get_dir_contents(Diagnostics, Git, path)
   local contents = fs.list_dir_contents(path)
-  return filter_and_encrich_dir_contents(Diagnostics, GitIgnore, GitStatus, contents)
+  return filter_and_encrich_dir_contents(Diagnostics, Git, contents)
 end
 
 ---@param State TrypticState
 ---@param target_dir string
 ---@param Diagnostics Diagnostics
----@param GitStatus GitStatus
----@param GitIgnore GitIgnore
+---@param Git Git
 ---@param cursor_target? string full path
 ---@return nil
-local function nav_to(State, target_dir, Diagnostics, GitIgnore, GitStatus, cursor_target)
+local function nav_to(State, target_dir, Diagnostics, Git, cursor_target)
   local vim = _G.tryptic_mock_vim or vim
 
   local focused_win = State.windows.current.win
@@ -199,14 +199,14 @@ local function nav_to(State, target_dir, Diagnostics, GitIgnore, GitStatus, curs
   local child_win = State.windows.child.win
 
   local focused_buf = vim.api.nvim_win_get_buf(focused_win)
-  local focused_contents = get_dir_contents(Diagnostics, GitIgnore, GitStatus, target_dir)
+  local focused_contents = get_dir_contents(Diagnostics, Git, target_dir)
   local focused_title = vim.fs.basename(target_dir)
   local focused_lines, focused_highlights = path_details_to_lines(State, focused_contents)
 
   local parent_buf = vim.api.nvim_win_get_buf(parent_win)
   local parent_path = fs.get_parent(target_dir)
   local parent_title = vim.fs.basename(parent_path)
-  local parent_contents = get_dir_contents(Diagnostics, GitIgnore, GitStatus, parent_path)
+  local parent_contents = get_dir_contents(Diagnostics, Git, parent_path)
   local parent_lines, parent_highlights = path_details_to_lines(State, parent_contents)
 
   float.win_set_lines(parent_win, parent_lines)
@@ -257,28 +257,26 @@ end
 
 ---@param State TrypticState
 ---@param Diagnostics Diagnostics
----@param GitStatus GitStatus
----@param GitIgnore GitIgnore
+---@param Git Git
 ---@return nil
-local function jump_to_cwd(State, Diagnostics, GitStatus, GitIgnore)
+local function jump_to_cwd(State, Diagnostics, Git)
   local vim = _G.tryptic_mock_vim or vim
   local current = State.windows.current
   local cwd = vim.fn.getcwd()
   -- TODO: DRY
   if current.path == cwd and current.previous_path then
-    nav_to(State, current.previous_path, Diagnostics, GitIgnore, GitStatus)
+    nav_to(State, current.previous_path, Diagnostics, Git)
   else
-    nav_to(State, cwd, Diagnostics, GitIgnore, GitStatus)
+    nav_to(State, cwd, Diagnostics, Git)
   end
 end
 
 ---@param State TrypticState
 ---@param path_details PathDetails
 ---@param Diagnostics Diagnostics
----@param GitStatus GitStatus
----@param GitIgnore GitIgnore
+---@param Git Git
 ---@return nil
-local function update_child_window(State, path_details, Diagnostics, GitStatus, GitIgnore)
+local function update_child_window(State, path_details, Diagnostics, Git)
   local vim = _G.tryptic_mock_vim or vim
   local buf = vim.api.nvim_win_get_buf(State.windows.child.win)
 
@@ -300,7 +298,7 @@ local function update_child_window(State, path_details, Diagnostics, GitStatus, 
       'Directory',
       get_title_postfix(path_details.path)
     )
-    local contents = get_dir_contents(Diagnostics, GitIgnore, GitStatus, path_details.path)
+    local contents = get_dir_contents(Diagnostics, Git, path_details.path)
     local lines, highlights = path_details_to_lines(State, contents)
     float.buf_set_lines(buf, lines)
     float.buf_apply_highlights(buf, highlights)
@@ -339,12 +337,11 @@ end
 
 ---@param State TrypticState
 ---@param Diagnostics Diagnostics
----@param GitStatus GitStatus
----@param GitIgnore GitIgnore
+---@param Git Git
 ---@return nil
-local function refresh_view(State, Diagnostics, GitStatus, GitIgnore)
+local function refresh_view(State, Diagnostics, Git)
   -- TODO: This an inefficient way of refreshing the view
-  nav_to(State, State.windows.current.path, Diagnostics, GitIgnore, GitStatus)
+  nav_to(State, State.windows.current.path, Diagnostics, Git)
 end
 
 return {

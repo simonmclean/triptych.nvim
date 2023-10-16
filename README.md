@@ -133,6 +133,7 @@ For example, if you want to make `<c-f>` search the file or directory under the 
     - Consider an IO abstraction that wraps sides effects and provides uniform error handling
     - Abstraction for user input which handles trim etc
     - Performance profiling
+    - Is path_to_line_map actually used now?...
 - Features
     - When creating a file or dir, the cursor should move to it
     - Toggle hidden (from gitignore)

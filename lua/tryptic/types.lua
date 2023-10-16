@@ -72,13 +72,10 @@
 
 ---@alias GitFileStatus ('A' | 'AM' | 'D' | 'M' | 'R' | '??')
 
----@class GitStatus
----@field new fun(): GitStatus
----@field get fun(self: GitStatus, path: string): GitFileStatus | nil
-
----@class GitIgnore
----@field new fun(): GitIgnore
----@field is_ignored fun(self: GitIgnore, path: string): boolean
+---@class Git
+---@field new fun(): Git
+---@field status_of fun(self: Git, path: string): GitFileStatus | nil
+---@field filter_ignored fun(self: Git, path_details: PathDetails): PathDetails
 
 ---@class PathDetails
 ---@field path string

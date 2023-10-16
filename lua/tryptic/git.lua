@@ -1,5 +1,4 @@
 local u = require 'tryptic.utils'
-local fs = require 'tryptic.fs'
 
 -- Sorted by highest priority last, so that > comparison works intuitively
 ---@enum GitFileStatusPriority
@@ -28,45 +27,12 @@ local function get_sign(status)
   return map[status]
 end
 
--- TODO: Can we make these private memebers?
-local GitIgnore = {
-  ---@type string[]
-  entries = {},
-}
+local Git = {}
 
----@return GitIgnore
-function GitIgnore.new()
+function Git.new()
+  local vim = _G.tryptic_mock_vim or vim
   local instance = {}
-  setmetatable(instance, { __index = GitIgnore })
-  -- TODO: Handle when file is not present
-  local lines = fs.read_lines_from_file './.gitignore'
-  for _, line in pairs(lines) do
-    table.insert(instance.entries, line)
-  end
-  return instance
-end
-
----@param path string
----@return boolean
-function GitIgnore:is_ignored(path)
-  local parts = u.path_split(path)
-  local is_dir = vim.fn.isdirectory(path) == 1
-  for index, part in ipairs(parts) do
-    local is_part_dir = is_dir or index < #parts
-    if u.list_includes(self.entries, part) or (is_part_dir and u.list_includes(self.entries, part .. '/')) then
-      return true
-    end
-  end
-  return false
-end
-
-local GitStatus = {
-  status = {},
-}
-
-function GitStatus.new()
-  local instance = {}
-  setmetatable(instance, { __index = GitStatus })
+  setmetatable(instance, { __index = Git })
 
   local cwd = vim.fn.getcwd()
   local git_status = u.multiline_str_to_table(vim.fn.system 'git status --porcelain')
@@ -96,18 +62,35 @@ function GitStatus.new()
   end
 
   instance.status = result
+  instance.project_root = u.multiline_str_to_table(vim.fn.system 'git rev-parse --show-toplevel')[1]
 
   return instance
 end
 
+--- Takes a list of paths and filters out those which are git ignored
+---@param paths string[]
+---@return PathDetails
+function Git:filter_ignored(paths)
+  local vim = _G.tryptic_mock_vim or vim
+  -- If this isn't a git project, then nothing is git ignored
+  if u.is_empty(self.project_root) then
+    return paths
+  end
+  local paths_str = u.string_join(' ', paths)
+  local git_ignore_matches = u.multiline_str_to_table(vim.fn.system('git check-ignore ' .. paths_str))
+  local without_ignored = u.filter(paths, function(path)
+    return not u.list_includes(git_ignore_matches, path)
+  end)
+  return without_ignored
+end
+
 ---@param path string
 ---@return GitFileStatus | nil
-function GitStatus:get(path)
+function Git:status_of(path)
   return self.status[path]
 end
 
 return {
   get_sign = get_sign,
-  GitIgnore = GitIgnore,
-  GitStatus = GitStatus,
+  Git = Git,
 }
