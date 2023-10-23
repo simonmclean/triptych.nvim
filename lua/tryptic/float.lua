@@ -31,6 +31,7 @@ end
 local function buf_apply_highlights(buf, highlights)
   local vim = _G.tryptic_mock_vim or vim
   for i, highlight in ipairs(highlights) do
+    -- Col end is hard-coded to to 3 because this is only used to for the filetype icons
     vim.api.nvim_buf_add_highlight(buf, 0, highlight, i - 1, 0, 3)
   end
 end

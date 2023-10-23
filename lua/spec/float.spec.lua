@@ -1,9 +1,7 @@
 local float = require 'tryptic.float'
 local fs = require 'tryptic.fs'
-local stub = require 'luassert.stub'
 local spy = require 'luassert.spy'
 local mock = require 'luassert.mock'
-local tu = require 'spec.test_utils'
 
 describe('create_three_floating_windows', function()
   it('makes the expected nvim api calls', function()
@@ -251,12 +249,13 @@ describe('buf_set_lines_from_path', function()
   end)
 end)
 
--- TODO This test
 describe('win_set_lines', function()
   it('sets lines for a buffer by window id', function()
     local nvim_buf_set_lines_spy = {}
     local nvim_buf_set_option_spy = {}
     local nvim_win_get_buf_spy = {}
+
+    local mock_buf_id = 12
 
     _G.tryptic_mock_vim = {
       api = {
@@ -266,18 +265,20 @@ describe('win_set_lines', function()
         nvim_buf_set_option = function(bufid, opt, value)
           table.insert(nvim_buf_set_option_spy, { bufid, opt, value })
         end,
-        nvim_win_get_buf = function (winid)
+        nvim_win_get_buf = function(winid)
           table.insert(nvim_win_get_buf_spy, winid)
-          return 12
+          return mock_buf_id
         end,
       },
     }
 
     float.win_set_lines(3, { 'hello', 'world', 'wow' })
 
+    assert.same({ 3 }, nvim_win_get_buf_spy)
+
     assert.same({
       {
-        3,
+        mock_buf_id,
         0,
         -1,
         false,
@@ -286,10 +287,85 @@ describe('win_set_lines', function()
     }, nvim_buf_set_lines_spy)
 
     assert.same({
-      { 3, 'readonly', false },
-      { 3, 'modifiable', true },
-      { 3, 'readonly', true },
-      { 3, 'modifiable', false },
+      { mock_buf_id, 'readonly', false },
+      { mock_buf_id, 'modifiable', true },
+      { mock_buf_id, 'readonly', true },
+      { mock_buf_id, 'modifiable', false },
     }, nvim_buf_set_option_spy)
+  end)
+
+  it('scrolls to top if flag is true', function()
+    local nvim_buf_call_spy = {}
+    local nvim_exec2_spy = {}
+
+    local mock_buf_id = 12
+
+    _G.tryptic_mock_vim = {
+      api = {
+        nvim_buf_set_lines = function(_, _, _, _, _) end,
+        nvim_buf_set_option = function(_, _, _) end,
+        nvim_win_get_buf = function(_)
+          return mock_buf_id
+        end,
+        nvim_buf_call = function(bufid, fn)
+          table.insert(nvim_buf_call_spy, { bufid, fn })
+          fn()
+        end,
+        nvim_exec2 = function(str, config)
+          table.insert(nvim_exec2_spy, { str, config })
+        end,
+      },
+    }
+
+    float.win_set_lines(3, { 'hello', 'world', 'wow' }, true)
+
+    assert.same(mock_buf_id, nvim_buf_call_spy[1][1])
+    assert.same({
+      { 'normal! zb', {} },
+    }, nvim_exec2_spy)
+  end)
+end)
+
+describe('win_set_title', function()
+  it('sets the title for a window', function()
+    local spies = {
+      nvim_win_call = {},
+    }
+
+    _G.tryptic_mock_vim = {
+      wo = {
+        winbar = '',
+      },
+      api = {
+        nvim_win_call = function(winid, fn)
+          table.insert(spies.nvim_win_call, winid)
+          fn()
+        end,
+      },
+    }
+
+    float.win_set_title(6, 'monkey', '+', 'FooHi', '>')
+
+    assert.same({ 6 }, spies.nvim_win_call)
+    assert.same('%=%#FooHi#+ %#WinBar#monkey %#Comment#>%=', _G.tryptic_mock_vim.wo.winbar)
+  end)
+end)
+
+describe('buf_apply_highlights', function()
+  it('applies highlights to a buffer', function()
+    local nvim_buf_add_highlight_spy = {}
+    _G.tryptic_mock_vim = {
+      api = {
+        nvim_buf_add_highlight = function(budid, ns_id, hl_group, line, col_start, col_end)
+          table.insert(nvim_buf_add_highlight_spy, { budid, ns_id, hl_group, line, col_start, col_end })
+        end,
+      },
+    }
+    float.buf_apply_highlights(4, { 'hello', 'world', 'monkey' })
+    assert.same({
+      { 4, 0, 'hello', 0, 0, 3 },
+      { 4, 0, 'world', 1, 0, 3 },
+      { 4, 0, 'monkey', 2, 0, 3 },
+    }, nvim_buf_add_highlight_spy)
   end)
 end)
