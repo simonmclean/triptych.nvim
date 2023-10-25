@@ -1,20 +1,16 @@
+-- TODO: I actually think the key/binding should be displayed the other way around
+
 ---@return string[]
 local function help_lines()
   local vim = _G.tryptic_mock_vim or vim
   local mappings = vim.g.tryptic_config.mappings
-  local lines = {
-    'Tryptic key bindings',
-    '',
-  }
+  local lines = {}
+  local left_col_length = 0 -- Used for padding and alignment
 
-  local left_col_length = 0
-  for _, value in pairs(mappings) do
-    local str_value = value
-    if type(value) == 'table' then
-      str_value = table.concat(value, ', ')
-    end
-    if string.len(str_value) > left_col_length then
-      left_col_length = string.len(str_value)
+  -- Update padding/alignment
+  for key, _ in pairs(mappings) do
+    if string.len(key) > left_col_length then
+      left_col_length = string.len(key)
     end
   end
 
@@ -31,6 +27,12 @@ local function help_lines()
     local line = '[' .. display_value .. ']' .. padding .. ' : ' .. key
     table.insert(lines, line)
   end
+
+  table.sort(lines)
+
+  table.insert(lines, 1, 'Tryptic key bindings')
+  table.insert(lines, 2, '')
+
   return lines
 end
 

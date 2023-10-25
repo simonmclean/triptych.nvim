@@ -44,7 +44,6 @@ describe('get_path_details', function()
           return vim.fs.dirname(path)
         end,
       },
-      print = vim.print,
     }
 
     plenary_filetype.detect = function(path)
@@ -129,7 +128,6 @@ describe('get_path_details', function()
           return vim.fs.dirname(path)
         end,
       },
-      print = vim.print,
     }
 
     local result = fs.get_path_details '/hello/world'
