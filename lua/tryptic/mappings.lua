@@ -30,6 +30,7 @@ function Mappings.new(State, actions, Diagnostics, Git)
   -----------------------------------------
 
   map('n', mappings.nav_left, function()
+    -- TODO: Move to actions
     local focused_path = State.windows.current.path
     local parent_path = State.windows.parent.path
     if parent_path ~= '/' then
@@ -38,6 +39,7 @@ function Mappings.new(State, actions, Diagnostics, Git)
   end)
 
   map('n', mappings.nav_right, function()
+    -- TODO: Move to actions
     local target = view.get_target_under_cursor(State)
     -- TODO: edit_file should be called from nav_to
     if vim.fn.isdirectory(target.path) == 1 then
@@ -48,6 +50,8 @@ function Mappings.new(State, actions, Diagnostics, Git)
   end)
 
   map('n', mappings.jump_to_cwd, function()
+    -- TODO: Change this?
+    -- TODO: Move to actions
     view.jump_to_cwd(vim.g.tryptic_get_state())
   end)
   map('n', mappings.delete, actions.delete)
@@ -62,7 +66,7 @@ function Mappings.new(State, actions, Diagnostics, Git)
   map('n', mappings.show_help, actions.help)
   map('n', mappings.toggle_hidden, actions.toggle_hidden)
   map('n', mappings.quit, function()
-    vim.g.tryptic_close()
+    vim.g.tryptic_close() -- TODO: Move to actions
   end)
   map('v', mappings.quit, function()
     vim.g.tryptic_close()

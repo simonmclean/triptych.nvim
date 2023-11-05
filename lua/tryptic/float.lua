@@ -1,6 +1,5 @@
 local u = require 'tryptic.utils'
 local fs = require 'tryptic.fs'
-local log = require 'tryptic.logger'
 
 ---Modify a buffer which is readonly and not modifiable
 ---@param buf number
@@ -101,8 +100,7 @@ local function buf_set_lines_from_path(buf, path)
           local msg = '[Unable to preview file contents]'
           vim.api.nvim_buf_set_lines(buf, 0, -1, false, { '', msg })
           if err then
-            -- TODO: Maybe bring some sctructure to the labels?
-            log('FILE_PREVIEW', err, 'WARN')
+            vim.print(err)
           end
         end
       else

@@ -1,6 +1,5 @@
 local float = require 'tryptic.float'
 local fs = require 'tryptic.fs'
-local spy = require 'luassert.spy'
 local mock = require 'luassert.mock'
 
 describe('create_three_floating_windows', function()

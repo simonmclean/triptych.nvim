@@ -1,8 +1,8 @@
 local u = require 'tryptic.utils'
 local float = require 'tryptic.float'
 local view = require 'tryptic.view'
-local log = require 'tryptic.logger'
 local plenary_path = require 'plenary.path'
+local tryptic_help = require('tryptic.help')
 
 local Actions = {}
 
@@ -12,15 +12,17 @@ local Actions = {}
 function Actions.new(State, refresh_view)
   local vim = _G.tryptic_mock_vim or vim
 
+  local M = {}
+
   ---@return nil
-  local function help()
+  M.help = function ()
     local win = State.windows.child.win
     float.win_set_title(win, 'Help', '󰋗', 'Directory')
-    float.win_set_lines(win, require('tryptic.help').help_lines())
+    float.win_set_lines(win, tryptic_help.help_lines())
   end
 
   ---@return nil
-  local function delete()
+  M.delete = function()
     local target = view.get_target_under_cursor(State)
     local response =
       vim.fn.confirm('Are you sure you want to delete "' .. target.display_name .. '"?', '&y\n&n', 'Question')
@@ -30,7 +32,10 @@ function Actions.new(State, refresh_view)
     end
   end
 
-  local function bulk_delete(_targets, skip_confirm)
+  ---@param _targets PathDetails[]
+  ---@param skip_confirm boolean
+  ---@return nil
+  M.bulk_delete = function(_targets, skip_confirm)
     local targets = _targets or view.get_targets_in_selection(State)
 
     if skip_confirm then
@@ -50,7 +55,7 @@ function Actions.new(State, refresh_view)
             vim.fn.delete(target.path, 'rf')
           end)
           if not success then
-            log('DELETE', result or 'Error deleting item', 'ERROR')
+	    vim.print('Error deleting item', result)
           end
         end
         refresh_view()
@@ -59,7 +64,8 @@ function Actions.new(State, refresh_view)
   end
 
   ---@return nil
-  local function add_file_or_dir()
+  M.add_file_or_dir = function()
+    vim = _G.tryptic_mock_vim or vim
     local current_directory = State.windows.current.path
     local response = vim.fn.trim(vim.fn.input 'Enter name for new file or directory (dirs end with a "/"): ')
     if u.is_empty(response) then
@@ -89,22 +95,24 @@ function Actions.new(State, refresh_view)
   end
 
   ---@return nil
-  local function toggle_cut()
+  M.toggle_cut = function()
     local target = view.get_target_under_cursor(State)
     State:list_remove('copy', target)
     State:list_toggle('cut', target)
     refresh_view()
   end
 
-  local function toggle_copy()
+  ---@return nil
+  M.toggle_copy = function()
     local target = view.get_target_under_cursor(State)
     State:list_remove('cut', target)
     State:list_toggle('copy', target)
     refresh_view()
   end
 
+  --TODO: Should this also remove items from the copy list like toggle_cut does?
   ---@return nil
-  local function bulk_toggle_cut()
+  M.bulk_toggle_cut = function()
     local targets = view.get_targets_in_selection(State)
     local contains_cut_items = false
     local contains_uncut_items = false
@@ -129,7 +137,7 @@ function Actions.new(State, refresh_view)
   ---@param target PathDetails
   ---@param destination string
   ---@return nil
-  local function duplicate_file_or_dir(target, destination)
+  M.duplicate_file_or_dir = function(target, destination)
     local p = plenary_path:new(target.path)
     p:copy {
       destination = destination,
@@ -139,7 +147,7 @@ function Actions.new(State, refresh_view)
     }
   end
 
-  local function bulk_toggle_copy()
+  M.bulk_toggle_copy = function()
     local targets = view.get_targets_in_selection(State)
     local contains_copy_items = false
     local contains_noncopy_items = false
@@ -155,14 +163,14 @@ function Actions.new(State, refresh_view)
       if is_mixed or not State:list_contains('copy', target) then
         State:list_add('copy', target)
       else
-        State:list_add('copy', target)
+        State:list_remove('copy', target)
       end
     end
     refresh_view()
   end
 
   ---@return nil
-  local function rename()
+  M.rename = function()
     local target = view.get_target_under_cursor(State)
     local display_name = u.cond(target.is_dir, {
       when_true = u.trim_last_char(target.display_name),
@@ -176,7 +184,7 @@ function Actions.new(State, refresh_view)
   end
 
   ---@return nil
-  local function paste()
+  M.paste = function()
     local cursor_target = view.get_target_under_cursor(State)
     local destination_dir = u.cond(cursor_target.is_dir, {
       when_true = cursor_target.path,
@@ -191,7 +199,7 @@ function Actions.new(State, refresh_view)
         local destination = u.path_join(destination_dir, item.basename)
         if item.path ~= destination then
           -- TODO: Don't add to delete list unless the copy was successful
-          duplicate_file_or_dir(item, destination)
+          M.duplicate_file_or_dir(item, destination)
           table.insert(delete_list, item)
         end
       end
@@ -199,15 +207,14 @@ function Actions.new(State, refresh_view)
       for _, item in ipairs(State.copy_list) do
         local destination = u.path_join(destination_dir, item.basename)
         if item.path ~= destination then
-          duplicate_file_or_dir(item, destination)
+          M.duplicate_file_or_dir(item, destination)
         end
       end
-      bulk_delete(delete_list, true)
+      M.bulk_delete(delete_list, true)
       view.jump_cursor_to(State, destination_dir)
     end)
     if not success then
-      -- TODO: Log this at warning level
-      log('PASTE', 'Failed to paste: ' .. result, 'ERROR')
+      vim.print('Failed to paste "' .. result .. '"')
     end
     State:list_remove_all 'cut'
     State:list_remove_all 'copy'
@@ -216,12 +223,12 @@ function Actions.new(State, refresh_view)
 
   ---@param path string
   ---@return nil
-  local function edit_file(path)
+  M.edit_file = function(path)
     vim.g.tryptic_close()
     vim.cmd.edit(path)
   end
 
-  local function toggle_hidden()
+  M.toggle_hidden = function()
     local current_value = vim.g.tryptic_config.options.show_hidden
     vim.g.tryptic_config['options']['show_hidden'] = u.cond(current_value, {
       when_true = false,
@@ -230,20 +237,7 @@ function Actions.new(State, refresh_view)
     refresh_view()
   end
 
-  return {
-    help = help,
-    rename = rename,
-    paste = paste,
-    delete = delete,
-    bulk_delete = bulk_delete,
-    toggle_cut = toggle_cut,
-    bulk_toggle_cut = bulk_toggle_cut,
-    toggle_copy = toggle_copy,
-    bulk_toggle_copy = bulk_toggle_copy,
-    add_file_or_dir = add_file_or_dir,
-    edit_file = edit_file,
-    toggle_hidden = toggle_hidden,
-  }
+  return M
 end
 
 return {
