@@ -865,5 +865,160 @@ describe('paste', function()
     }, spies.actions.bulk_delete)
     assert.same({ { state_instance, '/hello/world/wow' } }, spies.view.jump_cursor_to)
     assert.same({ 'cut', 'copy' }, spies.state.list_remove_all)
+    assert.same(1, spies.refresh)
+  end)
+
+  it('pastes the items in the cut list', function()
+    _G.tryptic_mock_vim = {
+      print = vim.print,
+    }
+
+    local spies = {
+      view = {
+        get_target_under_cursor = {},
+        jump_cursor_to = {},
+      },
+      plenary_path = {
+        new = {},
+        copy = {},
+      },
+      state = {
+        list_remove_all = {},
+      },
+      refresh = 0,
+    }
+
+    local config = require('tryptic.config').create_merged_config {}
+    local state_instance = require('tryptic.state').new(config, 2)
+
+    state_instance.list_remove_all = function(_, list_type)
+      table.insert(spies.state.list_remove_all, list_type)
+    end
+
+    state_instance.copy_list = {
+      ---@diagnostic disable-next-line: missing-fields
+      {
+        basename = 'foo.js',
+        path = '/hello/world/foo.js',
+      },
+      ---@diagnostic disable-next-line: missing-fields
+      {
+        basename = 'bar.js',
+        path = '/hello/world/bar.js',
+      },
+    }
+
+    view.get_target_under_cursor = function(state)
+      table.insert(spies.view.get_target_under_cursor, state)
+      return {
+        is_dir = true,
+        path = '/hello/world/wow',
+        dirname = '/hello/world/wow',
+      }
+    end
+
+    view.jump_cursor_to = function(state, dest)
+      table.insert(spies.view.jump_cursor_to, { state, dest })
+    end
+
+    plenary_path.new = function(_, path)
+      table.insert(spies.plenary_path.new, path)
+      return {
+        copy = function(_, opts)
+          table.insert(spies.plenary_path.copy, opts)
+        end,
+      }
+    end
+
+    local mock_refresh = function()
+      spies.refresh = spies.refresh + 1
+    end
+
+    local actions_instance = actions.new(state_instance, mock_refresh)
+
+    actions_instance.paste()
+
+    assert.same({ state_instance }, spies.view.get_target_under_cursor)
+    assert.same({ '/hello/world/foo.js', '/hello/world/bar.js' }, spies.plenary_path.new)
+    assert.same({
+      {
+        destination = '/hello/world/wow/foo.js',
+        recursive = true,
+        override = false,
+        interactive = true,
+      },
+      {
+        destination = '/hello/world/wow/bar.js',
+        recursive = true,
+        override = false,
+        interactive = true,
+      },
+    }, spies.plenary_path.copy)
+    assert.same({ { state_instance, '/hello/world/wow' } }, spies.view.jump_cursor_to)
+    assert.same({ 'cut', 'copy' }, spies.state.list_remove_all)
+    assert.same(2, spies.refresh) -- TODO: Look into duplicate refresh calls
+  end)
+end)
+
+describe('edit_file', function()
+  it('closes tryptic and opens the file', function()
+    local spies = {
+      close = 0,
+      cmd = {
+        edit = {},
+      },
+    }
+
+    _G.tryptic_mock_vim = {
+      g = {
+        tryptic_close = function()
+          spies.close = spies.close + 1
+        end,
+      },
+      cmd = {
+        edit = function(path)
+          table.insert(spies.cmd.edit, path)
+        end,
+      },
+    }
+
+    ---@diagnostic disable-next-line: missing-fields
+    actions.new({}, noop).edit_file '/hello/foo.js'
+
+    assert.same({ '/hello/foo.js' }, spies.cmd.edit)
+    assert.same(1, spies.close)
+  end)
+end)
+
+describe('toggle_hidden', function()
+  it('closes tryptic and opens the file', function()
+    local spies = {
+      refresh = 0,
+    }
+
+    _G.tryptic_mock_vim = {
+      g = {
+        tryptic_config = {
+          options = {
+            show_hidden = false
+          }
+        }
+      },
+    }
+
+    local function mock_refresh()
+      spies.refresh = spies.refresh + 1
+    end
+
+    ---@diagnostic disable-next-line: missing-fields
+    actions.new({}, mock_refresh).toggle_hidden()
+
+    assert.same(1, spies.refresh)
+    assert.same(true, _G.tryptic_mock_vim.g.tryptic_config.options.show_hidden)
+
+    ---@diagnostic disable-next-line: missing-fields
+    actions.new({}, mock_refresh).toggle_hidden()
+
+    assert.same(false, _G.tryptic_mock_vim.g.tryptic_config.options.show_hidden)
   end)
 end)
