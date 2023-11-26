@@ -5,6 +5,8 @@ local fs = require 'tryptic.fs'
 local git = require 'tryptic.git'
 local diagnostics = require 'tryptic.diagnostics'
 
+local M = {}
+
 ---@param Diagnostics Diagnostics
 ---@param Git Git
 ---@param path_details PathDetails
@@ -15,12 +17,12 @@ local function filter_and_encrich_dir_contents(Diagnostics, Git, path_details)
   local filtered_children = u.cond(vim.g.tryptic_config.options.show_hidden, {
     when_true = path_details.children,
     when_false = function()
-      local child_paths = u.map(path_details.children, u.get('path'))
+      local child_paths = u.map(path_details.children, u.get 'path')
       local paths_not_ignored = Git:filter_ignored(child_paths)
       return u.filter(path_details.children, function(child)
-	local is_git_ignored = not u.list_includes(paths_not_ignored, child.path)
+        local is_git_ignored = not u.list_includes(paths_not_ignored, child.path)
         local is_dot_file = string.sub(child.display_name, 1, 1) == '.'
-	return not is_git_ignored and not is_dot_file
+        return not is_git_ignored and not is_dot_file
       end)
     end,
   })
@@ -95,7 +97,7 @@ end
 ---Get the PathDetails that correspond to the path under the cursor
 ---@param State TrypticState
 ---@return PathDetails
-local function get_target_under_cursor(State)
+function M.get_target_under_cursor(State)
   local vim = _G.tryptic_mock_vim or vim
   local line_number = vim.api.nvim_win_get_cursor(0)[1]
   return State.windows.current.contents.children[line_number]
@@ -104,7 +106,7 @@ end
 ---Get a list of PathDetails that correspond to all the paths under the visual selection
 ---@param State TrypticState
 ---@return PathDetails[]
-local function get_targets_in_selection(State)
+function M.get_targets_in_selection(State)
   local vim = _G.tryptic_mock_vim or vim
   local from = vim.fn.getpos('v')[2]
   local to = vim.api.nvim_win_get_cursor(0)[1]
@@ -191,7 +193,7 @@ end
 ---@param Git Git
 ---@param cursor_target? string full path
 ---@return nil
-local function nav_to(State, target_dir, Diagnostics, Git, cursor_target)
+function M.nav_to(State, target_dir, Diagnostics, Git, cursor_target)
   local vim = _G.tryptic_mock_vim or vim
 
   local focused_win = State.windows.current.win
@@ -259,15 +261,15 @@ end
 ---@param Diagnostics Diagnostics
 ---@param Git Git
 ---@return nil
-local function jump_to_cwd(State, Diagnostics, Git)
+function M.jump_to_cwd(State, Diagnostics, Git)
   local vim = _G.tryptic_mock_vim or vim
   local current = State.windows.current
   local cwd = vim.fn.getcwd()
   -- TODO: DRY
   if current.path == cwd and current.previous_path then
-    nav_to(State, current.previous_path, Diagnostics, Git)
+    M.nav_to(State, current.previous_path, Diagnostics, Git)
   else
-    nav_to(State, cwd, Diagnostics, Git)
+    M.nav_to(State, cwd, Diagnostics, Git)
   end
 end
 
@@ -276,7 +278,7 @@ end
 ---@param Diagnostics Diagnostics
 ---@param Git Git
 ---@return nil
-local function update_child_window(State, path_details, Diagnostics, Git)
+function M.update_child_window(State, path_details, Diagnostics, Git)
   local vim = _G.tryptic_mock_vim or vim
   local buf = vim.api.nvim_win_get_buf(State.windows.child.win)
 
@@ -319,9 +321,9 @@ local function update_child_window(State, path_details, Diagnostics, Git)
 end
 
 ---@param State TrypticState
----@param path PathDetails
+---@param path string
 ---@return nil
-local function jump_cursor_to(State, path)
+function M.jump_cursor_to(State, path)
   local vim = _G.tryptic_mock_vim or vim
   local line_num
   for index, item in ipairs(State.windows.current.contents.children) do
@@ -339,17 +341,9 @@ end
 ---@param Diagnostics Diagnostics
 ---@param Git Git
 ---@return nil
-local function refresh_view(State, Diagnostics, Git)
+function M.refresh_view(State, Diagnostics, Git)
   -- TODO: This an inefficient way of refreshing the view
-  nav_to(State, State.windows.current.path, Diagnostics, Git)
+  M.nav_to(State, State.windows.current.path, Diagnostics, Git)
 end
 
-return {
-  refresh_view = refresh_view,
-  jump_cursor_to = jump_cursor_to,
-  update_child_window = update_child_window,
-  get_target_under_cursor = get_target_under_cursor,
-  get_targets_in_selection = get_targets_in_selection,
-  jump_to_cwd = jump_to_cwd,
-  nav_to = nav_to,
-}
+return M
