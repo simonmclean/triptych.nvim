@@ -522,3 +522,73 @@ describe('nav_to', function()
     }, mock_state.windows)
   end)
 end)
+
+describe('get_targets_in_selection', function()
+  it('gets targets in the visuals selection', function()
+    local spies = {
+      vim = {
+        api = {
+          nvim_win_get_cursor = {},
+        },
+        fn = {
+          getpos = {},
+        },
+      },
+    }
+
+    _G.tryptic_mock_vim = {
+      fn = {
+        getpos = function(value)
+          table.insert(spies.vim.fn.getpos, value)
+          return { 1, 2 }
+        end,
+      },
+      api = {
+        nvim_win_get_cursor = function(winid)
+          table.insert(spies.vim.api.nvim_win_get_cursor, winid)
+          return { 4, 5 }
+        end,
+      },
+    }
+
+    local mock_state = {
+      windows = {
+        current = {
+          contents = {
+            children = { 'hello', 'world', 'monkey' },
+          },
+        },
+      },
+    }
+
+    local result = view.get_targets_in_selection(mock_state)
+
+    assert.same({ 'world', 'monkey' }, result)
+  end)
+end)
+
+describe('get_target_under_cursor', function()
+  it('gets target under cursor', function()
+    local spy = {}
+    _G.tryptic_mock_vim = {
+      api = {
+        nvim_win_get_cursor = function(winid)
+          table.insert(spy, winid)
+          return { 3, 4 }
+        end,
+      },
+    }
+    local mock_state = {
+      windows = {
+        current = {
+          contents = {
+            children = { 'hello', 'world', 'monkey' },
+          },
+        },
+      },
+    }
+    local result = view.get_target_under_cursor(mock_state)
+    assert.same({ 0 }, spy)
+    assert.same('monkey', result)
+  end)
+end)
