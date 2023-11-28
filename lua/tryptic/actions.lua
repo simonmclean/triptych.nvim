@@ -2,20 +2,22 @@ local u = require 'tryptic.utils'
 local float = require 'tryptic.float'
 local view = require 'tryptic.view'
 local plenary_path = require 'plenary.path'
-local tryptic_help = require('tryptic.help')
+local tryptic_help = require 'tryptic.help'
 
 local Actions = {}
 
 --- TODO: Return type
 ---@param State TrypticState
+---@param Diagnostics Diagnostics
+---@param Git Git
 ---@param refresh_view fun(): nil
-function Actions.new(State, refresh_view)
+function Actions.new(State, Diagnostics, Git, refresh_view)
   local vim = _G.tryptic_mock_vim or vim
 
   local M = {}
 
   ---@return nil
-  M.help = function ()
+  M.help = function()
     local win = State.windows.child.win
     float.win_set_title(win, 'Help', '󰋗', 'Directory')
     float.win_set_lines(win, tryptic_help.help_lines())
@@ -55,7 +57,7 @@ function Actions.new(State, refresh_view)
             vim.fn.delete(target.path, 'rf')
           end)
           if not success then
-	    vim.print('Error deleting item', result)
+            vim.print('Error deleting item', result)
           end
         end
         refresh_view()
@@ -235,6 +237,19 @@ function Actions.new(State, refresh_view)
       when_false = true,
     })
     refresh_view()
+  end
+
+  M.jump_to_cwd = function()
+    local cwd = vim.fn.getcwd()
+    local win = State.windows.current
+    -- If we're already in the route directory, nav back to the previous directory (if we have that in memory)
+    if win.path == cwd then
+      if win.previous_path then
+        view.nav_to(State, win.previous_path, Diagnostics, Git)
+      end
+    else
+      view.nav_to(State, cwd, Diagnostics, Git)
+    end
   end
 
   return M

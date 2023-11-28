@@ -35,7 +35,7 @@ local function open_tryptic()
 
   -- Autocmds need to be created after the above state is set
   local AutoCmds = autocmds.new(event_handlers, State, Diagnostics, Git)
-  local Actions = actions.new(State, function ()
+  local Actions = actions.new(State, Diagnostics, Git, function()
     view.refresh_view(State, Diagnostics, Git)
   end)
   mappings.new(State, Actions, Diagnostics, Git)

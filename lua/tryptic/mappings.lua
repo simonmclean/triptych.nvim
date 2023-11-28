@@ -49,11 +49,7 @@ function Mappings.new(State, actions, Diagnostics, Git)
     end
   end)
 
-  map('n', mappings.jump_to_cwd, function()
-    -- TODO: Change this?
-    -- TODO: Move to actions
-    view.jump_to_cwd(vim.g.tryptic_get_state())
-  end)
+  map('n', mappings.jump_to_cwd, actions.jump_to_cwd)
   map('n', mappings.delete, actions.delete)
   map('v', mappings.delete, actions.bulk_delete)
   map('n', mappings.add, actions.add_file_or_dir)

@@ -42,7 +42,8 @@ describe('help', function()
       return { 'hello', 'world' }
     end
 
-    actions.new(mock_state, noop).help()
+    ---@diagnostic disable-next-line: missing-fields
+    actions.new(mock_state, {}, {}, noop).help()
 
     assert.same({ {
       3,
@@ -96,7 +97,8 @@ describe('delete', function()
       }
     end
 
-    actions.new(mock_state, mock_refresh).delete()
+    ---@diagnostic disable-next-line: missing-fields
+    actions.new(mock_state, {}, {}, mock_refresh).delete()
 
     assert.same({ mock_state }, spies.view.get_target_under_cursor)
     assert.same({
@@ -138,7 +140,8 @@ describe('delete', function()
       }
     end
 
-    actions.new(mock_state, mock_refresh).delete()
+    ---@diagnostic disable-next-line: missing-fields
+    actions.new(mock_state, {}, {}, mock_refresh).delete()
 
     assert.same({}, spies.refresh)
     assert.same({}, spies.fn.delete)
@@ -181,7 +184,8 @@ describe('bulk_delete', function()
       print = vim.print,
     }
 
-    actions.new(mock_state, mock_refresh).bulk_delete(mock_targets, false)
+    ---@diagnostic disable-next-line: missing-fields
+    actions.new(mock_state, {}, {}, mock_refresh).bulk_delete(mock_targets, false)
     assert.same({
       { 'Are you sure you want to delete the 2 selected files/folders?', '&y\n&n', 'Question' },
     }, spies.fn.confirm)
@@ -227,7 +231,8 @@ describe('bulk_delete', function()
       print = vim.print,
     }
 
-    actions.new(mock_state, mock_refresh).bulk_delete(mock_targets, true)
+    ---@diagnostic disable-next-line: missing-fields
+    actions.new(mock_state, {}, {}, mock_refresh).bulk_delete(mock_targets, true)
     assert.same({}, spies.fn.confirm)
     assert.same({
       { 'foo/bar/a.js', 'rf' },
@@ -271,7 +276,8 @@ describe('bulk_delete', function()
       print = vim.print,
     }
 
-    actions.new(mock_state, mock_refresh).bulk_delete(mock_targets, false)
+    ---@diagnostic disable-next-line: missing-fields
+    actions.new(mock_state, {}, {}, mock_refresh).bulk_delete(mock_targets, false)
 
     assert.same({
       { 'Are you sure you want to delete the 2 selected files/folders?', '&y\n&n', 'Question' },
@@ -324,7 +330,8 @@ describe('add_file_or_dir', function()
       },
     }
 
-    actions.new(mock_state, mock_refresh).add_file_or_dir()
+    ---@diagnostic disable-next-line: missing-fields
+    actions.new(mock_state, {}, {}, mock_refresh).add_file_or_dir()
 
     assert.same({ 'hello.lua' }, spies.fn.trim)
     assert.same({ 'Enter name for new file or directory (dirs end with a "/"): ' }, spies.fn.input)
@@ -368,7 +375,8 @@ describe('add_file_or_dir', function()
       },
     }
 
-    actions.new(mock_state, mock_refresh).add_file_or_dir()
+    ---@diagnostic disable-next-line: missing-fields
+    actions.new(mock_state, {}, {}, mock_refresh).add_file_or_dir()
 
     assert.same({ { '/foo/bar/new_dir/', 'p' } }, spies.fn.mkdir)
   end)
@@ -411,7 +419,8 @@ describe('add_file_or_dir', function()
       },
     }
 
-    actions.new(mock_state, mock_refresh).add_file_or_dir()
+    ---@diagnostic disable-next-line: missing-fields
+    actions.new(mock_state, {}, {}, mock_refresh).add_file_or_dir()
 
     assert.same({ { '/foo/bar/new_dir_1/new_dir_2/', 'p' } }, spies.fn.mkdir)
     assert.same({ { {}, '/foo/bar/new_dir_1/new_dir_2/new_file.ts' } }, spies.fn.writefile)
@@ -447,7 +456,7 @@ describe('toggle_cut', function()
       table.insert(spies.refresh, nil)
     end
 
-    actions.new(state_instance, mock_refresh).toggle_cut()
+    actions.new(state_instance, {}, {}, mock_refresh).toggle_cut()
 
     assert.same({ state_instance }, spies.get_target_under_cursor)
     assert.same({ { 'copy', 'hello' } }, spies.list_remove)
@@ -485,7 +494,8 @@ describe('toggle_copy', function()
       table.insert(spies.refresh, nil)
     end
 
-    actions.new(state_instance, mock_refresh).toggle_copy()
+    ---@diagnostic disable-next-line: missing-fields
+    actions.new(state_instance, {}, {}, mock_refresh).toggle_copy()
 
     assert.same({ state_instance }, spies.get_target_under_cursor)
     assert.same({ { 'cut', 'hello' } }, spies.list_remove)
@@ -542,7 +552,7 @@ describe('bulk_toggle_cut', function()
       table.insert(spies.refresh, nil)
     end
 
-    actions.new(state_instance, mock_refresh).bulk_toggle_cut()
+    actions.new(state_instance, {}, {}, mock_refresh).bulk_toggle_cut()
 
     assert.same({ state_instance }, spies.view.get_targets_in_selection)
     assert.same({
@@ -589,7 +599,7 @@ describe('bulk_toggle_cut', function()
       return mock_paths
     end
 
-    actions.new(state_instance, noop).bulk_toggle_cut()
+    actions.new(state_instance, {}, {}, noop).bulk_toggle_cut()
 
     assert.same({
       { 'cut', 'hello' },
@@ -647,7 +657,7 @@ describe('bulk_toggle_copy', function()
       table.insert(spies.refresh, nil)
     end
 
-    actions.new(state_instance, mock_refresh).bulk_toggle_copy()
+    actions.new(state_instance, {}, {}, mock_refresh).bulk_toggle_copy()
 
     assert.same({ state_instance }, spies.view.get_targets_in_selection)
     assert.same({
@@ -694,7 +704,7 @@ describe('bulk_toggle_copy', function()
       return mock_paths
     end
 
-    actions.new(state_instance, noop).bulk_toggle_copy()
+    actions.new(state_instance, {}, {}, noop).bulk_toggle_copy()
 
     assert.same({
       { 'copy', 'hello' },
@@ -750,7 +760,7 @@ describe('rename', function()
       spies.refresh = spies.refresh + 1
     end
 
-    actions.new(mock_state, mock_refresh).rename()
+    actions.new(mock_state, {}, {}, mock_refresh).rename()
 
     assert.same({ mock_state }, spies.view.get_target_under_cursor)
     assert.same({ 'bar.js' }, spies.fn.trim)
@@ -829,7 +839,7 @@ describe('paste', function()
       spies.refresh = spies.refresh + 1
     end
 
-    local actions_instance = actions.new(state_instance, mock_refresh)
+    local actions_instance = actions.new(state_instance, {}, {}, mock_refresh)
 
     ---@diagnostic disable-next-line: duplicate-set-field
     actions_instance.bulk_delete = function(list, skip_confirm)
@@ -934,7 +944,8 @@ describe('paste', function()
       spies.refresh = spies.refresh + 1
     end
 
-    local actions_instance = actions.new(state_instance, mock_refresh)
+    ---@diagnostic disable-next-line: missing-fields
+    local actions_instance = actions.new(state_instance, {}, {}, mock_refresh)
 
     actions_instance.paste()
 
@@ -983,7 +994,7 @@ describe('edit_file', function()
     }
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new({}, noop).edit_file '/hello/foo.js'
+    actions.new({}, {}, {}, noop).edit_file '/hello/foo.js'
 
     assert.same({ '/hello/foo.js' }, spies.cmd.edit)
     assert.same(1, spies.close)
@@ -1000,9 +1011,9 @@ describe('toggle_hidden', function()
       g = {
         tryptic_config = {
           options = {
-            show_hidden = false
-          }
-        }
+            show_hidden = false,
+          },
+        },
       },
     }
 
@@ -1011,14 +1022,92 @@ describe('toggle_hidden', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new({}, mock_refresh).toggle_hidden()
+    actions.new({}, {}, {}, mock_refresh).toggle_hidden()
 
     assert.same(1, spies.refresh)
     assert.same(true, _G.tryptic_mock_vim.g.tryptic_config.options.show_hidden)
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new({}, mock_refresh).toggle_hidden()
+    actions.new({}, {}, {}, mock_refresh).toggle_hidden()
 
     assert.same(false, _G.tryptic_mock_vim.g.tryptic_config.options.show_hidden)
+  end)
+end)
+
+describe('jump_to_cwd', function()
+  it('jumps to root if we not already there', function()
+    local spies = {
+      fn = {
+        getcwd = 0
+      },
+      view = {
+        nav_to = {}
+      }
+    }
+    _G.tryptic_mock_vim = {
+      fn = {
+        getcwd = function ()
+          spies.fn.getcwd = spies.fn.getcwd + 1
+          return '/hello'
+        end
+      }
+    }
+    view.nav_to = function(s, dir, d, g)
+      table.insert(spies.view.nav_to, { s, dir, d, g })
+    end
+    local mock_state = {
+      windows = {
+        current = {
+          path = '/hello/world/foo',
+          previous_path = '/hello',
+        },
+      },
+    }
+    local mock_git = { 'git' }
+    local mock_diagnostics = { 'diagnostic' }
+    local actions_instance = actions.new(mock_state, mock_diagnostics, mock_git, noop)
+    actions_instance.jump_to_cwd()
+    assert.same(1, spies.fn.getcwd)
+    assert.same({
+      { mock_state, '/hello', mock_diagnostics, mock_git },
+    }, spies.view.nav_to)
+  end)
+
+  it('if currently in root, jumps to previous path', function()
+    local spies = {
+      fn = {
+        getcwd = 0
+      },
+      view = {
+        nav_to = {}
+      }
+    }
+    _G.tryptic_mock_vim = {
+      fn = {
+        getcwd = function ()
+          spies.fn.getcwd = spies.fn.getcwd + 1
+          return '/hello'
+        end
+      }
+    }
+    view.nav_to = function(s, dir, d, g)
+      table.insert(spies.view.nav_to, { s, dir, d, g })
+    end
+    local mock_state = {
+      windows = {
+        current = {
+          path = '/hello',
+          previous_path = '/hello/world/foo',
+        },
+      },
+    }
+    local mock_git = { 'git' }
+    local mock_diagnostics = { 'diagnostic' }
+    local actions_instance = actions.new(mock_state, mock_diagnostics, mock_git, noop)
+    actions_instance.jump_to_cwd()
+    assert.same(1, spies.fn.getcwd)
+    assert.same({
+      { mock_state, '/hello/world/foo', mock_diagnostics, mock_git },
+    }, spies.view.nav_to)
   end)
 end)
