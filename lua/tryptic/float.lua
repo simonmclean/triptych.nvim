@@ -35,6 +35,7 @@ local function buf_apply_highlights(buf, highlights)
   end
 end
 
+--- Read the contents of a file into the window buffer
 ---@param win number
 ---@param lines string[]
 ---@param attempt_scroll_top? boolean
@@ -75,6 +76,7 @@ local function win_set_title(win, title, icon, highlight, postfix)
   end)
 end
 
+--- Read the contents of a file into the buffer
 ---@param buf number
 ---@param path string
 ---@return nil

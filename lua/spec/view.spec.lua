@@ -72,6 +72,7 @@ describe('update_child_window', function()
     local spies = {
       api = {
         nvim_win_get_buf = {},
+        nvim_buf_set_option = {},
       },
       float = {
         win_set_title = {},
@@ -108,6 +109,9 @@ describe('update_child_window', function()
         nvim_win_get_buf = function(winid)
           table.insert(spies.api.nvim_win_get_buf, winid)
           return 11
+        end,
+        nvim_buf_set_option = function(bufid, opt, value)
+          table.insert(spies.api.nvim_buf_set_option, { bufid, opt, value })
         end,
       },
       fn = {
@@ -212,6 +216,7 @@ describe('update_child_window', function()
       '',
       'Directory',
     } }, spies.float.win_set_title)
+    assert.same({ { 11, 'filetype', 'tryptic' } }, spies.api.nvim_buf_set_option)
     assert.same(1, spies.fn.getcwd)
     assert.same({ '/hello/' }, spies.fs.get_path_details)
     assert.same({}, spies.git.filter_ignored)
