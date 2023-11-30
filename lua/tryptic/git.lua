@@ -5,27 +5,16 @@ local u = require 'tryptic.utils'
 local sign_priority = {
   '??',
   'R',
-  'D',
   'M',
   'A',
-  'AM',
 }
 
----@param status GitFileStatus
----@return string
-local function get_sign(status)
-  local vim = _G.tryptic_mock_vim or vim
-  local signs = vim.g.tryptic_config.git_signs.signs
-  local map = {
-    ['A'] = signs.add,
-    ['AM'] = signs.add_modify,
-    ['D'] = signs.delete,
-    ['M'] = signs.modify,
-    ['R'] = signs.rename,
-    ['??'] = signs.untracked,
-  }
-  return map[status]
-end
+local status_to_sign = {
+  ['??'] = 'TrypticGitAdd',
+  ['R'] = 'TrypticGitRename',
+  ['M'] = 'TrypticGitModify',
+  ['A'] = 'TrypticGitAdd',
+}
 
 local Git = {}
 
@@ -37,6 +26,22 @@ function Git.new()
   local cwd = vim.fn.getcwd()
   local git_status = u.multiline_str_to_table(vim.fn.system 'git status --porcelain')
   local result = {}
+
+  local signs_config = vim.g.tryptic_config.git_signs.signs
+
+  local signs_to_text = {
+    ['TrypticGitAdd'] = signs_config.add,
+    ['TrypticGitModify'] = signs_config.modify,
+    ['TrypticGitRename'] = signs_config.rename,
+    ['TrypticGitUntracked'] = signs_config.untracked,
+  }
+
+  -- Register the signs if they're not already
+  for sign_name, text in pairs(signs_to_text) do
+    if u.is_empty(vim.fn.sign_getdefined(sign_name)) then
+      vim.fn.sign_define(sign_name, { text = text, texthl = 'Normal' })
+    end
+  end
 
   -- Propagate the status up through the parent directories
   for _, value in ipairs(git_status) do
@@ -91,6 +96,6 @@ function Git:status_of(path)
 end
 
 return {
-  get_sign = get_sign,
+  status_to_sign = status_to_sign,
   Git = Git,
 }

@@ -166,7 +166,7 @@ local function set_sign_columns(buf, children, group)
   vim.fn.sign_unplace(group)
   for index, entry in ipairs(children) do
     if entry.git_status then
-      local sign_name = git.get_sign(entry.git_status)
+      local sign_name = git.status_to_sign[entry.git_status]
       place_sign(buf, sign_name, group, index)
     end
 

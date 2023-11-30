@@ -59,9 +59,7 @@
 
 ---@class TrypticConfigGitSignsSigns
 ---@field add string
----@field add_modify string
 ---@field modify string
----@field delete string
 ---@field rename string
 ---@field untracked string
 
@@ -70,7 +68,7 @@
 
 ---@alias KeyMapping (string | string[])
 
----@alias GitFileStatus ('A' | 'AM' | 'D' | 'M' | 'R' | '??')
+---@alias GitFileStatus ('A' | 'D' | 'M' | 'R' | '??')
 
 ---@class Git
 ---@field new fun(): Git

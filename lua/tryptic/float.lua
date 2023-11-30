@@ -139,6 +139,10 @@ local function create_floating_window(config)
   })
   vim.api.nvim_win_set_option(win, 'cursorline', config.enable_cursorline)
   vim.api.nvim_win_set_option(win, 'number', config.show_numbers)
+  if config.show_numbers then
+     -- 2 to accomodate both diagnostics and git signs
+    vim.api.nvim_win_set_option(win, 'signcolumn', 'auto:2')
+  end
   return win
 end
 

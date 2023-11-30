@@ -141,4 +141,5 @@ For example, if you want to make `<c-f>` search the file or directory under the 
     - After an action, go back to normal mode
     - Print out result of actions (in case file is git ignored and hidden for example)
     - Fixed inconsistency between copy overwrite prompt and delete prompt
+    - Honour the enable flags
 - Tests

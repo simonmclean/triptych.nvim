@@ -1,5 +1,5 @@
 local u = require 'tryptic.utils'
-
+--
 ---@type TrypticConfig
 local default_config = {
   mappings = {
@@ -29,12 +29,10 @@ local default_config = {
   git_signs = {
     enabled = true,
     signs = {
-      add = 'GitSignsAdd',
-      add_modify = 'GitSignsAdd',
-      modify = 'GitSignsChange',
-      delete = 'GitSignsDelete',
-      rename = 'GitSignsRename',
-      untracked = 'GitSignsUntracked',
+      add = '+',
+      modify = '~',
+      rename = 'r',
+      untracked = '?',
     },
   },
   diagnostic_signs = {
