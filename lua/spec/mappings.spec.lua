@@ -66,7 +66,7 @@ describe('new', function()
       assert.same(1, #results)
       local result = results[1]
       assert.same(mode, result[1])
-      assert.same({ buffer = 0 }, result[4])
+      assert.same({ buffer = 0, nowait = true }, result[4])
     end
 
     assert_mapping('nav_left', 'n')
