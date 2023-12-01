@@ -16,7 +16,7 @@ end)
 
 describe('Diagnostics', function()
   it('exposes diagnostics per path', function()
-    local mock_vim = {
+    _G.tryptic_mock_vim = {
       diagnostic = {
         get = function()
           return {
@@ -47,12 +47,12 @@ describe('Diagnostics', function()
       },
     }
     local Diagnostics = diagnostics.new()
-    assert.are.same(1, Diagnostics:get '/a/b/foo.js')
-    assert.are.same(3, Diagnostics:get '/a/b/bar.js')
-    assert.are.same(4, Diagnostics:get '/a/b/baz.js')
-    assert.are.same(1, Diagnostics:get '/a/b/')
-    assert.are.same(1, Diagnostics:get '/a/')
-    assert.are.same(1, Diagnostics:get '/')
-    assert.are.same(nil, Diagnostics:get '/should/not/throw.js')
+    assert.same(1, Diagnostics:get '/a/b/foo.js')
+    assert.same(3, Diagnostics:get '/a/b/bar.js')
+    assert.same(4, Diagnostics:get '/a/b/baz.js')
+    assert.same(1, Diagnostics:get '/a/b/')
+    assert.same(1, Diagnostics:get '/a/')
+    assert.same(1, Diagnostics:get '/')
+    assert.same(nil, Diagnostics:get '/should/not/throw.js')
   end)
 end)

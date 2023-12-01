@@ -117,6 +117,7 @@ describe('create_three_floating_windows', function()
       -- second win
       { 2, 'cursorline', true },
       { 2, 'number', true },
+      { 2, 'signcolumn', 'auto:2' },
       -- third win
       { 3, 'cursorline', false },
       { 3, 'number', false },
