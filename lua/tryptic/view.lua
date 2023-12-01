@@ -258,22 +258,6 @@ function M.nav_to(State, target_dir, Diagnostics, Git, cursor_target)
 end
 
 ---@param State TrypticState
----@param Diagnostics Diagnostics
----@param Git Git
----@return nil
-function M.jump_to_cwd(State, Diagnostics, Git)
-  local vim = _G.tryptic_mock_vim or vim
-  local current = State.windows.current
-  local cwd = vim.fn.getcwd()
-  -- TODO: DRY
-  if current.path == cwd and current.previous_path then
-    M.nav_to(State, current.previous_path, Diagnostics, Git)
-  else
-    M.nav_to(State, cwd, Diagnostics, Git)
-  end
-end
-
----@param State TrypticState
 ---@param path_details PathDetails
 ---@param Diagnostics Diagnostics
 ---@param Git Git

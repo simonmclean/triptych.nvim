@@ -1,54 +1,43 @@
 local git = require 'tryptic.git'
-local config = require 'tryptic.config'
 local u = require 'tryptic.utils'
 local tu = require 'spec.test_utils'
+local config = require 'tryptic.config'
 
 local mocks = {
-  git_status = 'M  lua/foo.lua\nD  lua/bar.lua\nAM docs/README.md\n?? .DS_Store',
+  git_status = 'M  lua/foo.lua\nA  lua/bar.lua\nR  docs/README.md\n?? .DS_Store',
   project_root = '/hello/world',
 }
 
-describe('get_sign', function()
-  it('takes an abbreviated status and returns a sign name', function()
-    local conf = config.create_merged_config()
-
-    _G.tryptic_mock_vim = {
-      g = {
-        tryptic_config = conf,
-      },
-    }
-
-    local a = git.get_sign 'A'
-    local am = git.get_sign 'AM'
-    local d = git.get_sign 'D'
-    local m = git.get_sign 'M'
-    local r = git.get_sign 'R'
-    local unknown = git.get_sign '??'
-    assert.equals('GitSignsAdd', a)
-    assert.equals('GitSignsAdd', am)
-    assert.equals('GitSignsDelete', d)
-    assert.equals('GitSignsChange', m)
-    assert.equals('GitSignsRename', r)
-    assert.equals('GitSignsUntracked', unknown)
-  end)
-end)
-
 describe('Git.new', function()
   it('sets project_root and status', function()
-    local spy = {}
+    local spies = {
+      system = {},
+      sign_getdefined = {},
+      sign_define = {},
+    }
     _G.tryptic_mock_vim = {
+      g = {
+        tryptic_config = config.create_merged_config {},
+      },
       fn = {
         getcwd = function()
           return mocks.project_root
         end,
         system = function(cmd)
-          table.insert(spy, cmd)
+          table.insert(spies.system, cmd)
           if cmd == 'git status --porcelain' then
             return mocks.git_status
           elseif cmd == 'git rev-parse --show-toplevel' then
             return mocks.project_root
           end
           return nil
+        end,
+        sign_getdefined = function(name)
+          table.insert(spies.sign_getdefined, name)
+          return {}
+        end,
+        sign_define = function(name, conf)
+          table.insert(spies.sign_define, { name, conf.text, conf.texthl })
         end,
       },
       fs = {
@@ -59,20 +48,28 @@ describe('Git.new', function()
     assert.same({
       'git status --porcelain',
       'git rev-parse --show-toplevel',
-    }, spy)
+    }, spies.system)
     assert.same(mocks.project_root, Git.project_root)
     assert.same({
       ['/hello/world/lua/foo.lua'] = 'M',
-      ['/hello/world/lua/bar.lua'] = 'D',
-      ['/hello/world/docs/README.md'] = 'AM',
+      ['/hello/world/lua/bar.lua'] = 'A',
+      ['/hello/world/docs/README.md'] = 'R',
       ['/hello/world/.DS_Store'] = '??',
     }, Git.status)
+    table.sort(spies.sign_getdefined)
+    assert.same(
+      { 'TrypticGitAdd', 'TrypticGitModify', 'TrypticGitRename', 'TrypticGitUntracked' },
+      spies.sign_getdefined
+    )
   end)
 end)
 
 describe('Git:status_of', function()
   it('returns the git status of a path', function()
     _G.tryptic_mock_vim = {
+      g = {
+        tryptic_config = config.create_merged_config {},
+      },
       fn = {
         getcwd = function()
           return mocks.project_root
@@ -85,6 +82,9 @@ describe('Git:status_of', function()
           end
           return nil
         end,
+        sign_getdefined = function (_)
+          return true
+        end
       },
       fs = {
         parents = tu.iterator {},
@@ -111,6 +111,9 @@ describe('Git:filter_ignored', function()
     local combined_paths = u.list_concat(ignored_paths, not_ignored_paths)
     local spy = {}
     _G.tryptic_mock_vim = {
+      g = {
+        tryptic_config = config.create_merged_config {},
+      },
       fn = {
         getcwd = function()
           return mocks.project_root
@@ -126,6 +129,9 @@ describe('Git:filter_ignored', function()
           end
           return nil
         end,
+        sign_getdefined = function (_)
+          return true
+        end
       },
       fs = {
         parents = tu.iterator {},

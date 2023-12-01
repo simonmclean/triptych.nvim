@@ -87,7 +87,6 @@ describe('update_child_window', function()
         getcwd = 0,
       },
       git = {
-        get_sign = {},
         filter_ignored = {},
         status_of = {},
       },
@@ -134,11 +133,6 @@ describe('update_child_window', function()
 
     float.buf_apply_highlights = function(bufid, highlight)
       table.insert(spies.float.buf_apply_highlights, { bufid, highlight })
-    end
-
-    git.get_sign = function(status)
-      table.insert(spies.git.get_sign, status)
-      return '🥸'
     end
 
     diagnostics.get_sign = function(status)
@@ -229,7 +223,6 @@ describe('update_child_window', function()
     } } }, spies.float.buf_set_lines)
     assert.same({ { 11, { 'Directory' } } }, spies.float.buf_apply_highlights)
     assert.same({ 'tryptic_sign_col_child' }, spies.fn.sign_unplace)
-    assert.same({ 'M', 'M', 'M' }, spies.git.get_sign)
     assert.same({ '🎸', '🎸', '🎸' }, spies.diagnostics.get_sign)
   end)
 end)
@@ -374,11 +367,6 @@ describe('nav_to', function()
         return 'x'
       end,
     }
-
-    git.get_sign = function(status)
-      table.insert(spies.git.get_sign, status)
-      return '+'
-    end
 
     diagnostics.get_sign = function(status)
       table.insert(spies.diagnostics.get_sign, status)
