@@ -230,6 +230,7 @@ function Actions.new(State, Diagnostics, Git, refresh_view)
     vim.cmd.edit(path)
   end
 
+  ---@return nil
   M.toggle_hidden = function()
     local current_value = vim.g.tryptic_config.options.show_hidden
     vim.g.tryptic_config['options']['show_hidden'] = u.cond(current_value, {
@@ -239,12 +240,13 @@ function Actions.new(State, Diagnostics, Git, refresh_view)
     refresh_view()
   end
 
+  ---@return nil
   M.jump_to_cwd = function()
     local cwd = vim.fn.getcwd()
     local win = State.windows.current
     -- If we're already in the route directory, nav back to the previous directory (if we have that in memory)
     if win.path == cwd then
-      if win.previous_path then
+      if u.is_defined(win.previous_path) then
         view.nav_to(State, win.previous_path, Diagnostics, Git)
       end
     else
