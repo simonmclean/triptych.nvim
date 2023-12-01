@@ -1,0 +1,20 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - run: sudo apt-get update
+    - run: sudo apt install -y neovim
+    - run: git clone https://github.com/nvim-lua/plenary.nvim.git ~/.local/share/nvim/lazy/plenary.nvim
+    - run: git clone https://github.com/simonmclean/tryptic.git ~/.local/share/nvim/lazy/tryptic
+    - run: git clone https://github.com/nvim-tree/nvim-web-devicons ~/.local/share/nvim/lazy/nvim-web-devicons
+    - run: git clone https://github.com/lewis6991/gitsigns.nvim ~/.local/share/nvim/lazy/gitsigns.nvim
+    # - run: nvim --headless -c "PlenaryBustedFile tests/plenary/ {options}"
+
