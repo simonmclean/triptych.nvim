@@ -30,12 +30,10 @@ local function get_default_config()
     git_signs = {
       enabled = true,
       signs = {
-        add = 'GitSignsAdd',
-        add_modify = 'GitSignsAdd',
-        modify = 'GitSignsChange',
-        delete = 'GitSignsDelete',
-        rename = 'GitSignsRename',
-        untracked = 'GitSignsUntracked',
+        add = '+',
+        modify = '~',
+        rename = 'r',
+        untracked = '?',
       },
     },
     diagnostic_signs = {
@@ -61,7 +59,7 @@ describe('create_merged_config', function()
         enabled = false,
       },
     }
-    local expected = u.eval(function ()
+    local expected = u.eval(function()
       local result = default_config
       result.mappings.open_tryptic = 'H'
       result.git_signs.enabled = false
