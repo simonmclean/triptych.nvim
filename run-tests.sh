@@ -16,5 +16,6 @@ if [ "$all_tests_pass" = false ]
 then
   exit 1
 else
+  echo "Success: All tests passing 🎉"
   exit 0
 fi
