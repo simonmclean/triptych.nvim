@@ -15,7 +15,7 @@ local default_config = {
     cut = 'x',
     paste = 'p',
     quit = 'q',
-    toggle_hidden = '<leader>,',
+    toggle_hidden = '<leader>.',
   },
   extension_mappings = {},
   options = {

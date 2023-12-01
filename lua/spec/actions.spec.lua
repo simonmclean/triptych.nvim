@@ -1007,30 +1007,21 @@ describe('toggle_hidden', function()
       refresh = 0,
     }
 
-    _G.tryptic_mock_vim = {
-      g = {
-        tryptic_config = {
-          options = {
-            show_hidden = false,
-          },
-        },
-      },
-    }
-
     local function mock_refresh()
       spies.refresh = spies.refresh + 1
     end
 
-    ---@diagnostic disable-next-line: missing-fields
-    actions.new({}, {}, {}, mock_refresh).toggle_hidden()
-
-    assert.same(1, spies.refresh)
-    assert.same(true, _G.tryptic_mock_vim.g.tryptic_config.options.show_hidden)
+    local mock_state = {
+      show_hidden = false
+    }
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new({}, {}, {}, mock_refresh).toggle_hidden()
-
-    assert.same(false, _G.tryptic_mock_vim.g.tryptic_config.options.show_hidden)
+    local actions_instance = actions.new(mock_state, {}, {}, mock_refresh)
+    actions_instance.toggle_hidden()
+    assert.same(true, mock_state.show_hidden)
+    actions_instance.toggle_hidden()
+    assert.same(false, mock_state.show_hidden)
+    assert.same(2, spies.refresh)
   end)
 end)
 

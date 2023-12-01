@@ -10,11 +10,10 @@ local M = {}
 ---@param Diagnostics Diagnostics
 ---@param Git Git
 ---@param path_details PathDetails
+---@param show_hidden boolean
 ---@return PathDetails
-local function filter_and_encrich_dir_contents(Diagnostics, Git, path_details)
-  local vim = _G.tryptic_mock_vim or vim
-
-  local filtered_children = u.cond(vim.g.tryptic_config.options.show_hidden, {
+local function filter_and_encrich_dir_contents(Diagnostics, Git, path_details, show_hidden)
+  local filtered_children = u.cond(show_hidden, {
     when_true = path_details.children,
     when_false = function()
       local child_paths = u.map(path_details.children, u.get 'path')
@@ -181,10 +180,11 @@ end
 ---@param Diagnostics Diagnostics
 ---@param Git Git
 ---@param path string
+---@param show_hidden boolean
 ---@return PathDetails
-local function get_dir_contents(Diagnostics, Git, path)
+local function get_dir_contents(Diagnostics, Git, path, show_hidden)
   local contents = fs.get_path_details(path)
-  return filter_and_encrich_dir_contents(Diagnostics, Git, contents)
+  return filter_and_encrich_dir_contents(Diagnostics, Git, contents, show_hidden)
 end
 
 ---@param State TrypticState
@@ -201,14 +201,14 @@ function M.nav_to(State, target_dir, Diagnostics, Git, cursor_target)
   local child_win = State.windows.child.win
 
   local focused_buf = vim.api.nvim_win_get_buf(focused_win)
-  local focused_contents = get_dir_contents(Diagnostics, Git, target_dir)
+  local focused_contents = get_dir_contents(Diagnostics, Git, target_dir, State.show_hidden)
   local focused_title = vim.fs.basename(target_dir)
   local focused_lines, focused_highlights = path_details_to_lines(State, focused_contents)
 
   local parent_buf = vim.api.nvim_win_get_buf(parent_win)
   local parent_path = vim.fs.dirname(target_dir)
   local parent_title = vim.fs.basename(parent_path)
-  local parent_contents = get_dir_contents(Diagnostics, Git, parent_path)
+  local parent_contents = get_dir_contents(Diagnostics, Git, parent_path, State.show_hidden)
   local parent_lines, parent_highlights = path_details_to_lines(State, parent_contents)
 
   float.win_set_lines(parent_win, parent_lines)
@@ -284,7 +284,7 @@ function M.update_child_window(State, path_details, Diagnostics, Git)
       'Directory',
       get_title_postfix(path_details.path)
     )
-    local contents = get_dir_contents(Diagnostics, Git, path_details.path)
+    local contents = get_dir_contents(Diagnostics, Git, path_details.path, State.show_hidden)
     local lines, highlights = path_details_to_lines(State, contents)
     vim.api.nvim_buf_set_option(buf, 'filetype', 'tryptic')
     float.buf_set_lines(buf, lines)

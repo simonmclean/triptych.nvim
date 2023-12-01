@@ -170,6 +170,7 @@ describe('update_child_window', function()
     end
 
     local mock_state = {
+      show_hidden = true,
       windows = {
         child = {
           win = 6,
@@ -266,6 +267,7 @@ describe('nav_to', function()
     }
 
     local mock_state = {
+      show_hidden = true,
       windows = {
         parent = {
           win = 2,

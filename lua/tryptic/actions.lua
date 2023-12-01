@@ -232,11 +232,11 @@ function Actions.new(State, Diagnostics, Git, refresh_view)
 
   ---@return nil
   M.toggle_hidden = function()
-    local current_value = vim.g.tryptic_config.options.show_hidden
-    vim.g.tryptic_config['options']['show_hidden'] = u.cond(current_value, {
-      when_true = false,
-      when_false = true,
-    })
+    if State.show_hidden then
+      State.show_hidden = false
+    else
+      State.show_hidden = true
+    end
     refresh_view()
   end
 
