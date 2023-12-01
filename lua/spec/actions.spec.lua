@@ -456,6 +456,7 @@ describe('toggle_cut', function()
       table.insert(spies.refresh, nil)
     end
 
+    ---@diagnostic disable-next-line: missing-fields
     actions.new(state_instance, {}, {}, mock_refresh).toggle_cut()
 
     assert.same({ state_instance }, spies.get_target_under_cursor)
@@ -552,6 +553,7 @@ describe('bulk_toggle_cut', function()
       table.insert(spies.refresh, nil)
     end
 
+    ---@diagnostic disable-next-line: missing-fields
     actions.new(state_instance, {}, {}, mock_refresh).bulk_toggle_cut()
 
     assert.same({ state_instance }, spies.view.get_targets_in_selection)
@@ -599,6 +601,7 @@ describe('bulk_toggle_cut', function()
       return mock_paths
     end
 
+    ---@diagnostic disable-next-line: missing-fields
     actions.new(state_instance, {}, {}, noop).bulk_toggle_cut()
 
     assert.same({
@@ -657,6 +660,7 @@ describe('bulk_toggle_copy', function()
       table.insert(spies.refresh, nil)
     end
 
+    ---@diagnostic disable-next-line: missing-fields
     actions.new(state_instance, {}, {}, mock_refresh).bulk_toggle_copy()
 
     assert.same({ state_instance }, spies.view.get_targets_in_selection)
@@ -704,6 +708,7 @@ describe('bulk_toggle_copy', function()
       return mock_paths
     end
 
+    ---@diagnostic disable-next-line: missing-fields
     actions.new(state_instance, {}, {}, noop).bulk_toggle_copy()
 
     assert.same({
@@ -760,6 +765,7 @@ describe('rename', function()
       spies.refresh = spies.refresh + 1
     end
 
+    ---@diagnostic disable-next-line: missing-fields
     actions.new(mock_state, {}, {}, mock_refresh).rename()
 
     assert.same({ mock_state }, spies.view.get_target_under_cursor)
@@ -839,9 +845,9 @@ describe('paste', function()
       spies.refresh = spies.refresh + 1
     end
 
+    ---@diagnostic disable-next-line: missing-fields
     local actions_instance = actions.new(state_instance, {}, {}, mock_refresh)
 
-    ---@diagnostic disable-next-line: duplicate-set-field
     actions_instance.bulk_delete = function(list, skip_confirm)
       table.insert(spies.actions.bulk_delete, { list, skip_confirm })
     end
@@ -1012,7 +1018,7 @@ describe('toggle_hidden', function()
     end
 
     local mock_state = {
-      show_hidden = false
+      show_hidden = false,
     }
 
     ---@diagnostic disable-next-line: missing-fields
@@ -1029,19 +1035,19 @@ describe('jump_to_cwd', function()
   it('jumps to root if we not already there', function()
     local spies = {
       fn = {
-        getcwd = 0
+        getcwd = 0,
       },
       view = {
-        nav_to = {}
-      }
+        nav_to = {},
+      },
     }
     _G.tryptic_mock_vim = {
       fn = {
-        getcwd = function ()
+        getcwd = function()
           spies.fn.getcwd = spies.fn.getcwd + 1
           return '/hello'
-        end
-      }
+        end,
+      },
     }
     view.nav_to = function(s, dir, d, g)
       table.insert(spies.view.nav_to, { s, dir, d, g })
@@ -1067,19 +1073,19 @@ describe('jump_to_cwd', function()
   it('if currently in root, jumps to previous path', function()
     local spies = {
       fn = {
-        getcwd = 0
+        getcwd = 0,
       },
       view = {
-        nav_to = {}
-      }
+        nav_to = {},
+      },
     }
     _G.tryptic_mock_vim = {
       fn = {
-        getcwd = function ()
+        getcwd = function()
           spies.fn.getcwd = spies.fn.getcwd + 1
           return '/hello'
-        end
-      }
+        end,
+      },
     }
     view.nav_to = function(s, dir, d, g)
       table.insert(spies.view.nav_to, { s, dir, d, g })

@@ -1,7 +1,10 @@
 {
-    "diagnostics.globals": [
-        "vim",
-        "describe",
-        "it"
-    ]
+  "diagnostics.globals": [
+    "vim",
+    "describe",
+    "it"
+  ],
+  "diagnostics.disable": [
+    "duplicate-set-field"
+  ]
 }

@@ -147,6 +147,7 @@ end
 ---@param str string
 ---@return string
 local function trim(str)
+---@diagnostic disable-next-line: redundant-return-value
   return string.gsub(str, '^%s*(.-)%s*$', '%1')
 end
 

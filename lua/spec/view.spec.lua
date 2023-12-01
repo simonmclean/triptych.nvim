@@ -1,6 +1,5 @@
 local view = require 'tryptic.view'
 local float = require 'tryptic.float'
-local git = require 'tryptic.git'
 local diagnostics = require 'tryptic.diagnostics'
 local fs = require 'tryptic.fs'
 
