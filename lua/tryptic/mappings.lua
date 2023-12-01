@@ -17,10 +17,10 @@ function Mappings.new(State, actions, Diagnostics, Git)
   ---@param fn fun(): nil
   local function map(mode, key_or_keys, fn)
     if type(key_or_keys) == 'string' then
-      vim.keymap.set(mode, key_or_keys, fn, { buffer = 0 })
+      vim.keymap.set(mode, key_or_keys, fn, { buffer = 0, nowait = true })
     else
       for _, key in pairs(key_or_keys) do
-        vim.keymap.set(mode, key, fn, { buffer = 0 })
+        vim.keymap.set(mode, key, fn, { buffer = 0, nowait = true })
       end
     end
   end
