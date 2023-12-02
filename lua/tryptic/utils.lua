@@ -161,14 +161,22 @@ local function split_string_at_index(str, index)
   return a, b
 end
 
----@param a table
----@param b table
+---@param t1 table
+---@param t2 table
 ---@return table
-local function merge_tables(a, b)
-  for k, v in pairs(b) do
-    a[k] = v
+local function merge_tables(t1, t2)
+  for k, v in pairs(t2) do
+    if type(v) == 'table' then
+      if type(t1[k] or false) == 'table' then
+        merge_tables(t1[k] or {}, t2[k] or {})
+      else
+        t1[k] = v
+      end
+    else
+      t1[k] = v
+    end
   end
-  return a
+  return t1
 end
 
 local function list_concat(a, b)
