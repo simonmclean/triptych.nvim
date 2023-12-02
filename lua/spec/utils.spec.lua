@@ -10,3 +10,61 @@ describe("set", function ()
     assert.are.same(3, result.foo)
   end)
 end)
+
+describe("merge_tables", function ()
+  it("merges tables - none empty", function ()
+    local a = {
+      foo = 'bar',
+      options = {
+        show_hidden = true
+      }
+    }
+    local b = {
+      options = {
+        show_hidden = false
+      }
+    }
+    local expected = {
+      foo = 'bar',
+      options = {
+        show_hidden = false
+      }
+    }
+    local result = u.merge_tables(a,b)
+    assert.same(expected, result)
+  end)
+
+  it("merges tables - first one is empty", function ()
+    local a = {}
+    local b = {
+      options = {
+        show_hidden = false
+      }
+    }
+    local expected = {
+      options = {
+        show_hidden = false
+      }
+    }
+    local result = u.merge_tables(a,b)
+    assert.same(expected, result)
+  end)
+
+  it("merges tables - second one empty", function ()
+    local a = {
+      foo = 'bar',
+      options = {
+        show_hidden = true
+      }
+    }
+    local b = {}
+    local expected = {
+      foo = 'bar',
+      options = {
+        show_hidden = true
+      }
+    }
+    local result = u.merge_tables(a,b)
+    assert.same(expected, result)
+  end)
+end)

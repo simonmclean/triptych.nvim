@@ -8,7 +8,6 @@ describe('refresh_view', function()
     local spy = {}
     local nav_to_actual = view.nav_to
 
-    ---@diagnostic disable-next-line: duplicate-set-field
     view.nav_to = function(s, p, d, g)
       table.insert(spy, { s, p, d, g })
     end

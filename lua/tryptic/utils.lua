@@ -147,7 +147,7 @@ end
 ---@param str string
 ---@return string
 local function trim(str)
----@diagnostic disable-next-line: redundant-return-value
+  ---@diagnostic disable-next-line: redundant-return-value
   return string.gsub(str, '^%s*(.-)%s*$', '%1')
 end
 
@@ -165,12 +165,8 @@ end
 ---@param b table
 ---@return table
 local function merge_tables(a, b)
-  for key, value in pairs(b) do
-    if type(value) == 'table' then
-      merge_tables(a[key], b[key])
-    else
-      a[key] = value
-    end
+  for k, v in pairs(b) do
+    a[k] = v
   end
   return a
 end
