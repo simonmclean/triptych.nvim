@@ -128,18 +128,6 @@ For example, if you want to make `<c-f>` search the file or directory under the 
 - Bug
     - When doing cut-n-paste, cursor pos can change in unintuitive way
     - Creating a file over a dir should put the file in that dir
-- Code quality
-    - View refreshing is kind of inefficient (especially in paste operations)
-    - Consider an IO abstraction that wraps sides effects and provides uniform error handling
-    - Abstraction for user input which handles trim etc
-    - Performance profiling
-    - Is path_to_line_map actually used now?...
+    - Sign col highlighting
 - Features
-    - When creating a file or dir, the cursor should move to it
-    - Toggle hidden (from gitignore)
-    - Make sure this works in Windows
-    - After an action, go back to normal mode
-    - Print out result of actions (in case file is git ignored and hidden for example)
-    - Fixed inconsistency between copy overwrite prompt and delete prompt
     - Honour the enable flags
-- Tests

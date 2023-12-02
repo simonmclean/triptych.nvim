@@ -62,8 +62,10 @@ describe('delete', function()
   it('makes the expected calls', function()
     local spies = {
       fn = {
-        confirm = {},
         delete = {},
+      },
+      ui = {
+        select = {},
       },
       view = {
         get_target_under_cursor = {},
@@ -78,11 +80,13 @@ describe('delete', function()
     end
 
     _G.tryptic_mock_vim = {
-      fn = {
-        confirm = function(str, choices, _type)
-          table.insert(spies.fn.confirm, { str, choices, _type })
-          return 1
+      ui = {
+        select = function(options, prompt, callback)
+          table.insert(spies.ui.select, { options, prompt })
+          callback 'Yes'
         end,
+      },
+      fn = {
         delete = function(path, flags)
           table.insert(spies.fn.delete, { path, flags })
         end,
@@ -101,9 +105,7 @@ describe('delete', function()
     actions.new(mock_state, {}, {}, mock_refresh).delete()
 
     assert.same({ mock_state }, spies.view.get_target_under_cursor)
-    assert.same({
-      { 'Are you sure you want to delete "foo"?', '&y\n&n', 'Question' },
-    }, spies.fn.confirm)
+    assert.same({ { { 'Yes', 'No' }, { prompt = 'Are you sure you want to delete "foo"?' } } }, spies.ui.select)
     assert.same({ { 'hello/world/foo', 'rf' } }, spies.fn.delete)
     assert.same({ nil }, spies.refresh)
   end)
@@ -123,10 +125,12 @@ describe('delete', function()
     end
 
     _G.tryptic_mock_vim = {
-      fn = {
-        confirm = function(_, _, _)
-          return 0
+      ui = {
+        select = function(_, _, callback)
+          callback('No')
         end,
+      },
+      fn = {
         delete = function(path, flags)
           table.insert(spies.fn.delete, { path, flags })
         end,
@@ -151,9 +155,11 @@ end)
 describe('bulk_delete', function()
   it('makes the expected calls', function()
     local spies = {
+      ui = {
+        select = {},
+      },
       fn = {
         delete = {},
-        confirm = {},
       },
       refresh = {},
     }
@@ -172,6 +178,12 @@ describe('bulk_delete', function()
     end
 
     _G.tryptic_mock_vim = {
+      ui = {
+        select = function(options, config, callback)
+          table.insert(spies.ui.select, { options, config })
+          callback 'Yes'
+        end,
+      },
       fn = {
         delete = function(path, flags)
           table.insert(spies.fn.delete, { path, flags })
@@ -186,9 +198,7 @@ describe('bulk_delete', function()
 
     ---@diagnostic disable-next-line: missing-fields
     actions.new(mock_state, {}, {}, mock_refresh).bulk_delete(mock_targets, false)
-    assert.same({
-      { 'Are you sure you want to delete the 2 selected files/folders?', '&y\n&n', 'Question' },
-    }, spies.fn.confirm)
+    assert.same({ { { 'Yes', 'No' }, { prompt = 'Are you sure you want to delete these 2 items?' } } }, spies.ui.select)
     assert.same({
       { 'foo/bar/a.js', 'rf' },
       { 'foo/bar/b.js', 'rf' },
@@ -198,9 +208,11 @@ describe('bulk_delete', function()
 
   it('does not present confirmation prompt when flag is true', function()
     local spies = {
+      ui = {
+        select = 0
+      },
       fn = {
         delete = {},
-        confirm = {},
       },
       refresh = {},
     }
@@ -219,13 +231,14 @@ describe('bulk_delete', function()
     end
 
     _G.tryptic_mock_vim = {
+      ui = {
+        select = function (_, _, _)
+          spies.ui.select = spies.ui.select + 1
+        end
+      },
       fn = {
         delete = function(path, flags)
           table.insert(spies.fn.delete, { path, flags })
-        end,
-        confirm = function(str, choices, _type)
-          table.insert(spies.fn.confirm, { str, choices, _type })
-          return 1
         end,
       },
       print = vim.print,
@@ -233,7 +246,7 @@ describe('bulk_delete', function()
 
     ---@diagnostic disable-next-line: missing-fields
     actions.new(mock_state, {}, {}, mock_refresh).bulk_delete(mock_targets, true)
-    assert.same({}, spies.fn.confirm)
+    assert.same(0, spies.ui.select)
     assert.same({
       { 'foo/bar/a.js', 'rf' },
       { 'foo/bar/b.js', 'rf' },
@@ -243,9 +256,11 @@ describe('bulk_delete', function()
 
   it('does not delete if confirmation not received', function()
     local spies = {
+      ui = {
+        select = {}
+      },
       fn = {
         delete = {},
-        confirm = {},
       },
       refresh = {},
     }
@@ -264,13 +279,14 @@ describe('bulk_delete', function()
     end
 
     _G.tryptic_mock_vim = {
+      ui = {
+        select = function (_, _, callback)
+          callback('No')
+        end
+      },
       fn = {
         delete = function(path, flags)
           table.insert(spies.fn.delete, { path, flags })
-        end,
-        confirm = function(str, choices, _type)
-          table.insert(spies.fn.confirm, { str, choices, _type })
-          return 0
         end,
       },
       print = vim.print,
@@ -279,9 +295,6 @@ describe('bulk_delete', function()
     ---@diagnostic disable-next-line: missing-fields
     actions.new(mock_state, {}, {}, mock_refresh).bulk_delete(mock_targets, false)
 
-    assert.same({
-      { 'Are you sure you want to delete the 2 selected files/folders?', '&y\n&n', 'Question' },
-    }, spies.fn.confirm)
     assert.same({}, spies.fn.delete)
     assert.same({}, spies.refresh)
   end)

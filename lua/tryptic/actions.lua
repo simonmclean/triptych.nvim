@@ -26,12 +26,13 @@ function Actions.new(State, Diagnostics, Git, refresh_view)
   ---@return nil
   M.delete = function()
     local target = view.get_target_under_cursor(State)
-    local response =
-      vim.fn.confirm('Are you sure you want to delete "' .. target.display_name .. '"?', '&y\n&n', 'Question')
-    if u.is_defined(response) and response == 1 then
-      vim.fn.delete(target.path, 'rf')
-      refresh_view()
-    end
+    local prompt = 'Are you sure you want to delete "' .. target.display_name .. '"?'
+    vim.ui.select({ 'Yes', 'No' }, { prompt = prompt }, function(response)
+      if u.is_defined(response) and response == 'Yes' then
+        vim.fn.delete(target.path, 'rf')
+        refresh_view()
+      end
+    end)
   end
 
   ---@param _targets PathDetails[]
@@ -46,22 +47,22 @@ function Actions.new(State, Diagnostics, Git, refresh_view)
       end
       refresh_view()
     else
-      local response = vim.fn.confirm(
-        'Are you sure you want to delete the ' .. #targets .. ' selected files/folders?',
-        '&y\n&n',
-        'Question'
-      )
-      if u.is_defined(response) and response == 1 then
-        for _, target in ipairs(targets) do
-          local success, result = pcall(function()
-            vim.fn.delete(target.path, 'rf')
-          end)
-          if not success then
-            vim.print('Error deleting item', result)
+      local prompt = 'Are you sure you want to delete these ' .. #targets .. ' items?'
+      vim.ui.select({ 'Yes', 'No' }, {
+        prompt = prompt,
+      }, function(response)
+        if u.is_defined(response) and response == 'Yes' then
+          for _, target in ipairs(targets) do
+            local success, result = pcall(function()
+              vim.fn.delete(target.path, 'rf')
+            end)
+            if not success then
+              vim.print('Error deleting item', result)
+            end
           end
+          refresh_view()
         end
-        refresh_view()
-      end
+      end)
     end
   end
 
