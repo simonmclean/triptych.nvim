@@ -48,7 +48,7 @@ describe('create_three_floating_windows', function()
       },
     }
 
-    float.create_three_floating_windows()
+    float.create_three_floating_windows(true, false)
 
     assert.same({
       { false, true },
@@ -114,13 +114,16 @@ describe('create_three_floating_windows', function()
       -- first win
       { 1, 'cursorline', true },
       { 1, 'number', false },
+      { 1, 'relativenumber', false },
       -- second win
       { 2, 'cursorline', true },
       { 2, 'number', true },
+      { 2, 'relativenumber', false },
       { 2, 'signcolumn', 'auto:2' },
       -- third win
       { 3, 'cursorline', false },
       { 3, 'number', false },
+      { 3, 'relativenumber', false },
     }, nvim_win_set_option_spy)
 
     assert.same({ 2 }, nvim_set_current_win_spy)

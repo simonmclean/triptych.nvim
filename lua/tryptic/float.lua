@@ -139,15 +139,18 @@ local function create_floating_window(config)
   })
   vim.api.nvim_win_set_option(win, 'cursorline', config.enable_cursorline)
   vim.api.nvim_win_set_option(win, 'number', config.show_numbers)
+  vim.api.nvim_win_set_option(win, 'relativenumber', config.relative_numbers)
   if config.show_numbers then
-     -- 2 to accomodate both diagnostics and git signs
+    -- 2 to accomodate both diagnostics and git signs
     vim.api.nvim_win_set_option(win, 'signcolumn', 'auto:2')
   end
   return win
 end
 
+---@param show_numbers boolean
+---@param relative_numbers boolean
 ---@return { [1]: number, [2]: number, [3]: number }
-local function create_three_floating_windows()
+local function create_three_floating_windows(show_numbers, relative_numbers)
   local vim = _G.tryptic_mock_vim or vim
   local max_width = 220
   local max_height = 45
@@ -186,7 +189,8 @@ local function create_three_floating_windows()
       omit_right_border = is_parent or is_primary,
       enable_cursorline = is_parent or is_primary,
       is_focusable = is_primary,
-      show_numbers = is_primary,
+      show_numbers = show_numbers and is_primary,
+      relative_numbers = show_numbers and relative_numbers and is_primary,
     }
 
     table.insert(wins, win)

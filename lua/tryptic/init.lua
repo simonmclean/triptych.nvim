@@ -11,12 +11,13 @@ local event_handlers = require 'tryptic.event_handlers'
 ---@return nil
 local function open_tryptic()
   local vim = _G.tryptic_mock_vim or vim
-  local State = state.new(vim.g.tryptic_config, vim.api.nvim_get_current_win())
+  local config = vim.g.tryptic_config
+  local State = state.new(config, vim.api.nvim_get_current_win())
   local Git = git.Git.new()
   local Diagnostics = diagnostics.new()
   local buf = vim.api.nvim_buf_get_name(0)
   local buf_dir = vim.fs.dirname(buf)
-  local windows = float.create_three_floating_windows()
+  local windows = float.create_three_floating_windows(config.line_numbers.enabled, config.line_numbers.relative)
 
   State.windows = {
     parent = {

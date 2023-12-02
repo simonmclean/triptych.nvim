@@ -113,6 +113,7 @@
 ---@field is_focusable boolean
 ---@field enable_cursorline boolean
 ---@field show_numbers boolean
+---@field relative_numbers boolean
 
 ---@class Diagnostics
 ---@field new fun(): Diagnostics
