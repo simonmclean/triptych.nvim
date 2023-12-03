@@ -1,11 +1,11 @@
 ---@class TrypticConfig
----@field mappings? TrypticConfigMappings
----@field extension_mappings? { [string]: ExtensionMapping }
----@field options? TrypticConfigOptions
----@field line_numbers? TrypticConfigLineNumbers
----@field git_signs? TrypticConfigGitSigns
----@field diagnostic_signs? TrypticConfigDiagnostic
----@field debug? boolean
+---@field mappings TrypticConfigMappings
+---@field extension_mappings { [string]: ExtensionMapping }
+---@field options TrypticConfigOptions
+---@field line_numbers TrypticConfigLineNumbers
+---@field git_signs TrypticConfigGitSigns
+---@field diagnostic_signs TrypticConfigDiagnostic
+---@field debug boolean
 
 ---@class TrypticState
 ---@field new fun(config: TrypticConfig, opening_win: integer): TrypticState

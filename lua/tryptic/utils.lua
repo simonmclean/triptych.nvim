@@ -216,9 +216,12 @@ local function filter(tbl, fn)
   return result
 end
 
----@param str string
+---@param str? string
 ---@return string[]
 local function multiline_str_to_table(str)
+  if not str then
+    return {}
+  end
   local lines = {}
   for s in str:gmatch '[^\r\n]+' do
     table.insert(lines, s)

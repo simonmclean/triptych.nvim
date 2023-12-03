@@ -24,7 +24,7 @@ describe('new', function()
 
     _G.tryptic_mock_vim = {
       g = {
-        tryptic_config = tryptic_config.create_merged_config(),
+        tryptic_config = tryptic_config.create_merged_config {},
         tryptic_close = function()
           table.insert(spies.tryptic_close, nil)
         end,
@@ -45,22 +45,20 @@ describe('new', function()
       },
     }
 
-    view = {
-      nav_to = function(state, parent_path, diagnostics, git, focused_path)
-        table.insert(spies.view.nav_to, { state, parent_path, diagnostics, git, focused_path })
-      end,
-      jump_to_cwd = function (state, diagnostics, git)
-        table.insert(spies.view.jump_to_cwd, { state, diagnostics, git })
-      end,
-      get_target_under_cursor = function (state)
-        table.insert(spies.view.get_target_under_cursor, state)
-      end
-    }
+    view.nav_to = function(state, parent_path, diagnostics, git, focused_path)
+      table.insert(spies.view.nav_to, { state, parent_path, diagnostics, git, focused_path })
+    end
+    view.jump_to_cwd = function(state, diagnostics, git)
+      table.insert(spies.view.jump_to_cwd, { state, diagnostics, git })
+    end
+    view.get_target_under_cursor = function(state)
+      table.insert(spies.view.get_target_under_cursor, state)
+    end
 
     mappings.new(mock_state, mock_actions, mock_diagnostics, mock_git)
 
-    local assert_mapping = function (name, mode)
-      local results = u.filter(spies.keymap_set, function (entry)
+    local assert_mapping = function(name, mode)
+      local results = u.filter(spies.keymap_set, function(entry)
         return entry[2] == _G.tryptic_mock_vim.g.tryptic_config.mappings[name]
       end)
       assert.same(1, #results)

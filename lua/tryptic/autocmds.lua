@@ -4,8 +4,8 @@ local AutoCommands = {}
 
 ---@param event_handlers any
 ---@param State TrypticState
----@param Diagnostics Diagnostics
----@param Git Git
+---@param Diagnostics? Diagnostics
+---@param Git? Git
 ---@return AutoCommands
 function AutoCommands.new(event_handlers, State, Diagnostics, Git)
   local vim = _G.tryptic_mock_vim or vim

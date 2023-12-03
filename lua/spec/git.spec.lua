@@ -82,9 +82,9 @@ describe('Git:status_of', function()
           end
           return nil
         end,
-        sign_getdefined = function (_)
-          return true
-        end
+        sign_getdefined = function(_)
+          return { name = 'foo', text = '+', texthl = 'Error' }
+        end,
       },
       fs = {
         parents = tu.iterator {},
@@ -129,9 +129,9 @@ describe('Git:filter_ignored', function()
           end
           return nil
         end,
-        sign_getdefined = function (_)
-          return true
-        end
+        sign_getdefined = function(_)
+          return { name = 'foo', text = '+', texthl = 'Error' }
+        end,
       },
       fs = {
         parents = tu.iterator {},

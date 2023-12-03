@@ -43,7 +43,7 @@ describe('help', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(mock_state, {}, {}, noop).help()
+    actions.new(mock_state, noop, {}, {}).help()
 
     assert.same({ {
       3,
@@ -102,7 +102,7 @@ describe('delete', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(mock_state, {}, {}, mock_refresh).delete()
+    actions.new(mock_state, mock_refresh, {}, {}).delete()
 
     assert.same({ mock_state }, spies.view.get_target_under_cursor)
     assert.same({ { { 'Yes', 'No' }, { prompt = 'Are you sure you want to delete "foo"?' } } }, spies.ui.select)
@@ -145,7 +145,7 @@ describe('delete', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(mock_state, {}, {}, mock_refresh).delete()
+    actions.new(mock_state, mock_refresh, {}, {}).delete()
 
     assert.same({}, spies.refresh)
     assert.same({}, spies.fn.delete)
@@ -197,7 +197,7 @@ describe('bulk_delete', function()
     }
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(mock_state, {}, {}, mock_refresh).bulk_delete(mock_targets, false)
+    actions.new(mock_state, mock_refresh, {}, {}).bulk_delete(mock_targets, false)
     assert.same({ { { 'Yes', 'No' }, { prompt = 'Are you sure you want to delete these 2 items?' } } }, spies.ui.select)
     assert.same({
       { 'foo/bar/a.js', 'rf' },
@@ -245,7 +245,7 @@ describe('bulk_delete', function()
     }
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(mock_state, {}, {}, mock_refresh).bulk_delete(mock_targets, true)
+    actions.new(mock_state, mock_refresh, {}, {}).bulk_delete(mock_targets, true)
     assert.same(0, spies.ui.select)
     assert.same({
       { 'foo/bar/a.js', 'rf' },
@@ -293,7 +293,7 @@ describe('bulk_delete', function()
     }
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(mock_state, {}, {}, mock_refresh).bulk_delete(mock_targets, false)
+    actions.new(mock_state, mock_refresh, {}, {}).bulk_delete(mock_targets, false)
 
     assert.same({}, spies.fn.delete)
     assert.same({}, spies.refresh)
@@ -344,7 +344,7 @@ describe('add_file_or_dir', function()
     }
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(mock_state, {}, {}, mock_refresh).add_file_or_dir()
+    actions.new(mock_state, mock_refresh, {}, {}).add_file_or_dir()
 
     assert.same({ 'hello.lua' }, spies.fn.trim)
     assert.same({ 'Enter name for new file or directory (dirs end with a "/"): ' }, spies.fn.input)
@@ -389,7 +389,7 @@ describe('add_file_or_dir', function()
     }
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(mock_state, {}, {}, mock_refresh).add_file_or_dir()
+    actions.new(mock_state, mock_refresh, {}, {}).add_file_or_dir()
 
     assert.same({ { '/foo/bar/new_dir/', 'p' } }, spies.fn.mkdir)
   end)
@@ -433,7 +433,7 @@ describe('add_file_or_dir', function()
     }
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(mock_state, {}, {}, mock_refresh).add_file_or_dir()
+    actions.new(mock_state, mock_refresh, {}, {}).add_file_or_dir()
 
     assert.same({ { '/foo/bar/new_dir_1/new_dir_2/', 'p' } }, spies.fn.mkdir)
     assert.same({ { {}, '/foo/bar/new_dir_1/new_dir_2/new_file.ts' } }, spies.fn.writefile)
@@ -470,7 +470,7 @@ describe('toggle_cut', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(state_instance, {}, {}, mock_refresh).toggle_cut()
+    actions.new(state_instance, mock_refresh, {}, {}).toggle_cut()
 
     assert.same({ state_instance }, spies.get_target_under_cursor)
     assert.same({ { 'copy', 'hello' } }, spies.list_remove)
@@ -509,7 +509,7 @@ describe('toggle_copy', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(state_instance, {}, {}, mock_refresh).toggle_copy()
+    actions.new(state_instance, mock_refresh, {}, {}).toggle_copy()
 
     assert.same({ state_instance }, spies.get_target_under_cursor)
     assert.same({ { 'cut', 'hello' } }, spies.list_remove)
@@ -567,7 +567,7 @@ describe('bulk_toggle_cut', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(state_instance, {}, {}, mock_refresh).bulk_toggle_cut()
+    actions.new(state_instance, mock_refresh, {}, {}).bulk_toggle_cut()
 
     assert.same({ state_instance }, spies.view.get_targets_in_selection)
     assert.same({
@@ -615,7 +615,7 @@ describe('bulk_toggle_cut', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(state_instance, {}, {}, noop).bulk_toggle_cut()
+    actions.new(state_instance, noop, {}, {}).bulk_toggle_cut()
 
     assert.same({
       { 'cut', 'hello' },
@@ -674,7 +674,7 @@ describe('bulk_toggle_copy', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(state_instance, {}, {}, mock_refresh).bulk_toggle_copy()
+    actions.new(state_instance, mock_refresh, {}, {}).bulk_toggle_copy()
 
     assert.same({ state_instance }, spies.view.get_targets_in_selection)
     assert.same({
@@ -721,8 +721,9 @@ describe('bulk_toggle_copy', function()
       return mock_paths
     end
 
+
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(state_instance, {}, {}, noop).bulk_toggle_copy()
+    actions.new(state_instance, noop, {}, {}).bulk_toggle_copy()
 
     assert.same({
       { 'copy', 'hello' },
@@ -779,7 +780,7 @@ describe('rename', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(mock_state, {}, {}, mock_refresh).rename()
+    actions.new(mock_state, mock_refresh, {}, {}).rename()
 
     assert.same({ mock_state }, spies.view.get_target_under_cursor)
     assert.same({ 'bar.js' }, spies.fn.trim)
@@ -859,7 +860,7 @@ describe('paste', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    local actions_instance = actions.new(state_instance, {}, {}, mock_refresh)
+    local actions_instance = actions.new(state_instance, mock_refresh, {}, {})
 
     actions_instance.bulk_delete = function(list, skip_confirm)
       table.insert(spies.actions.bulk_delete, { list, skip_confirm })
@@ -964,7 +965,7 @@ describe('paste', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    local actions_instance = actions.new(state_instance, {}, {}, mock_refresh)
+    local actions_instance = actions.new(state_instance, mock_refresh, {}, {})
 
     actions_instance.paste()
 
@@ -1013,7 +1014,7 @@ describe('edit_file', function()
     }
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new({}, {}, {}, noop).edit_file '/hello/foo.js'
+    actions.new({}, noop, {}, {}).edit_file '/hello/foo.js'
 
     assert.same({ '/hello/foo.js' }, spies.cmd.edit)
     assert.same(1, spies.close)
@@ -1035,7 +1036,7 @@ describe('toggle_hidden', function()
     }
 
     ---@diagnostic disable-next-line: missing-fields
-    local actions_instance = actions.new(mock_state, {}, {}, mock_refresh)
+    local actions_instance = actions.new(mock_state, mock_refresh, {}, {})
     actions_instance.toggle_hidden()
     assert.same(true, mock_state.show_hidden)
     actions_instance.toggle_hidden()
@@ -1075,7 +1076,7 @@ describe('jump_to_cwd', function()
     }
     local mock_git = { 'git' }
     local mock_diagnostics = { 'diagnostic' }
-    local actions_instance = actions.new(mock_state, mock_diagnostics, mock_git, noop)
+    local actions_instance = actions.new(mock_state, noop, mock_diagnostics, mock_git)
     actions_instance.jump_to_cwd()
     assert.same(1, spies.fn.getcwd)
     assert.same({
@@ -1113,7 +1114,7 @@ describe('jump_to_cwd', function()
     }
     local mock_git = { 'git' }
     local mock_diagnostics = { 'diagnostic' }
-    local actions_instance = actions.new(mock_state, mock_diagnostics, mock_git, noop)
+    local actions_instance = actions.new(mock_state, noop, mock_diagnostics, mock_git)
     actions_instance.jump_to_cwd()
     assert.same(1, spies.fn.getcwd)
     assert.same({

@@ -23,8 +23,8 @@ local default_config = {
     show_hidden = false,
   },
   line_numbers = {
-    enabled = true, -- TODO: Document this, and implement
-    relative = false, -- TODO: Document and implement
+    enabled = true,
+    relative = false,
   },
   git_signs = {
     enabled = true,
@@ -36,15 +36,15 @@ local default_config = {
     },
   },
   diagnostic_signs = {
-    enabled = true, -- TODO: Document this, and implement
+    enabled = true,
   },
   debug = false,
 }
 
----@param user_config? TrypticConfig
+---@param user_config table
 ---@return TrypticConfig
 local create_merged_config = function(user_config)
-  return u.merge_tables(default_config, user_config or {})
+  return u.merge_tables(default_config, user_config)
 end
 
 return {

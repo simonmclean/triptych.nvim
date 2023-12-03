@@ -8,10 +8,10 @@ local Actions = {}
 
 --- TODO: Return type
 ---@param State TrypticState
----@param Diagnostics Diagnostics
----@param Git Git
 ---@param refresh_view fun(): nil
-function Actions.new(State, Diagnostics, Git, refresh_view)
+---@param Diagnostics? Diagnostics
+---@param Git? Git
+function Actions.new(State, refresh_view, Diagnostics, Git)
   local vim = _G.tryptic_mock_vim or vim
 
   local M = {}
@@ -246,11 +246,9 @@ function Actions.new(State, Diagnostics, Git, refresh_view)
     local cwd = vim.fn.getcwd()
     local win = State.windows.current
     -- If we're already in the route directory, nav back to the previous directory (if we have that in memory)
-    if win.path == cwd then
-      if u.is_defined(win.previous_path) then
-        view.nav_to(State, win.previous_path, Diagnostics, Git)
-      end
-    else
+    if win.path == cwd and u.is_defined(win.previous_path) then
+      view.nav_to(State, win.previous_path, Diagnostics, Git)
+    elseif cwd then
       view.nav_to(State, cwd, Diagnostics, Git)
     end
   end

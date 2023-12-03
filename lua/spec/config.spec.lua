@@ -45,7 +45,6 @@ end
 
 describe('create_merged_config', function()
   it('returns the default config when user config is empty', function()
-    assert.same(get_default_config(), config.create_merged_config())
     assert.same(get_default_config(), config.create_merged_config {})
   end)
 

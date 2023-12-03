@@ -1,6 +1,6 @@
 ---@param State TrypticState
----@param Diagnostics Diagnostics
----@param Git Git
+---@param Diagnostics? Diagnostics
+---@param Git? Git
 ---@return nil
 local function handle_cursor_moved(State, Diagnostics, Git)
   local vim = _G.tryptic_mock_vim or vim

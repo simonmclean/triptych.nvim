@@ -5,8 +5,8 @@ local Mappings = {}
 -- TODO: Type actions
 ---@param State TrypticState
 ---@param actions unknown
----@param Diagnostics Diagnostics
----@param Git Git
+---@param Diagnostics? Diagnostics
+---@param Git? Git
 function Mappings.new(State, actions, Diagnostics, Git)
   local vim = _G.tryptic_mock_vim or vim
   local mappings = vim.g.tryptic_config.mappings
@@ -71,7 +71,7 @@ function Mappings.new(State, actions, Diagnostics, Git)
   -----------------------------------------
   ----------- Extension mappings ----------
   -----------------------------------------
-  for key, ext_mapping in pairs(extension_mappings) do
+  for key, ext_mapping in pairs(extension_mappings or {}) do
     map(ext_mapping.mode, key, function()
       ext_mapping.fn(view.get_target_under_cursor(State))
     end)

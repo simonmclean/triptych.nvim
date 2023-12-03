@@ -13,8 +13,8 @@ local function open_tryptic()
   local vim = _G.tryptic_mock_vim or vim
   local config = vim.g.tryptic_config
   local State = state.new(config, vim.api.nvim_get_current_win())
-  local Git = git.Git.new()
-  local Diagnostics = diagnostics.new()
+  local Git = config.git_signs.enabled and git.Git.new() or nil
+  local Diagnostics = config.diagnostic_signs.enabled and diagnostics.new() or nil
   local buf = vim.api.nvim_buf_get_name(0)
   local buf_dir = vim.fs.dirname(buf)
   local windows = float.create_three_floating_windows(config.line_numbers.enabled, config.line_numbers.relative)
@@ -36,9 +36,10 @@ local function open_tryptic()
 
   -- Autocmds need to be created after the above state is set
   local AutoCmds = autocmds.new(event_handlers, State, Diagnostics, Git)
-  local Actions = actions.new(State, Diagnostics, Git, function()
+  local refresh_fn = function ()
     view.refresh_view(State, Diagnostics, Git)
-  end)
+  end
+  local Actions = actions.new(State, refresh_fn, Diagnostics, Git)
   mappings.new(State, Actions, Diagnostics, Git)
 
   vim.g.tryptic_close = function()
@@ -56,7 +57,7 @@ local function open_tryptic()
   view.nav_to(State, buf_dir, Diagnostics, Git, buf)
 end
 
----@param user_config? TrypticConfig
+---@param user_config? table
 local function setup(user_config)
   local vim = _G.tryptic_mock_vim or vim
   vim.g.tryptic_config = require('tryptic.config').create_merged_config(user_config or {})
