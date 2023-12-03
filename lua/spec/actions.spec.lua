@@ -4,9 +4,6 @@ local actions = require 'tryptic.actions'
 local view = require 'tryptic.view'
 local plenary_path = require 'plenary.path'
 
--- TODO: The refresh { nil } assertions don't work!
--- Maybe assert a counter instead?
-
 local noop = function() end
 
 describe('help', function()
@@ -17,7 +14,7 @@ describe('help', function()
         win_set_lines = {},
       },
       help = {
-        help_lines = {},
+        help_lines = 0,
       },
     }
 
@@ -38,7 +35,7 @@ describe('help', function()
     end
 
     help.help_lines = function()
-      table.insert(spies.help.help_lines, nil)
+      spies.help.help_lines = spies.help.help_lines + 1
       return { 'hello', 'world' }
     end
 
@@ -52,7 +49,7 @@ describe('help', function()
       'Directory',
     } }, spies.float.win_set_title)
 
-    assert.same({ nil }, spies.help.help_lines)
+    assert.same(1, spies.help.help_lines)
 
     assert.same({ { 3, { 'hello', 'world' } } }, spies.float.win_set_lines)
   end)
@@ -70,13 +67,13 @@ describe('delete', function()
       view = {
         get_target_under_cursor = {},
       },
-      refresh = {},
+      refresh = 0,
     }
 
     local mock_state = {}
 
     local mock_refresh = function()
-      table.insert(spies.refresh, nil)
+      spies.refresh = spies.refresh + 1
     end
 
     _G.tryptic_mock_vim = {
@@ -107,7 +104,7 @@ describe('delete', function()
     assert.same({ mock_state }, spies.view.get_target_under_cursor)
     assert.same({ { { 'Yes', 'No' }, { prompt = 'Are you sure you want to delete "foo"?' } } }, spies.ui.select)
     assert.same({ { 'hello/world/foo', 'rf' } }, spies.fn.delete)
-    assert.same({ nil }, spies.refresh)
+    assert.same(1, spies.refresh)
   end)
 
   it('does not delete if confirmation not received', function()
@@ -115,13 +112,13 @@ describe('delete', function()
       fn = {
         delete = {},
       },
-      refresh = {},
+      refresh = 0,
     }
 
     local mock_state = {}
 
     local mock_refresh = function()
-      table.insert(spies.refresh, nil)
+      spies.refresh = spies.refresh + 1
     end
 
     _G.tryptic_mock_vim = {
@@ -147,7 +144,7 @@ describe('delete', function()
     ---@diagnostic disable-next-line: missing-fields
     actions.new(mock_state, mock_refresh, {}, {}).delete()
 
-    assert.same({}, spies.refresh)
+    assert.same(0, spies.refresh)
     assert.same({}, spies.fn.delete)
   end)
 end)
@@ -161,7 +158,7 @@ describe('bulk_delete', function()
       fn = {
         delete = {},
       },
-      refresh = {},
+      refresh = 0,
     }
 
     local mock_state = {}
@@ -174,7 +171,7 @@ describe('bulk_delete', function()
       },
     }
     local mock_refresh = function()
-      table.insert(spies.refresh, nil)
+      spies.refresh = spies.refresh + 1
     end
 
     _G.tryptic_mock_vim = {
@@ -203,7 +200,7 @@ describe('bulk_delete', function()
       { 'foo/bar/a.js', 'rf' },
       { 'foo/bar/b.js', 'rf' },
     }, spies.fn.delete)
-    assert.same({ nil }, spies.refresh)
+    assert.same(1, spies.refresh)
   end)
 
   it('does not present confirmation prompt when flag is true', function()
@@ -214,7 +211,7 @@ describe('bulk_delete', function()
       fn = {
         delete = {},
       },
-      refresh = {},
+      refresh = 0,
     }
 
     local mock_state = {}
@@ -227,7 +224,7 @@ describe('bulk_delete', function()
       },
     }
     local mock_refresh = function()
-      table.insert(spies.refresh, nil)
+      spies.refresh = spies.refresh + 1
     end
 
     _G.tryptic_mock_vim = {
@@ -251,7 +248,7 @@ describe('bulk_delete', function()
       { 'foo/bar/a.js', 'rf' },
       { 'foo/bar/b.js', 'rf' },
     }, spies.fn.delete)
-    assert.same({ nil }, spies.refresh)
+    assert.same(1, spies.refresh)
   end)
 
   it('does not delete if confirmation not received', function()
@@ -262,7 +259,7 @@ describe('bulk_delete', function()
       fn = {
         delete = {},
       },
-      refresh = {},
+      refresh = 0,
     }
 
     local mock_state = {}
@@ -275,7 +272,7 @@ describe('bulk_delete', function()
       },
     }
     local mock_refresh = function()
-      table.insert(spies.refresh, nil)
+      spies.refresh = spies.refresh + 1
     end
 
     _G.tryptic_mock_vim = {
@@ -296,7 +293,7 @@ describe('bulk_delete', function()
     actions.new(mock_state, mock_refresh, {}, {}).bulk_delete(mock_targets, false)
 
     assert.same({}, spies.fn.delete)
-    assert.same({}, spies.refresh)
+    assert.same(0, spies.refresh)
   end)
 end)
 
@@ -309,7 +306,7 @@ describe('add_file_or_dir', function()
         mkdir = {},
         input = {},
       },
-      refresh = {},
+      refresh = 0,
     }
 
     local mock_state = {
@@ -321,7 +318,7 @@ describe('add_file_or_dir', function()
     }
 
     local mock_refresh = function()
-      table.insert(spies.refresh, nil)
+      spies.refresh = spies.refresh + 1
     end
 
     _G.tryptic_mock_vim = {
@@ -349,7 +346,7 @@ describe('add_file_or_dir', function()
     assert.same({ 'hello.lua' }, spies.fn.trim)
     assert.same({ 'Enter name for new file or directory (dirs end with a "/"): ' }, spies.fn.input)
     assert.same({ { {}, '/foo/bar/hello.lua' } }, spies.fn.writefile)
-    assert.same({ nil }, spies.refresh)
+    assert.same(1, spies.refresh)
   end)
 
   it('creates a dir', function()
@@ -360,7 +357,7 @@ describe('add_file_or_dir', function()
         mkdir = {},
         input = {},
       },
-      refresh = {},
+      refresh = 0,
     }
 
     local mock_state = {
@@ -402,7 +399,7 @@ describe('add_file_or_dir', function()
         mkdir = {},
         input = {},
       },
-      refresh = {},
+      refresh = 0,
     }
 
     local mock_state = {
@@ -446,7 +443,7 @@ describe('toggle_cut', function()
       get_target_under_cursor = {},
       list_remove = {},
       list_toggle = {},
-      refresh = {},
+      refresh = 0,
     }
 
     local config = require('tryptic.config').create_merged_config {}
@@ -466,7 +463,7 @@ describe('toggle_cut', function()
     end
 
     local mock_refresh = function()
-      table.insert(spies.refresh, nil)
+      spies.refresh = spies.refresh + 1
     end
 
     ---@diagnostic disable-next-line: missing-fields
@@ -475,7 +472,7 @@ describe('toggle_cut', function()
     assert.same({ state_instance }, spies.get_target_under_cursor)
     assert.same({ { 'copy', 'hello' } }, spies.list_remove)
     assert.same({ { 'cut', 'hello' } }, spies.list_toggle)
-    assert.same({ nil }, spies.refresh)
+    assert.same(1, spies.refresh)
   end)
 end)
 
@@ -485,7 +482,7 @@ describe('toggle_copy', function()
       get_target_under_cursor = {},
       list_remove = {},
       list_toggle = {},
-      refresh = {},
+      refresh = 0,
     }
 
     local config = require('tryptic.config').create_merged_config {}
@@ -505,7 +502,7 @@ describe('toggle_copy', function()
     end
 
     local mock_refresh = function()
-      table.insert(spies.refresh, nil)
+      spies.refresh = spies.refresh + 1
     end
 
     ---@diagnostic disable-next-line: missing-fields
@@ -514,7 +511,7 @@ describe('toggle_copy', function()
     assert.same({ state_instance }, spies.get_target_under_cursor)
     assert.same({ { 'cut', 'hello' } }, spies.list_remove)
     assert.same({ { 'copy', 'hello' } }, spies.list_toggle)
-    assert.same({ nil }, spies.refresh)
+    assert.same(1, spies.refresh)
   end)
 end)
 
@@ -529,7 +526,7 @@ describe('bulk_toggle_cut', function()
         list_add = {},
         list_remove = {},
       },
-      refresh = {},
+      refresh = 0,
     }
 
     local mock_paths = {
@@ -563,7 +560,7 @@ describe('bulk_toggle_cut', function()
     end
 
     local mock_refresh = function()
-      table.insert(spies.refresh, nil)
+      spies.refresh = spies.refresh + 1
     end
 
     ---@diagnostic disable-next-line: missing-fields
@@ -581,7 +578,7 @@ describe('bulk_toggle_cut', function()
       { 'cut', 'world' },
       { 'cut', 'wow' },
     }, spies.state.list_add)
-    assert.same({ nil }, spies.refresh)
+    assert.same(1, spies.refresh)
   end)
 
   it('remove items from the cut list', function()
@@ -636,7 +633,7 @@ describe('bulk_toggle_copy', function()
         list_add = {},
         list_remove = {},
       },
-      refresh = {},
+      refresh = 0,
     }
 
     local mock_paths = {
@@ -670,7 +667,7 @@ describe('bulk_toggle_copy', function()
     end
 
     local mock_refresh = function()
-      table.insert(spies.refresh, nil)
+      spies.refresh = spies.refresh + 1
     end
 
     ---@diagnostic disable-next-line: missing-fields
@@ -688,7 +685,7 @@ describe('bulk_toggle_copy', function()
       { 'copy', 'world' },
       { 'copy', 'wow' },
     }, spies.state.list_add)
-    assert.same({ nil }, spies.refresh)
+    assert.same(1, spies.refresh)
   end)
 
   it('remove items from the copy list', function()
