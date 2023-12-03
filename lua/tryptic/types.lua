@@ -2,7 +2,6 @@
 ---@field mappings TrypticConfigMappings
 ---@field extension_mappings { [string]: ExtensionMapping }
 ---@field options TrypticConfigOptions
----@field line_numbers TrypticConfigLineNumbers
 ---@field git_signs TrypticConfigGitSigns
 ---@field diagnostic_signs TrypticConfigDiagnostic
 ---@field debug boolean
@@ -48,6 +47,7 @@
 ---@class TrypticConfigOptions
 ---@field dirs_first boolean
 ---@field show_hidden boolean
+---@field line_numbers TrypticConfigLineNumbers
 
 ---@class TrypticConfigLineNumbers
 ---@field enabled boolean

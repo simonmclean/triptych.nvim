@@ -17,7 +17,8 @@ local function open_tryptic()
   local Diagnostics = config.diagnostic_signs.enabled and diagnostics.new() or nil
   local buf = vim.api.nvim_buf_get_name(0)
   local buf_dir = vim.fs.dirname(buf)
-  local windows = float.create_three_floating_windows(config.line_numbers.enabled, config.line_numbers.relative)
+  local windows =
+    float.create_three_floating_windows(config.options.line_numbers.enabled, config.options.line_numbers.relative)
 
   State.windows = {
     parent = {
@@ -36,7 +37,7 @@ local function open_tryptic()
 
   -- Autocmds need to be created after the above state is set
   local AutoCmds = autocmds.new(event_handlers, State, Diagnostics, Git)
-  local refresh_fn = function ()
+  local refresh_fn = function()
     view.refresh_view(State, Diagnostics, Git)
   end
   local Actions = actions.new(State, refresh_fn, Diagnostics, Git)

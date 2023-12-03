@@ -21,10 +21,10 @@ local default_config = {
   options = {
     dirs_first = true,
     show_hidden = false,
-  },
-  line_numbers = {
-    enabled = true,
-    relative = false,
+    line_numbers = {
+      enabled = true,
+      relative = false,
+    },
   },
   git_signs = {
     enabled = true,

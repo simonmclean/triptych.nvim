@@ -1,6 +1,7 @@
 local config = require 'tryptic.config'
 local u = require 'tryptic.utils'
 
+---@return TrypticConfig
 local function get_default_config()
   return {
     mappings = {
@@ -22,10 +23,10 @@ local function get_default_config()
     options = {
       dirs_first = true,
       show_hidden = false,
-    },
-    line_numbers = {
-      enabled = true,
-      relative = false,
+      line_numbers = {
+        enabled = true,
+        relative = false,
+      },
     },
     git_signs = {
       enabled = true,

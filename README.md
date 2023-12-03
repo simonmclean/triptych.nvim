@@ -125,9 +125,13 @@ For example, if you want to make `<c-f>` search the file or directory under the 
 ```
 
 ## 🛠️ TODO
-- Bug
-    - When doing cut-n-paste, cursor pos can change in unintuitive way
-    - Creating a file over a dir should put the file in that dir
-    - Sign col highlighting
-- Features
-    - Honour the enable flags
+
+- Project
+    - Github Action
+        - Formating
+        - Linting
+        - Testing
+    - Bring the readme up to date and add a screenshot
+    - License
+- Test
+    - Extension mappings
