@@ -69,4 +69,49 @@ describe('new', function()
 
     assert_mapping('nav_left', 'n')
   end)
+
+  it('sets up extension mappings', function()
+    local spies = {
+      keymap_set = {},
+      get_target_under_cursor = {},
+      ext_fn = {},
+    }
+    _G.tryptic_mock_vim = {
+      g = {
+        tryptic_config = tryptic_config.create_merged_config {
+          extension_mappings = {
+            ['<leader>xxx'] = {
+              mode = 'v',
+              fn = function(target)
+                table.insert(spies.ext_fn, target)
+              end,
+            },
+          },
+        },
+      },
+      keymap = {
+        set = function(mode, key_binding, fn, config)
+          table.insert(spies.keymap_set, { mode, key_binding, fn, config })
+        end,
+      },
+    }
+    local mock_state = { 'mock_state' } ---@as TrypticState
+    local mock_target = { 'mock_target' } ---@as PathDetails
+    view.get_target_under_cursor = function(s)
+      table.insert(spies.get_target_under_cursor, s)
+      return mock_target
+    end
+
+    ---@diagnostic disable-next-line: missing-fields
+    mappings.new(mock_state, {}, {}, {})
+    local ext_mapping_index = u.list_index_of(spies.keymap_set, function(entry)
+      return entry[2] == '<leader>xxx'
+    end)
+    local ex_mapping = spies.keymap_set[ext_mapping_index]
+    assert.same(ex_mapping[1], 'v')
+    assert.same(ex_mapping[2], '<leader>xxx')
+    ex_mapping[3]() -- Run the mapped function
+    assert.same({ mock_state }, spies.get_target_under_cursor)
+    assert.same({ mock_target }, spies.ext_fn)
+  end)
 end)

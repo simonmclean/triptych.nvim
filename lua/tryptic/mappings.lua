@@ -71,7 +71,7 @@ function Mappings.new(State, actions, Diagnostics, Git)
   -----------------------------------------
   ----------- Extension mappings ----------
   -----------------------------------------
-  for key, ext_mapping in pairs(extension_mappings or {}) do
+  for key, ext_mapping in pairs(extension_mappings) do
     map(ext_mapping.mode, key, function()
       ext_mapping.fn(view.get_target_under_cursor(State))
     end)

@@ -133,5 +133,3 @@ For example, if you want to make `<c-f>` search the file or directory under the 
         - Testing
     - Bring the readme up to date and add a screenshot
     - License
-- Test
-    - Extension mappings
