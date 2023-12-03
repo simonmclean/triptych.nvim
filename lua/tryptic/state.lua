@@ -50,7 +50,6 @@ end
 ---@param item_to_remove PathDetails
 ---@return nil
 function TrypticState:list_remove(list_type, item_to_remove)
-  -- TODO: Do we need to set self.cut or copy list at the end?
   local list = u.cond(list_type == 'cut', {
     when_true = self.cut_list,
     when_false = self.copy_list,

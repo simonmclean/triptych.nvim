@@ -69,7 +69,7 @@ require 'tryptic'.setup {
     add = 'a',
     copy = 'c',
     rename = 'r',
-    cut = 'x', -- Pressing again will remove the item from the cut list
+    cut = 'x',
     paste = 'p',
     quit = 'q',
     toggle_hidden = '<leader>.'
@@ -78,7 +78,7 @@ require 'tryptic'.setup {
   options = {
     dirs_first = true
   },
-  git_signs = { -- TODO: Document this
+  git_signs = {
     enabled = true,
     signs = {
       add = 'GitSignsAdd',
@@ -98,7 +98,7 @@ The `extension_mappings` property allows you add any arbitrary functionality bas
 You simply provide a key mapping and a function. When the mapped keys are pressed the function is invoked, and will receive a table containing the following:
 
 ```lua
-{ -- TODO: Update this
+{
   path, -- e.g. /User/Name/foo/bar.js
   display_name -- e.g. bar.js
   basename, -- e.g. bar.js
@@ -133,3 +133,7 @@ For example, if you want to make `<c-f>` search the file or directory under the 
         - Testing
     - Bring the readme up to date and add a screenshot
     - License
+    - Go through the TODOs
+- Test
+    - Close function
+    - Move nav left and right to actions, and add tests

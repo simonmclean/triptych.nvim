@@ -333,7 +333,6 @@ end
 ---@param Git? Git
 ---@return nil
 function M.refresh_view(State, Diagnostics, Git)
-  -- TODO: This an inefficient way of refreshing the view
   M.nav_to(State, State.windows.current.path, Diagnostics, Git)
 end
 

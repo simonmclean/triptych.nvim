@@ -124,7 +124,7 @@ describe('delete', function()
     _G.tryptic_mock_vim = {
       ui = {
         select = function(_, _, callback)
-          callback('No')
+          callback 'No'
         end,
       },
       fn = {
@@ -206,7 +206,7 @@ describe('bulk_delete', function()
   it('does not present confirmation prompt when flag is true', function()
     local spies = {
       ui = {
-        select = 0
+        select = 0,
       },
       fn = {
         delete = {},
@@ -229,9 +229,9 @@ describe('bulk_delete', function()
 
     _G.tryptic_mock_vim = {
       ui = {
-        select = function (_, _, _)
+        select = function(_, _, _)
           spies.ui.select = spies.ui.select + 1
-        end
+        end,
       },
       fn = {
         delete = function(path, flags)
@@ -254,7 +254,7 @@ describe('bulk_delete', function()
   it('does not delete if confirmation not received', function()
     local spies = {
       ui = {
-        select = {}
+        select = {},
       },
       fn = {
         delete = {},
@@ -277,9 +277,9 @@ describe('bulk_delete', function()
 
     _G.tryptic_mock_vim = {
       ui = {
-        select = function (_, _, callback)
-          callback('No')
-        end
+        select = function(_, _, callback)
+          callback 'No'
+        end,
       },
       fn = {
         delete = function(path, flags)
@@ -525,6 +525,7 @@ describe('bulk_toggle_cut', function()
         list_contains = {},
         list_add = {},
         list_remove = {},
+        list_remove_all = {},
       },
       refresh = 0,
     }
@@ -548,6 +549,10 @@ describe('bulk_toggle_cut', function()
 
     state_instance.list_remove = function(_, list_type, item)
       table.insert(spies.state.list_remove, { list_type, item })
+    end
+
+    state_instance.list_remove_all = function(_, list_type)
+      table.insert(spies.state.list_remove_all, { list_type })
     end
 
     state_instance.list_add = function(_, list_type, item)
@@ -578,6 +583,7 @@ describe('bulk_toggle_cut', function()
       { 'cut', 'world' },
       { 'cut', 'wow' },
     }, spies.state.list_add)
+    assert.same({ { 'copy' } }, spies.state.list_remove_all)
     assert.same(1, spies.refresh)
   end)
 
@@ -632,6 +638,7 @@ describe('bulk_toggle_copy', function()
         list_contains = {},
         list_add = {},
         list_remove = {},
+        list_remove_all = {},
       },
       refresh = 0,
     }
@@ -655,6 +662,10 @@ describe('bulk_toggle_copy', function()
 
     state_instance.list_remove = function(_, list_type, item)
       table.insert(spies.state.list_remove, { list_type, item })
+    end
+
+    state_instance.list_remove_all = function(_, list_type)
+      table.insert(spies.state.list_remove_all, { list_type })
     end
 
     state_instance.list_add = function(_, list_type, item)
@@ -685,6 +696,7 @@ describe('bulk_toggle_copy', function()
       { 'copy', 'world' },
       { 'copy', 'wow' },
     }, spies.state.list_add)
+    assert.same({ { 'cut' } }, spies.state.list_remove_all)
     assert.same(1, spies.refresh)
   end)
 
@@ -717,7 +729,6 @@ describe('bulk_toggle_copy', function()
     view.get_targets_in_selection = function(_)
       return mock_paths
     end
-
 
     ---@diagnostic disable-next-line: missing-fields
     actions.new(state_instance, noop, {}, {}).bulk_toggle_copy()

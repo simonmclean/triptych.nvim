@@ -113,7 +113,6 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
     refresh_view()
   end
 
-  --TODO: Should this also remove items from the copy list like toggle_cut does?
   ---@return nil
   M.bulk_toggle_cut = function()
     local targets = view.get_targets_in_selection(State)
@@ -134,6 +133,7 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
         State:list_remove('cut', target)
       end
     end
+    State:list_remove_all('copy')
     refresh_view()
   end
 
@@ -169,6 +169,7 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
         State:list_remove('copy', target)
       end
     end
+    State:list_remove_all('cut')
     refresh_view()
   end
 
