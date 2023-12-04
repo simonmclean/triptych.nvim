@@ -1,6 +1,6 @@
-# 📚 Tryptic
+<h1 align="center">Tryptic.nvim</h1>
 
-Directory viewer for Neovim, inspired by [Ranger](https://github.com/ranger/ranger).
+<p align="center">Directory viewer for Neovim, inspired by <a href="https://github.com/ranger/ranger" target="_blank">Ranger</a></p>
 
 ![Tryptic screenshot](screenshot.png?raw=true "Tryptic screenshot")
 
@@ -19,7 +19,7 @@ You only ever control or focus the middle window.
 - Devicons support
 - Git signs
 - Diagnostic signs
-- Perform actions on the filesystem
+- Perform common actions on the filesystem
     - Rename
     - Delete (including bulk)
     - Copy 'n' paste (including bulk)
@@ -29,9 +29,9 @@ You only ever control or focus the middle window.
 ## ⚡️ Requirements
 
 - Neovim >= 0.9.0
-- `nvim-lua/plenary.nvim`
+- `nvim-lua/plenary.nvim` plugin
 - Optional, if you want fancy icons
-    - `nvim-tree/nvim-web-devicons`
+    - `nvim-tree/nvim-web-devicons` plugin
     -  A [Nerd Font](https://www.nerdfonts.com/)
 
 ## 📦 Installation
