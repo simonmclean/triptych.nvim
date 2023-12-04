@@ -1130,3 +1130,123 @@ describe('jump_to_cwd', function()
     }, spies.view.nav_to)
   end)
 end)
+
+describe('nav_left', function()
+  it('navigate to the parent directory', function()
+    local spy = {}
+    local mock_state = {
+      windows = {
+        current = {
+          path = '/hello/world',
+        },
+        parent = {
+          path = '/hello',
+        },
+      },
+    }
+    local mock_git = { 'git' }
+    local mock_diagnostics = { 'diagnostic' }
+    view.nav_to = function(s, dir, d, g)
+      table.insert(spy, { s, dir, d, g })
+    end
+    actions.new(mock_state, noop, mock_diagnostics, mock_git).nav_left()
+    assert.same({ {
+      mock_state,
+      '/hello',
+      mock_diagnostics,
+      mock_git,
+    } }, spy)
+  end)
+end)
+
+describe('nav_right', function()
+  it('navigates to the child directory', function()
+    local spies = {
+      view = {
+        get_target_under_cursor = {},
+        nav_to = {},
+      },
+      vim = {
+        fn = {
+          isdirectory = {},
+        },
+      },
+    }
+    local mock_state = { 'state' }
+    local mock_git = { 'git' }
+    local mock_diagnostics = { 'diagnostic' }
+    view.nav_to = function(s, dir, d, g)
+      table.insert(spies.view.nav_to, { s, dir, d, g })
+    end
+    view.get_target_under_cursor = function(s)
+      table.insert(spies.view.get_target_under_cursor, s)
+      return {
+        path = '/hello/world/foo',
+      }
+    end
+    _G.tryptic_mock_vim = {
+      fn = {
+        isdirectory = function(path)
+          table.insert(spies.vim.fn.isdirectory, path)
+          return 1
+        end,
+      },
+    }
+    actions.new(mock_state, noop, mock_diagnostics, mock_git).nav_right()
+    assert.same({ mock_state }, spies.view.get_target_under_cursor)
+    assert.same({ '/hello/world/foo' }, spies.vim.fn.isdirectory)
+    assert.same(
+      { {
+        mock_state,
+        '/hello/world/foo',
+        mock_diagnostics,
+        mock_git,
+      } },
+      spies.view.nav_to
+    )
+  end)
+
+  it('navigates to the child file', function()
+    local spies = {
+      actions = {
+        edit_file = {},
+      },
+      view = {
+        get_target_under_cursor = {},
+      },
+      vim = {
+        fn = {
+          isdirectory = {},
+        },
+      },
+    }
+    local mock_state = { 'state' }
+    local mock_git = { 'git' }
+    local mock_diagnostics = { 'diagnostic' }
+    view.nav_to = function(s, dir, d, g)
+      table.insert(spies.view.nav_to, { s, dir, d, g })
+    end
+    view.get_target_under_cursor = function(s)
+      table.insert(spies.view.get_target_under_cursor, s)
+      return {
+        path = '/hello/world/bar.js',
+      }
+    end
+    _G.tryptic_mock_vim = {
+      fn = {
+        isdirectory = function(path)
+          table.insert(spies.vim.fn.isdirectory, path)
+          return 0
+        end,
+      },
+    }
+    local actions_instance = actions.new(mock_state, noop, mock_diagnostics, mock_git)
+    actions_instance.edit_file = function(path)
+      table.insert(spies.actions.edit_file, path)
+    end
+    actions_instance.nav_right()
+    assert.same({ mock_state }, spies.view.get_target_under_cursor)
+    assert.same({ '/hello/world/bar.js' }, spies.vim.fn.isdirectory)
+    assert.same({ '/hello/world/bar.js' }, spies.actions.edit_file)
+  end)
+end)

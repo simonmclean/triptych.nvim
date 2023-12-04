@@ -11,7 +11,6 @@ local function create_path_details()
     basename = 'world.js',
     is_dir = false,
     is_git_ignored = false,
-    cutting = false,
   }
 end
 

@@ -29,7 +29,6 @@ describe('setup', function()
 end)
 
 describe('open_tryptic', function()
-  -- TODO: Test the close and refresh functions
   it('makes the expected calls', function()
     local spies = {
       state = {
@@ -103,7 +102,6 @@ describe('open_tryptic', function()
       return mock_state
     end
 
-    ---@diagnostic disable-next-line: duplicate-set-field
     git.Git.new = function()
       spies.git.new = spies.git.new + 1
       return 'mock_git'
@@ -124,18 +122,16 @@ describe('open_tryptic', function()
       return 'mock_actions'
     end
 
-    ---@diagnostic disable-next-line: duplicate-set-field
     view.refresh_view = function(s, d, g)
       table.insert(spies.view.refresh_view, { s, d, g })
     end
 
-    ---@diagnostic disable-next-line: duplicate-set-field
     view.nav_to = function(s, buf_dir, d, g, buf)
       table.insert(spies.view.nav_to, { s, buf_dir, d, g, buf })
     end
 
-    mappings.new = function(s, a, d, g)
-      table.insert(spies.mappings.new, { s, a, d, g })
+    mappings.new = function(s, a)
+      table.insert(spies.mappings.new, { s, a })
     end
 
     float.create_three_floating_windows = function()
@@ -171,7 +167,88 @@ describe('open_tryptic', function()
     }, mock_state)
     assert.same({ { event_handlers, mock_state, 'mock_diagnostic', 'mock_git' } }, spies.autocmds.new)
     assert.same(mock_state, spies.actions.new[1][1])
-    assert.same({ { mock_state, 'mock_actions', 'mock_diagnostic', 'mock_git' } }, spies.mappings.new)
+    assert.same({ { mock_state, 'mock_actions' } }, spies.mappings.new)
     assert.same({ { mock_state, '/hello', 'mock_diagnostic', 'mock_git', '/hello/world' } }, spies.view.nav_to)
+  end)
+
+  it('create a close function', function()
+    local spies = {
+      autocmd_destroy = 0,
+      close_floats = {},
+      nvim_set_current_win = {},
+    }
+
+    _G.tryptic_mock_vim = {
+      g = {
+        tryptic_config = config.create_merged_config {},
+      },
+      api = {
+        nvim_buf_get_name = function(_)
+          return '/hello/world'
+        end,
+        nvim_get_current_win = function()
+          return 66
+        end,
+        nvim_set_current_win = function(winid)
+          table.insert(spies.nvim_set_current_win, winid)
+        end,
+      },
+      fs = {
+        dirname = function(path)
+          return vim.fs.dirname(path)
+        end,
+      },
+    }
+
+    local mock_state = {
+      opening_win = 9,
+      windows = {},
+    }
+
+    state.new = function(_, _)
+      return mock_state
+    end
+
+    git.Git.new = function()
+      return 'mock_git'
+    end
+
+    diagnostics.new = function()
+      return 'mock_diagnostic'
+    end
+
+    autocmds.new = function(_, _, _, _)
+      return {
+        destroy_autocommands = function(_)
+          spies.autocmd_destroy = spies.autocmd_destroy + 1
+        end,
+      }
+    end
+
+    actions.new = function(_, _)
+      return 'mock_actions'
+    end
+
+    view.refresh_view = function(_, _, _) end
+
+    view.nav_to = function(_, _, _, _, _) end
+
+    mappings.new = function(_, _) end
+
+    float.create_three_floating_windows = function()
+      return { 4, 5, 6 }
+    end
+
+    float.close_floats = function(winids)
+      table.insert(spies.close_floats, winids)
+    end
+
+    init.open_tryptic()
+
+    _G.tryptic_mock_vim.g.tryptic_close()
+
+    assert.same(1, spies.autocmd_destroy)
+    assert.same({ { 4, 5, 6 } }, spies.close_floats)
+    assert.same({ 9 }, spies.nvim_set_current_win)
   end)
 end)

@@ -133,7 +133,7 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
         State:list_remove('cut', target)
       end
     end
-    State:list_remove_all('copy')
+    State:list_remove_all 'copy'
     refresh_view()
   end
 
@@ -169,7 +169,7 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
         State:list_remove('copy', target)
       end
     end
-    State:list_remove_all('cut')
+    State:list_remove_all 'cut'
     refresh_view()
   end
 
@@ -251,6 +251,23 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
       view.nav_to(State, win.previous_path, Diagnostics, Git)
     elseif cwd then
       view.nav_to(State, cwd, Diagnostics, Git)
+    end
+  end
+
+  M.nav_left = function()
+    local focused_path = State.windows.current.path
+    local parent_path = State.windows.parent.path
+    if parent_path ~= '/' then
+      view.nav_to(State, parent_path, Diagnostics, Git, focused_path)
+    end
+  end
+
+  M.nav_right = function()
+    local target = view.get_target_under_cursor(State)
+    if vim.fn.isdirectory(target.path) == 1 then
+      view.nav_to(State, target.path, Diagnostics, Git)
+    else
+      M.edit_file(target.path)
     end
   end
 

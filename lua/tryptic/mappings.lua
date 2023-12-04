@@ -2,12 +2,9 @@ local view = require 'tryptic.view'
 
 local Mappings = {}
 
--- TODO: Type actions
 ---@param State TrypticState
 ---@param actions unknown
----@param Diagnostics? Diagnostics
----@param Git? Git
-function Mappings.new(State, actions, Diagnostics, Git)
+function Mappings.new(State, actions)
   local vim = _G.tryptic_mock_vim or vim
   local mappings = vim.g.tryptic_config.mappings
   local extension_mappings = vim.g.tryptic_config.extension_mappings
@@ -29,26 +26,8 @@ function Mappings.new(State, actions, Diagnostics, Git)
   -- Mappings for built-in functionality --
   -----------------------------------------
 
-  map('n', mappings.nav_left, function()
-    -- TODO: Move to actions
-    local focused_path = State.windows.current.path
-    local parent_path = State.windows.parent.path
-    if parent_path ~= '/' then
-      view.nav_to(State, parent_path, Diagnostics, Git, focused_path)
-    end
-  end)
-
-  map('n', mappings.nav_right, function()
-    -- TODO: Move to actions
-    local target = view.get_target_under_cursor(State)
-    -- TODO: edit_file should be called from nav_to
-    if vim.fn.isdirectory(target.path) == 1 then
-      view.nav_to(State, target.path, Diagnostics, Git)
-    else
-      actions.edit_file(target.path)
-    end
-  end)
-
+  map('n', mappings.nav_left, actions.nav_left)
+  map('n', mappings.nav_right, actions.nav_right)
   map('n', mappings.jump_to_cwd, actions.jump_to_cwd)
   map('n', mappings.delete, actions.delete)
   map('v', mappings.delete, actions.bulk_delete)

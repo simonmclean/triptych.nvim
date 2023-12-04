@@ -12,7 +12,7 @@ end
 ---@param path string
 ---@return string
 local function get_filetype_from_path(path)
-  return plenary_filetype.detect(path)
+  plenary_filetype.detect(path)
 end
 
 ---@param _path string

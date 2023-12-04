@@ -4,7 +4,6 @@
 ---@field options TrypticConfigOptions
 ---@field git_signs TrypticConfigGitSigns
 ---@field diagnostic_signs TrypticConfigDiagnostic
----@field debug boolean
 
 ---@class TrypticState
 ---@field new fun(config: TrypticConfig, opening_win: integer): TrypticState
@@ -83,7 +82,6 @@
 ---@field is_dir boolean
 ---@field is_git_ignored boolean
 ---@field filetype? string
----@field cutting boolean
 ---@field git_status? string
 ---@field diagnostic_status? integer
 ---@field children? PathDetails

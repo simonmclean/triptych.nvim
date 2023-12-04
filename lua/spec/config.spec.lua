@@ -39,8 +39,7 @@ local function get_default_config()
     },
     diagnostic_signs = {
       enabled = true,
-    },
-    debug = false,
+    }
   }
 end
 

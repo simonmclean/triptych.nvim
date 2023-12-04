@@ -41,7 +41,7 @@ local function open_tryptic()
     view.refresh_view(State, Diagnostics, Git)
   end
   local Actions = actions.new(State, refresh_fn, Diagnostics, Git)
-  mappings.new(State, Actions, Diagnostics, Git)
+  mappings.new(State, Actions)
 
   vim.g.tryptic_close = function()
     -- Need to destroy autocmds before the floating windows

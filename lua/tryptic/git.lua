@@ -39,7 +39,7 @@ function Git.new()
   -- Register the signs if they're not already
   for sign_name, text in pairs(signs_to_text) do
     if u.is_empty(vim.fn.sign_getdefined(sign_name)) then
-      vim.fn.sign_define(sign_name, { text = text, texthl = 'Normal' })
+      vim.fn.sign_define(sign_name, { text = text})
     end
   end
 
