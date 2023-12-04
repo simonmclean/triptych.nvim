@@ -2,6 +2,8 @@
 
 Directory viewer for Neovim, inspired by [Ranger](https://github.com/ranger/ranger).
 
+![Tryptic screenshot](screenshot.png?raw=true "Tryptic screenshot")
+
 The UI consists of 3 floating windows. In the center is the currently focused directory. On the left is the parent directory.
 The right window contains either a child directory, or a file preview.
 
@@ -13,21 +15,24 @@ You only ever control or focus the middle window.
 ## ✨ Features
 
 - Rapid, intuitive directory browsing
-- Extensible
 - File preview
-- Pretty icons
+- Devicons support
 - Git signs
 - Diagnostic signs
-- Create files and folders
-- Rename
-- Delete
-- Copy
-- Cut 'n' paste
+- Perform actions on the filesystem
+    - Rename
+    - Delete (including bulk)
+    - Copy 'n' paste (including bulk)
+    - Cut 'n' paste (including bulk)
+- Extensible
 
 ## ⚡️ Requirements
 
 - Neovim >= 0.9.0
-- A [Nerd Font](https://www.nerdfonts.com/) (optional, used for icons)
+- `nvim-lua/plenary.nvim`
+- Optional, if you want fancy icons
+    - `nvim-tree/nvim-web-devicons`
+    -  A [Nerd Font](https://www.nerdfonts.com/)
 
 ## 📦 Installation
 
@@ -36,10 +41,10 @@ Example using [Lazy](https://github.com/folke/lazy.nvim).
 ```lua
 {
   'simonmclean/tryptic',
+  event = 'VeryLazy',
   dependencies = {
     'nvim-lua/plenary.nvim', -- required
     'nvim-tree/nvim-web-devicons', -- optional
-    'lewis6991/gitsigns.nvim' -- optional
   }
 }
 ```
@@ -62,7 +67,7 @@ require 'tryptic'.setup {
     open_tryptic = '<leader>-',
     -- Everything below is buffer-local, meaning it will only apply to Tryptic windows
     show_help = 'g?',
-    jump_to_cwd = '.', -- Pressing again will toggle back
+    jump_to_cwd = '.',  -- Pressing again will toggle back
     nav_left = 'h',
     nav_right = { 'l', '<CR>' },
     delete = 'd',
@@ -72,22 +77,28 @@ require 'tryptic'.setup {
     cut = 'x',
     paste = 'p',
     quit = 'q',
-    toggle_hidden = '<leader>.'
-  }
-  extension_mappings = {}
+    toggle_hidden = '<leader>.',
+  },
+  extension_mappings = {},
   options = {
-    dirs_first = true
+    dirs_first = true,
+    show_hidden = false,
+    line_numbers = {
+      enabled = true,
+      relative = false,
+    },
   },
   git_signs = {
     enabled = true,
     signs = {
-      add = 'GitSignsAdd',
-      add_modify = 'GitSignsAdd',
-      modify = 'GitSignsChange',
-      delete = 'GitSignsDelete',
-      rename = 'GitSignsRename',
-      untracked = 'GitSignsUntracked'
-    }
+      add = '+',
+      modify = '~',
+      rename = 'r',
+      untracked = '?',
+    },
+  },
+  diagnostic_signs = {
+    enabled = true,
   }
 }
 ```
@@ -95,18 +106,17 @@ require 'tryptic'.setup {
 ### Extending functionality
 
 The `extension_mappings` property allows you add any arbitrary functionality based on the current cursor target.
-You simply provide a key mapping and a function. When the mapped keys are pressed the function is invoked, and will receive a table containing the following:
+You simply provide a key mapping, a vim mode, and a function. When the mapped keys are pressed the function is invoked, and will receive a table containing the following:
 
 ```lua
 {
-  path, -- e.g. /User/Name/foo/bar.js
-  display_name -- e.g. bar.js
   basename, -- e.g. bar.js
-  dirname, -- e.g. /User/Name/foo/
-  is_dir, -- boolean indicating whether this is a directory
-  filetype, -- e.g. 'javascript'
-  cutting, -- whether this has been marked for cut 'n' paste
   children, -- table containing directory contents (if applicable)
+  dirname, -- e.g. /User/Name/foo
+  display_name -- same as basename (redundant field)
+  filetype, -- e.g. 'javascript'
+  is_dir, -- boolean indicating whether this is a directory
+  path, -- e.g. /User/Name/foo/bar.js
 }
 ```
 
@@ -115,11 +125,14 @@ For example, if you want to make `<c-f>` search the file or directory under the 
 ```lua
 {
   extension_mappings = {
-    ['<c-f>'] = function(target)
-      require 'telescope.builtin'.live_grep {
-        search_dirs = { target.path }
-      }
-    end
+    ['<c-f>'] = {
+      mode 'n',
+      fn = function(target)
+        require 'telescope.builtin'.live_grep {
+          search_dirs = { target.path }
+        }
+      end
+    }
   }
 }
 ```
@@ -133,7 +146,3 @@ For example, if you want to make `<c-f>` search the file or directory under the 
         - Testing
     - Bring the readme up to date and add a screenshot
     - License
-    - Go through the TODOs
-- Test
-    - Close function
-    - Move nav left and right to actions, and add tests
