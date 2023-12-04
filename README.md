@@ -1,6 +1,6 @@
 <h1 align="center">Tryptic.nvim</h1>
 
-<p align="center">Directory viewer for Neovim, inspired by <a href="https://github.com/ranger/ranger" target="_blank">Ranger</a></p>
+<p align="center">Directory viewer for Neovim, inspired by <a href="https://github.com/ranger/ranger">Ranger</a></p>
 
 ![Tryptic screenshot](screenshot.png?raw=true "Tryptic screenshot")
 
