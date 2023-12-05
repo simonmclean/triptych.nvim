@@ -2,6 +2,11 @@
 
 all_tests_pass=true
 
+echo "JIt"
+nvim --headless -c "lua vim.print(jit)"
+echo "VERSION"
+nvim --headless -c "lua vim.print(_VERSION)"
+
 for test_path in ./lua/spec/*
 do
   nvim --headless -c "PlenaryBustedFile $test_path" | grep "Failed" | grep -v "0" > /dev/null
