@@ -1,5 +1,5 @@
 local tryptic = require 'tryptic.init'
 
 return {
-  setup = tryptic.setup
+  setup = tryptic.setup,
 }

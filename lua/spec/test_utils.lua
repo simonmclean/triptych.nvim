@@ -12,7 +12,7 @@ function M.iterator(return_values, spy)
     return function()
       i = i + 1
       local result = return_values[i]
-      if (type(result) == 'table') then
+      if type(result) == 'table' then
         -- This assumes that a table in this case should translate to 2 return values
         -- This being a common iteration pattern, like with vim.fs.dir
         return result[1], result[2]

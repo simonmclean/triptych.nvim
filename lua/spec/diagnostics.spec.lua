@@ -38,7 +38,7 @@ describe('Diagnostics', function()
         end,
       },
       fs = {
-        parents = tu.iterator({ '/a/b/', '/a/', '/' })
+        parents = tu.iterator { '/a/b/', '/a/', '/' },
       },
       fn = {
         getcwd = function()

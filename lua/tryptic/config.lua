@@ -6,7 +6,7 @@ local default_config = {
     -- Everything below is buffer-local, meaning it will only apply to Tryptic windows
     open_tryptic = '<leader>-',
     show_help = 'g?',
-    jump_to_cwd = '.',  -- Pressing again will toggle back
+    jump_to_cwd = '.', -- Pressing again will toggle back
     nav_left = 'h',
     nav_right = { 'l', '<CR>' },
     delete = 'd',
@@ -38,7 +38,7 @@ local default_config = {
   },
   diagnostic_signs = {
     enabled = true,
-  }
+  },
 }
 
 ---@param user_config table
