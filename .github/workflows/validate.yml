@@ -1,7 +1,7 @@
 name: Validate
 
 env:
-  TRYPTIC_DIR: ~/.local/share/nvim/site/pack/simonmclean/start/tryptic
+  TRYPTIC_DIR: /root/.local/share/nvim/site/pack/simonmclean/start/tryptic
   LUA_LS_LOG_CHECK: /home/runner/lua-language-server/log/check.json
 
 on:
@@ -23,6 +23,7 @@ jobs:
         nvim --version
     - name: install neovim plugins
       run: |
+        git config --global advice.detachedHead false
         git clone https://github.com/nvim-lua/plenary.nvim.git ~/.local/share/nvim/site/pack/plenary/start/plenary
         git clone https://github.com/nvim-tree/nvim-web-devicons ~/.local/share/nvim/site/pack/nvim-tree/start/nvim-web-devicons
         git clone https://github.com/$GITHUB_REPOSITORY $TRYPTIC_DIR
@@ -32,7 +33,6 @@ jobs:
       run: |
         mkdir ~/lua-language-server
         cd ~/lua-language-server
-        # curl -O -J -L https://github.com/LuaLS/lua-language-server/releases/download/3.7.2/lua-language-server-3.7.2-linux-arm64.tar.gz
         curl -O -J -L https://github.com/LuaLS/lua-language-server/releases/download/3.7.2/lua-language-server-3.7.2-linux-x64.tar.gz
         tar -xzf *.tar.gz
     - name: check diagnostics
