@@ -2,6 +2,7 @@ name: Validate
 
 env:
   TRYPTIC_DIR: ~/.local/share/nvim/site/pack/simonmclean/start/tryptic
+  LUA_LS_LOG_CHECK: /home/runner/lua-language-server/log/check.json
 
 on:
   push:
@@ -35,7 +36,7 @@ jobs:
       run: |
         cd $TRYPTIC_DIR
         ~/lua-language-server/bin/lua-language-server --check $TRYPTIC_DIR
-        cat /home/runner/lua-language-server/log/check.json
+        [ -r $LUA_LS_LOG_CHECK ] && cat $LUA_LS_LOG_CHECK
     - name: check formatting
       run: |
         cd $TRYPTIC_DIR
