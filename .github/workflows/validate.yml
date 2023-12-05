@@ -29,15 +29,15 @@ jobs:
       run: |
         mkdir ~/lua-language-server
         cd ~/lua-language-server
-        curl -LJO https://github.com/LuaLS/lua-language-server/releases/download/3.7.3/lua-language-server-3.7.3-linux.tar.gz
+        curl -O -J -L https://github.com/LuaLS/lua-language-server/releases/download/3.7.2/lua-language-server-3.7.2-linux-x64.tar.gz
         tar -xzf *.tar.gz
+    - name: check diagnostics
+      run: |
+        ~/lua-language-server/bin/lua-language-server --check $TRYPTIC_DIR
     - name: check formatting
       run: |
         cd $TRYPTIC_DIR
         npx @johnnymorganz/stylua-bin --check .
-    - name: check diagnostics
-      run: |
-        ~/lua-language-server/bin/lua-language-server --check $TRYPTIC_DIR
     - name: run tests
       run: |
         cd $TRYPTIC_DIR
