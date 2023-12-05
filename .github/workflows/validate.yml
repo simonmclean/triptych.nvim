@@ -29,7 +29,7 @@ jobs:
       run: |
         mkdir ~/lua-language-server
         cd ~/lua-language-server
-        curl -LJO https://github.com/LuaLS/lua-language-server/releases/download/3.7.3/lua-language-server-3.7.3-linux-arm64.tar.gz
+        curl -LJO https://github.com/LuaLS/lua-language-server/releases/download/3.7.3/lua-language-server-3.7.3-linux.tar.gz
         tar -xzf *.tar.gz
     - name: check formatting
       run: |
