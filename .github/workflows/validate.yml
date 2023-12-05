@@ -17,8 +17,10 @@ jobs:
     - uses: actions/setup-node@v4
     - name: install neovim
       run: |
-        sudo apt-get update
-        sudo apt install -y neovim
+        curl -OJL https://github.com/neovim/neovim/releases/download/v0.9.4/nvim-linux64.tar.gz
+        tar xzf *.tar.gz
+        mv nvim-linux64/bin/nvim /usr/local/bin/nvim
+        nvim --version
     - name: install neovim plugins
       run: |
         git clone https://github.com/nvim-lua/plenary.nvim.git ~/.local/share/nvim/site/pack/plenary/start/plenary
