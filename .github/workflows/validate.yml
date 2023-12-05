@@ -33,7 +33,9 @@ jobs:
         tar -xzf *.tar.gz
     - name: check diagnostics
       run: |
+        cd $TRYPTIC_DIR
         ~/lua-language-server/bin/lua-language-server --check $TRYPTIC_DIR
+        cat /home/runner/lua-language-server/log/check.json
     - name: check formatting
       run: |
         cd $TRYPTIC_DIR
