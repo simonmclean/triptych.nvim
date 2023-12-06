@@ -38,7 +38,7 @@ jobs:
       run: |
         cd $HOME/$TRYPTIC_DIR
         $HOME/lua-language-server/bin/lua-language-server --check $HOME/$TRYPTIC_DIR
-        if [ -r $LUA_LS_LOG_CHECK ]; then cat $LUA_LS_LOG_CHECK; fi
+        # if [ -r $LUA_LS_LOG_CHECK ]; then cat $LUA_LS_LOG_CHECK; fi
     - name: check formatting
       run: |
         cd $HOME/$TRYPTIC_DIR
