@@ -1,4 +1,4 @@
-local float = require 'tryptic.float'
+local float = require "tryptic.float"
 local autocmds = require 'tryptic.autocmds'
 local state = require 'tryptic.state'
 local mappings = require 'tryptic.mappings'
@@ -9,7 +9,7 @@ local diagnostics = require 'tryptic.diagnostics'
 local event_handlers = require 'tryptic.event_handlers'
 
 ---@return nil
-local function open_tryptic()
+local function open_tryptic ()
   local vim = _G.tryptic_mock_vim or vim
   local config = vim.g.tryptic_config
   local State = state.new(config, vim.api.nvim_get_current_win())
