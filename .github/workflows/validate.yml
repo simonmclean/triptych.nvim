@@ -21,6 +21,7 @@ jobs:
         tar xzf *.tar.gz
         echo $HOME/nvim-linux64/bin/nvim --version
     - uses: actions/checkout@v4
+      with ref: ${{ github.event.pull_request.head.sha }}
     - name: install neovim plugins
       run: |
         git config --global advice.detachedHead false
