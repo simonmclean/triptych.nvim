@@ -20,8 +20,6 @@ jobs:
         curl -OJL https://github.com/neovim/neovim/releases/download/v0.9.4/nvim-linux64.tar.gz
         tar xzf *.tar.gz
         echo $HOME/nvim-linux64/bin/nvim --version
-    - uses: actions/checkout@v4
-      with ref: ${{ github.event.pull_request.head.sha }}
     - name: install neovim plugins
       run: |
         git config --global advice.detachedHead false
@@ -29,7 +27,10 @@ jobs:
         git clone https://github.com/nvim-tree/nvim-web-devicons $HOME/.local/share/nvim/site/pack/nvim-tree/start/nvim-web-devicons
         git clone https://github.com/$GITHUB_REPOSITORY $HOME/$TRYPTIC_DIR
         cd $HOME/$TRYPTIC_DIR
-        git checkout $GITHUB_SHA
+        echo "GITHUB_BASE_REF"
+        echo $GITHUB_BASE_REF
+        echo "GITHUB_BASE_REF"
+        $GITHUB_BASE_REF && git checkout $GITHUB_BASE_REF
     - name: install lua-language-server
       run: |
         mkdir $HOME/lua-language-server
