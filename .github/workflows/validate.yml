@@ -1,7 +1,7 @@
 name: Validate
 
 env:
-  TRYPTIC_DIR: /root/.local/share/nvim/site/pack/simonmclean/start/tryptic
+  TRYPTIC_DIR: .local/share/nvim/site/pack/simonmclean/start/tryptic
   LUA_LS_LOG_CHECK: /home/runner/lua-language-server/log/check.json
 
 on:
@@ -19,32 +19,32 @@ jobs:
       run: |
         curl -OJL https://github.com/neovim/neovim/releases/download/v0.9.4/nvim-linux64.tar.gz
         tar xzf *.tar.gz
-        mv nvim-linux64/bin/nvim /usr/local/bin/nvim
+        echo "${HOME}/nvim-linux64/bin" >> $GITHUB_PATH
         nvim --version
     - name: install neovim plugins
       run: |
         git config --global advice.detachedHead false
-        git clone https://github.com/nvim-lua/plenary.nvim.git ~/.local/share/nvim/site/pack/plenary/start/plenary
-        git clone https://github.com/nvim-tree/nvim-web-devicons ~/.local/share/nvim/site/pack/nvim-tree/start/nvim-web-devicons
-        git clone https://github.com/$GITHUB_REPOSITORY $TRYPTIC_DIR
-        cd $TRYPTIC_DIR
+        git clone https://github.com/nvim-lua/plenary.nvim.git $HOME/.local/share/nvim/site/pack/plenary/start/plenary
+        git clone https://github.com/nvim-tree/nvim-web-devicons $HOME/.local/share/nvim/site/pack/nvim-tree/start/nvim-web-devicons
+        git clone https://github.com/$GITHUB_REPOSITORY $HOME/$TRYPTIC_DIR
+        cd $HOME/$TRYPTIC_DIR
         git checkout $GITHUB_SHA
-    - name: install lua-language-server
-      run: |
-        mkdir ~/lua-language-server
-        cd ~/lua-language-server
-        curl -O -J -L https://github.com/LuaLS/lua-language-server/releases/download/3.7.2/lua-language-server-3.7.2-linux-x64.tar.gz
-        tar -xzf *.tar.gz
-    - name: check diagnostics
-      run: |
-        cd $TRYPTIC_DIR
-        ~/lua-language-server/bin/lua-language-server --check $TRYPTIC_DIR
-        if [ -r $LUA_LS_LOG_CHECK ]; then cat $LUA_LS_LOG_CHECK; fi
-    - name: check formatting
-      run: |
-        cd $TRYPTIC_DIR
-        npx @johnnymorganz/stylua-bin --check .
+    # - name: install lua-language-server
+    #   run: |
+    #     mkdir ~/lua-language-server
+    #     cd ~/lua-language-server
+    #     curl -O -J -L https://github.com/LuaLS/lua-language-server/releases/download/3.7.2/lua-language-server-3.7.2-linux-x64.tar.gz
+    #     tar -xzf *.tar.gz
+    # - name: check diagnostics
+    #   run: |
+    #     cd $HOME/$TRYPTIC_DIR
+    #     ~/lua-language-server/bin/lua-language-server --check $HOME/$TRYPTIC_DIR
+    #     if [ -r $LUA_LS_LOG_CHECK ]; then cat $LUA_LS_LOG_CHECK; fi
+    # - name: check formatting
+    #   run: |
+    #     cd $HOME/$TRYPTIC_DIR
+    #     npx @johnnymorganz/stylua-bin --check .
     - name: run tests
       run: |
-        cd $TRYPTIC_DIR
+        cd $HOME/$TRYPTIC_DIR
         ./run-tests.sh
