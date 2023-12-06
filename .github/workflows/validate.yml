@@ -20,6 +20,7 @@ jobs:
         curl -OJL https://github.com/neovim/neovim/releases/download/v0.9.4/nvim-linux64.tar.gz
         tar xzf *.tar.gz
         echo $HOME/nvim-linux64/bin/nvim --version
+    - uses: actions/checkout@v4
     - name: install neovim plugins
       run: |
         git config --global advice.detachedHead false
