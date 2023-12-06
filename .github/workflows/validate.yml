@@ -27,10 +27,10 @@ jobs:
         git clone https://github.com/nvim-tree/nvim-web-devicons $HOME/.local/share/nvim/site/pack/nvim-tree/start/nvim-web-devicons
         git clone https://github.com/$GITHUB_REPOSITORY $HOME/$TRYPTIC_DIR
         cd $HOME/$TRYPTIC_DIR
-        echo "GITHUB_BASE_REF"
-        echo $GITHUB_BASE_REF
-        echo "GITHUB_BASE_REF"
-        $GITHUB_BASE_REF && git checkout $GITHUB_BASE_REF
+        echo "GITHUB_HEAD_REF"
+        echo $GITHUB_HEAD_REF
+        echo "GITHUB_HEAD_REF"
+        # $GITHUB_BASE_REF && git checkout $GITHUB_BASE_REF
     - name: install lua-language-server
       run: |
         mkdir $HOME/lua-language-server
