@@ -35,6 +35,7 @@ jobs:
         cd $HOME/lua-language-server
         curl -OJL https://github.com/LuaLS/lua-language-server/releases/download/3.7.2/lua-language-server-3.7.2-linux-x64.tar.gz
         tar -xzf *.tar.gz
+        $HOME/lua-language-server/bin/lua-language-server --version
     - name: check diagnostics
       run: |
         cd $HOME/$TRYPTIC_DIR
