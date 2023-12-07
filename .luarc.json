@@ -1,8 +1,10 @@
 {
+  "workspace.library": [
+    "lib"
+  ],
+  "diagnostics.ignoredFiles": "Disable",
   "diagnostics.globals": [
-    "vim",
-    "describe",
-    "it"
+    "vim"
   ],
   "diagnostics.disable": [
     "duplicate-set-field"

@@ -2,7 +2,7 @@ name: Validate
 
 env:
   TRYPTIC_DIR: .local/share/nvim/site/pack/simonmclean/start/tryptic
-  LUA_LS_LOG_CHECK: /home/runner/lua-language-server/log/check.json
+  LUA_LS_LOG_PATH: /home/runner/lua-language-server/logs
 
 on:
   push:
@@ -17,28 +17,29 @@ jobs:
     - uses: actions/setup-node@v4
     - name: install neovim
       run: |
+        cd $HOME
         curl -OJL https://github.com/neovim/neovim/releases/download/v0.9.4/nvim-linux64.tar.gz
         tar xzf *.tar.gz
-        echo $HOME/nvim-linux64/bin/nvim --version
+        $HOME/nvim-linux64/bin/nvim --version
     - name: install neovim plugins
       run: |
         git config --global advice.detachedHead false
         git clone https://github.com/nvim-lua/plenary.nvim.git $HOME/.local/share/nvim/site/pack/plenary/start/plenary
         git clone https://github.com/nvim-tree/nvim-web-devicons $HOME/.local/share/nvim/site/pack/nvim-tree/start/nvim-web-devicons
-        git clone https://github.com/$GITHUB_REPOSITORY $HOME/$TRYPTIC_DIR
+        git clone --recurse-submodules https://github.com/$GITHUB_REPOSITORY $HOME/$TRYPTIC_DIR
         cd $HOME/$TRYPTIC_DIR
         git checkout $GITHUB_HEAD_REF
     - name: install lua-language-server
       run: |
         mkdir $HOME/lua-language-server
         cd $HOME/lua-language-server
-        curl -O -J -L https://github.com/LuaLS/lua-language-server/releases/download/3.7.2/lua-language-server-3.7.2-linux-x64.tar.gz
+        curl -OJL https://github.com/LuaLS/lua-language-server/releases/download/3.7.2/lua-language-server-3.7.2-linux-x64.tar.gz
         tar -xzf *.tar.gz
     - name: check diagnostics
       run: |
         cd $HOME/$TRYPTIC_DIR
-        $HOME/lua-language-server/bin/lua-language-server --check $HOME/$TRYPTIC_DIR
-        # if [ -r $LUA_LS_LOG_CHECK ]; then cat $LUA_LS_LOG_CHECK; fi
+        $HOME/lua-language-server/bin/lua-language-server --logpath=$LUA_LS_LOG_PATH --check $HOME/$TRYPTIC_DIR
+        if [ -r $LUA_LS_LOG_PATH/check.json ]; then cat $LUA_LS_LOG_PATH/check.json; exit 1; fi
     - name: check formatting
       run: |
         cd $HOME/$TRYPTIC_DIR

@@ -1,6 +1,5 @@
 local float = require 'tryptic.float'
 local fs = require 'tryptic.fs'
-local mock = require 'luassert.mock'
 
 describe('create_three_floating_windows', function()
   it('makes the expected nvim api calls', function()
@@ -205,6 +204,8 @@ describe('buf_set_lines_from_path', function()
     local nvim_buf_call_spy = {}
     local cmd_read_spy = {}
     local nvim_exec2_spy = {}
+    local get_filetype_from_path_spy = {}
+    local get_file_size_in_kb_spy = {}
 
     _G.tryptic_mock_vim = {
       cmd = {
@@ -232,16 +233,25 @@ describe('buf_set_lines_from_path', function()
     fs.get_file_size_in_kb = function(_)
       return 66
     end
-    mock(fs)
 
-    float.buf_set_lines_from_path(4, './hello/world.txt')
+    fs.get_filetype_from_path = function(path)
+      table.insert(get_filetype_from_path_spy, path)
+      return 'javascript'
+    end
 
-    assert.stub(fs.get_filetype_from_path).was_called_with './hello/world.txt'
-    assert.spy(fs.get_file_size_in_kb).was_called_with './hello/world.txt'
+    fs.get_file_size_in_kb = function(path)
+      table.insert(get_file_size_in_kb_spy, path)
+      return 3
+    end
+
+    float.buf_set_lines_from_path(4, '/hello/world.txt')
+
+    assert.same({ '/hello/world.txt' }, get_file_size_in_kb_spy)
+    assert.same({ '/hello/world.txt' }, get_filetype_from_path_spy)
     assert.same({
       { 4, 'readonly', false },
       { 4, 'modifiable', true },
-      { 4, 'filetype', 'text' },
+      { 4, 'filetype', 'javascript' },
       { 4, 'readonly', true },
       { 4, 'modifiable', false },
     }, nvim_buf_set_option_spy)
