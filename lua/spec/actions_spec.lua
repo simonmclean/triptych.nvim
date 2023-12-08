@@ -1,7 +1,7 @@
-local float = require 'tryptic.float'
-local help = require 'tryptic.help'
-local actions = require 'tryptic.actions'
-local view = require 'tryptic.view'
+local float = require 'triptych.float'
+local help = require 'triptych.help'
+local actions = require 'triptych.actions'
+local view = require 'triptych.view'
 local plenary_path = require 'plenary.path'
 
 local noop = function() end
@@ -76,7 +76,7 @@ describe('delete', function()
       spies.refresh = spies.refresh + 1
     end
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       ui = {
         select = function(options, prompt, callback)
           table.insert(spies.ui.select, { options, prompt })
@@ -121,7 +121,7 @@ describe('delete', function()
       spies.refresh = spies.refresh + 1
     end
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       ui = {
         select = function(_, _, callback)
           callback 'No'
@@ -174,7 +174,7 @@ describe('bulk_delete', function()
       spies.refresh = spies.refresh + 1
     end
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       ui = {
         select = function(options, config, callback)
           table.insert(spies.ui.select, { options, config })
@@ -227,7 +227,7 @@ describe('bulk_delete', function()
       spies.refresh = spies.refresh + 1
     end
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       ui = {
         select = function(_, _, _)
           spies.ui.select = spies.ui.select + 1
@@ -275,7 +275,7 @@ describe('bulk_delete', function()
       spies.refresh = spies.refresh + 1
     end
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       ui = {
         select = function(_, _, callback)
           callback 'No'
@@ -321,7 +321,7 @@ describe('add_file_or_dir', function()
       spies.refresh = spies.refresh + 1
     end
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       fn = {
         input = function(prompt)
           table.insert(spies.fn.input, prompt)
@@ -370,7 +370,7 @@ describe('add_file_or_dir', function()
 
     local mock_refresh = noop
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       fn = {
         input = function(_)
           return 'new_dir/'
@@ -412,7 +412,7 @@ describe('add_file_or_dir', function()
 
     local mock_refresh = noop
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       fn = {
         input = function(_)
           return 'new_dir_1/new_dir_2/new_file.ts'
@@ -446,8 +446,8 @@ describe('toggle_cut', function()
       refresh = 0,
     }
 
-    local config = require('tryptic.config').create_merged_config {}
-    local state_instance = require('tryptic.state').new(config, 2)
+    local config = require('triptych.config').create_merged_config {}
+    local state_instance = require('triptych.state').new(config, 2)
 
     state_instance.list_remove = function(_, list_type, item)
       table.insert(spies.list_remove, { list_type, item })
@@ -485,8 +485,8 @@ describe('toggle_copy', function()
       refresh = 0,
     }
 
-    local config = require('tryptic.config').create_merged_config {}
-    local state_instance = require('tryptic.state').new(config, 2)
+    local config = require('triptych.config').create_merged_config {}
+    local state_instance = require('triptych.state').new(config, 2)
 
     state_instance.list_remove = function(_, list_type, item)
       table.insert(spies.list_remove, { list_type, item })
@@ -536,8 +536,8 @@ describe('bulk_toggle_cut', function()
       'wow',
     }
 
-    local config = require('tryptic.config').create_merged_config {}
-    local state_instance = require('tryptic.state').new(config, 2)
+    local config = require('triptych.config').create_merged_config {}
+    local state_instance = require('triptych.state').new(config, 2)
 
     state_instance.list_contains = function(_, list_type, item)
       table.insert(spies.state.list_contains, { list_type, item })
@@ -600,8 +600,8 @@ describe('bulk_toggle_cut', function()
       'wow',
     }
 
-    local config = require('tryptic.config').create_merged_config {}
-    local state_instance = require('tryptic.state').new(config, 2)
+    local config = require('triptych.config').create_merged_config {}
+    local state_instance = require('triptych.state').new(config, 2)
 
     state_instance.list_contains = function(_, _, _)
       return true
@@ -649,8 +649,8 @@ describe('bulk_toggle_copy', function()
       'wow',
     }
 
-    local config = require('tryptic.config').create_merged_config {}
-    local state_instance = require('tryptic.state').new(config, 2)
+    local config = require('triptych.config').create_merged_config {}
+    local state_instance = require('triptych.state').new(config, 2)
 
     state_instance.list_contains = function(_, list_type, item)
       table.insert(spies.state.list_contains, { list_type, item })
@@ -713,8 +713,8 @@ describe('bulk_toggle_copy', function()
       'wow',
     }
 
-    local config = require('tryptic.config').create_merged_config {}
-    local state_instance = require('tryptic.state').new(config, 2)
+    local config = require('triptych.config').create_merged_config {}
+    local state_instance = require('triptych.state').new(config, 2)
 
     state_instance.list_contains = function(_, _, _)
       return true
@@ -755,7 +755,7 @@ describe('rename', function()
       refresh = 0,
     }
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       fn = {
         trim = function(str)
           table.insert(spies.fn.trim, str)
@@ -799,7 +799,7 @@ end)
 
 describe('paste', function()
   it('pastes the items in the copy list', function()
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       print = vim.print,
     }
 
@@ -821,8 +821,8 @@ describe('paste', function()
       refresh = 0,
     }
 
-    local config = require('tryptic.config').create_merged_config {}
-    local state_instance = require('tryptic.state').new(config, 2)
+    local config = require('triptych.config').create_merged_config {}
+    local state_instance = require('triptych.state').new(config, 2)
 
     state_instance.list_remove_all = function(_, list_type)
       table.insert(spies.state.list_remove_all, list_type)
@@ -907,7 +907,7 @@ describe('paste', function()
   end)
 
   it('pastes the items in the cut list', function()
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       print = vim.print,
     }
 
@@ -926,8 +926,8 @@ describe('paste', function()
       refresh = 0,
     }
 
-    local config = require('tryptic.config').create_merged_config {}
-    local state_instance = require('tryptic.state').new(config, 2)
+    local config = require('triptych.config').create_merged_config {}
+    local state_instance = require('triptych.state').new(config, 2)
 
     state_instance.list_remove_all = function(_, list_type)
       table.insert(spies.state.list_remove_all, list_type)
@@ -1000,7 +1000,7 @@ describe('paste', function()
 end)
 
 describe('edit_file', function()
-  it('closes tryptic and opens the file', function()
+  it('closes triptych and opens the file', function()
     local spies = {
       close = 0,
       cmd = {
@@ -1008,9 +1008,9 @@ describe('edit_file', function()
       },
     }
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       g = {
-        tryptic_close = function()
+        triptych_close = function()
           spies.close = spies.close + 1
         end,
       },
@@ -1030,7 +1030,7 @@ describe('edit_file', function()
 end)
 
 describe('toggle_hidden', function()
-  it('closes tryptic and opens the file', function()
+  it('closes triptych and opens the file', function()
     local spies = {
       refresh = 0,
     }
@@ -1063,7 +1063,7 @@ describe('jump_to_cwd', function()
         nav_to = {},
       },
     }
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       fn = {
         getcwd = function()
           spies.fn.getcwd = spies.fn.getcwd + 1
@@ -1101,7 +1101,7 @@ describe('jump_to_cwd', function()
         nav_to = {},
       },
     }
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       fn = {
         getcwd = function()
           spies.fn.getcwd = spies.fn.getcwd + 1
@@ -1184,7 +1184,7 @@ describe('nav_right', function()
         path = '/hello/world/foo',
       }
     end
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       fn = {
         isdirectory = function(path)
           table.insert(spies.vim.fn.isdirectory, path)
@@ -1232,7 +1232,7 @@ describe('nav_right', function()
         path = '/hello/world/bar.js',
       }
     end
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       fn = {
         isdirectory = function(path)
           table.insert(spies.vim.fn.isdirectory, path)

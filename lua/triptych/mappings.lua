@@ -1,13 +1,13 @@
-local view = require 'tryptic.view'
+local view = require 'triptych.view'
 
 local Mappings = {}
 
----@param State TrypticState
+---@param State TriptychState
 ---@param actions unknown
 function Mappings.new(State, actions)
-  local vim = _G.tryptic_mock_vim or vim
-  local mappings = vim.g.tryptic_config.mappings
-  local extension_mappings = vim.g.tryptic_config.extension_mappings
+  local vim = _G.triptych_mock_vim or vim
+  local mappings = vim.g.triptych_config.mappings
+  local extension_mappings = vim.g.triptych_config.extension_mappings
 
   ---@param mode string
   ---@param key_or_keys string | string[]
@@ -41,10 +41,10 @@ function Mappings.new(State, actions)
   map('n', mappings.show_help, actions.help)
   map('n', mappings.toggle_hidden, actions.toggle_hidden)
   map('n', mappings.quit, function()
-    vim.g.tryptic_close() -- TODO: Move to actions
+    vim.g.triptych_close() -- TODO: Move to actions
   end)
   map('v', mappings.quit, function()
-    vim.g.tryptic_close()
+    vim.g.triptych_close()
   end)
 
   -----------------------------------------

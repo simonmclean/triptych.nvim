@@ -1,4 +1,4 @@
-local event_handlers = require 'tryptic.event_handlers'
+local event_handlers = require 'triptych.event_handlers'
 
 describe('handle_cursor_moved', function()
   it('makes the expected function calls and updates path_to_line_map', function()
@@ -21,7 +21,7 @@ describe('handle_cursor_moved', function()
         ['a/b/c'] = 2,
       },
     }
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       api = {
         nvim_win_get_cursor = function(winid)
           table.insert(nvim_win_get_cursor_spy, winid)
@@ -29,7 +29,7 @@ describe('handle_cursor_moved', function()
         end,
       },
     }
-    _G.tryptic_mock_view = {
+    _G.triptych_mock_view = {
       get_target_under_cursor = function(s)
         table.insert(get_target_under_cursor_spy, s)
         return mock_target

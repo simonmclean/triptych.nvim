@@ -2,8 +2,8 @@
 
 ---@return string[]
 local function help_lines()
-  local vim = _G.tryptic_mock_vim or vim
-  local mappings = vim.g.tryptic_config.mappings
+  local vim = _G.triptych_mock_vim or vim
+  local mappings = vim.g.triptych_config.mappings
   local lines = {}
   local left_col_length = 0 -- Used for padding and alignment
 
@@ -30,7 +30,7 @@ local function help_lines()
 
   table.sort(lines)
 
-  table.insert(lines, 1, 'Tryptic key bindings')
+  table.insert(lines, 1, 'Triptych key bindings')
   table.insert(lines, 2, '')
 
   return lines

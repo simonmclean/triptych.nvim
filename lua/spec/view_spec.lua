@@ -1,8 +1,8 @@
-local view = require 'tryptic.view'
-local float = require 'tryptic.float'
-local diagnostics = require 'tryptic.diagnostics'
-local fs = require 'tryptic.fs'
-local icons = require 'tryptic.icons'
+local view = require 'triptych.view'
+local float = require 'triptych.float'
+local diagnostics = require 'triptych.diagnostics'
+local fs = require 'triptych.fs'
+local icons = require 'triptych.icons'
 
 describe('refresh_view', function()
   it('calls nav_to', function()
@@ -39,7 +39,7 @@ describe('jump_cursor_to', function()
       },
     }
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       api = {
         nvim_win_set_cursor = function(winid, pos)
           table.insert(spies.api.nvim_win_set_cursor, { winid, pos })
@@ -98,9 +98,9 @@ describe('update_child_window', function()
       },
     }
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       g = {
-        tryptic_config = {
+        triptych_config = {
           options = {
             show_hidden = true,
           },
@@ -219,7 +219,7 @@ describe('update_child_window', function()
       '',
       'Directory',
     } }, spies.float.win_set_title)
-    assert.same({ { 11, 'filetype', 'tryptic' } }, spies.api.nvim_buf_set_option)
+    assert.same({ { 11, 'filetype', 'triptych' } }, spies.api.nvim_buf_set_option)
     assert.same(1, spies.fn.getcwd)
     assert.same({ '/hello/' }, spies.fs.get_path_details)
     assert.same({}, spies.git.filter_ignored)
@@ -231,7 +231,7 @@ describe('update_child_window', function()
       'x c',
     } } }, spies.float.buf_set_lines)
     assert.same({ { 11, { 'Directory', 'Comment', 'Comment' } } }, spies.float.buf_apply_highlights)
-    assert.same({ 'tryptic_sign_col_child' }, spies.fn.sign_unplace)
+    assert.same({ 'triptych_sign_col_child' }, spies.fn.sign_unplace)
     assert.same({ '🎸', '🎸', '🎸' }, spies.diagnostics.get_sign)
   end)
 end)
@@ -382,9 +382,9 @@ describe('nav_to', function()
       table.insert(spies.diagnostics.get_sign, status)
     end
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       g = {
-        tryptic_config = {
+        triptych_config = {
           options = {
             show_hidden = true,
           },
@@ -429,7 +429,7 @@ describe('nav_to', function()
       },
     }
 
-    require('tryptic.view').nav_to(mock_state, '/level_1/level_2/level_3', mock_diagnostics, mock_git)
+    require('triptych.view').nav_to(mock_state, '/level_1/level_2/level_3', mock_diagnostics, mock_git)
 
     assert.same({ 1, 2 }, spies.vim.api.nvim_win_get_buf)
     assert.same({
@@ -539,7 +539,7 @@ describe('get_targets_in_selection', function()
       },
     }
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       fn = {
         getpos = function(value)
           table.insert(spies.vim.fn.getpos, value)
@@ -573,7 +573,7 @@ end)
 describe('get_target_under_cursor', function()
   it('gets target under cursor', function()
     local spy = {}
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       api = {
         nvim_win_get_cursor = function(winid)
           table.insert(spy, winid)

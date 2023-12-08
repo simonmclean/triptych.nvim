@@ -1,18 +1,18 @@
-local u = require 'tryptic.utils'
-local float = require 'tryptic.float'
-local view = require 'tryptic.view'
+local u = require 'triptych.utils'
+local float = require 'triptych.float'
+local view = require 'triptych.view'
 local plenary_path = require 'plenary.path'
-local tryptic_help = require 'tryptic.help'
+local triptych_help = require 'triptych.help'
 
 local Actions = {}
 
 --- TODO: Return type
----@param State TrypticState
+---@param State TriptychState
 ---@param refresh_view fun(): nil
 ---@param Diagnostics? Diagnostics
 ---@param Git? Git
 function Actions.new(State, refresh_view, Diagnostics, Git)
-  local vim = _G.tryptic_mock_vim or vim
+  local vim = _G.triptych_mock_vim or vim
 
   local M = {}
 
@@ -20,7 +20,7 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
   M.help = function()
     local win = State.windows.child.win
     float.win_set_title(win, 'Help', '󰋗', 'Directory')
-    float.win_set_lines(win, tryptic_help.help_lines())
+    float.win_set_lines(win, triptych_help.help_lines())
   end
 
   ---@return nil
@@ -68,7 +68,7 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
 
   ---@return nil
   M.add_file_or_dir = function()
-    vim = _G.tryptic_mock_vim or vim
+    vim = _G.triptych_mock_vim or vim
     local current_directory = State.windows.current.path
     local response = vim.fn.trim(vim.fn.input 'Enter name for new file or directory (dirs end with a "/"): ')
     if u.is_empty(response) then
@@ -228,7 +228,7 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
   ---@param path string
   ---@return nil
   M.edit_file = function(path)
-    vim.g.tryptic_close()
+    vim.g.triptych_close()
     vim.cmd.edit(path)
   end
 

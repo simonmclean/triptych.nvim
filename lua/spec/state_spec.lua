@@ -1,6 +1,6 @@
-local u = require 'tryptic.utils'
-local state = require 'tryptic.state'
-local config = require 'tryptic.config'
+local u = require 'triptych.utils'
+local state = require 'triptych.state'
+local config = require 'triptych.config'
 
 ---@return PathDetails
 local function create_path_details()

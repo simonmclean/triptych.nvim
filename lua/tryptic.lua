@@ -1,5 +1,5 @@
-local tryptic = require 'tryptic.init'
+local triptych = require 'triptych.init'
 
 return {
-  setup = tryptic.setup,
+  setup = triptych.setup,
 }

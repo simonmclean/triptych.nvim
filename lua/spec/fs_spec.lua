@@ -1,4 +1,4 @@
-local fs = require 'tryptic.fs'
+local fs = require 'triptych.fs'
 local tu = require 'spec.test_utils'
 local plenary_filetype = require 'plenary.filetype'
 
@@ -16,9 +16,9 @@ describe('get_path_details', function()
       },
     }
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       g = {
-        tryptic_config = {
+        triptych_config = {
           options = {
             dirs_first = false,
           },
@@ -103,9 +103,9 @@ describe('get_path_details', function()
   end)
 
   it('sorts dirs first when the config option is true', function()
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       g = {
-        tryptic_config = {
+        triptych_config = {
           options = {
             dirs_first = true,
           },
@@ -188,7 +188,7 @@ end)
 describe('get_file_size_in_kb', function()
   it('returns vim.fn.getfsize / 1000', function()
     local spy = {}
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       fn = {
         getfsize = function(path)
           table.insert(spy, path)

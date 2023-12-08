@@ -1,15 +1,15 @@
-<h1 align="center">Tryptic.nvim</h1>
+<h1 align="center">Triptych.nvim</h1>
 
 <p align="center">Directory viewer for Neovim, inspired by <a href="https://github.com/ranger/ranger">Ranger</a></p>
 
-![Tryptic screenshot](screenshot.png?raw=true "Tryptic screenshot")
+![Triptych screenshot](screenshot.png?raw=true "Triptych screenshot")
 
 The UI consists of 3 floating windows. In the center is the currently focused directory. On the left is the parent directory.
 The right window contains either a child directory, or a file preview.
 
 With default bindings use `j` and `k` (or any other motions like `G`,  `gg`, `/` etc) to navigate within the current directory.
 Use `h` and `l` to switch to the parent or child directories respectively.
-If the buffer on the right is a file, then pressing `l` will close Tryptic and open that file in the buffer you were just in.
+If the buffer on the right is a file, then pressing `l` will close Triptych and open that file in the buffer you were just in.
 You only ever control or focus the middle window.
 
 ## ✨ Features
@@ -40,7 +40,7 @@ Example using [Lazy](https://github.com/folke/lazy.nvim).
 
 ```lua
 {
-  'simonmclean/tryptic',
+  'simonmclean/triptych',
   event = 'VeryLazy',
   dependencies = {
     'nvim-lua/plenary.nvim', -- required
@@ -52,7 +52,7 @@ Example using [Lazy](https://github.com/folke/lazy.nvim).
 Then call the `setup` function somewhere in your Neovim config to initialise it with the default options.
 
 ```lua
-require 'tryptic'.setup()
+require 'triptych'.setup()
 ```
 
 ## ⚙️ Configuration
@@ -62,10 +62,10 @@ Below is the default configuration. Feel free to override any of these.
 Key mappings can either be a string, or a table of strings if you want multiple bindings.
 
 ```lua
-require 'tryptic'.setup {
+require 'triptych'.setup {
   mappings = {
-    open_tryptic = '<leader>-',
-    -- Everything below is buffer-local, meaning it will only apply to Tryptic windows
+    open_triptych = '<leader>-',
+    -- Everything below is buffer-local, meaning it will only apply to Triptych windows
     show_help = 'g?',
     jump_to_cwd = '.',  -- Pressing again will toggle back
     nav_left = 'h',

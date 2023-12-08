@@ -1,4 +1,4 @@
-local u = require 'tryptic.utils'
+local u = require 'triptych.utils'
 
 -- Sorted by highest priority last, so that > comparison works intuitively
 ---@enum GitFileStatusPriority
@@ -10,16 +10,16 @@ local sign_priority = {
 }
 
 local status_to_sign = {
-  ['??'] = 'TrypticGitAdd',
-  ['R'] = 'TrypticGitRename',
-  ['M'] = 'TrypticGitModify',
-  ['A'] = 'TrypticGitAdd',
+  ['??'] = 'TriptychGitAdd',
+  ['R'] = 'TriptychGitRename',
+  ['M'] = 'TriptychGitModify',
+  ['A'] = 'TriptychGitAdd',
 }
 
 local Git = {}
 
 function Git.new()
-  local vim = _G.tryptic_mock_vim or vim
+  local vim = _G.triptych_mock_vim or vim
   local instance = {}
   setmetatable(instance, { __index = Git })
 
@@ -27,13 +27,13 @@ function Git.new()
   local git_status = u.multiline_str_to_table(vim.fn.system 'git status --porcelain')
   local result = {}
 
-  local signs_config = vim.g.tryptic_config.git_signs.signs
+  local signs_config = vim.g.triptych_config.git_signs.signs
 
   local signs_to_text = {
-    ['TrypticGitAdd'] = signs_config.add,
-    ['TrypticGitModify'] = signs_config.modify,
-    ['TrypticGitRename'] = signs_config.rename,
-    ['TrypticGitUntracked'] = signs_config.untracked,
+    ['TriptychGitAdd'] = signs_config.add,
+    ['TriptychGitModify'] = signs_config.modify,
+    ['TriptychGitRename'] = signs_config.rename,
+    ['TriptychGitUntracked'] = signs_config.untracked,
   }
 
   -- Register the signs if they're not already
@@ -76,7 +76,7 @@ end
 ---@param paths string[]
 ---@return PathDetails
 function Git:filter_ignored(paths)
-  local vim = _G.tryptic_mock_vim or vim
+  local vim = _G.triptych_mock_vim or vim
   -- If this isn't a git project, then nothing is git ignored
   if u.is_empty(self.project_root) then
     return paths

@@ -1,4 +1,4 @@
-local diagnostics = require 'tryptic.diagnostics'
+local diagnostics = require 'triptych.diagnostics'
 local tu = require 'spec.test_utils'
 
 describe('get_sign', function()
@@ -16,7 +16,7 @@ end)
 
 describe('Diagnostics', function()
   it('exposes diagnostics per path', function()
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       diagnostic = {
         get = function()
           return {

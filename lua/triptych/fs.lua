@@ -1,10 +1,10 @@
-local u = require 'tryptic.utils'
+local u = require 'triptych.utils'
 local plenary_filetype = require 'plenary.filetype'
 
 ---@param path string
 ---@return number
 local function get_file_size_in_kb(path)
-  local vim = _G.tryptic_mock_vim or vim
+  local vim = _G.triptych_mock_vim or vim
   local bytes = vim.fn.getfsize(path)
   return bytes / 1000
 end
@@ -18,7 +18,7 @@ end
 ---@param _path string
 ---@return PathDetails
 local function get_path_details(_path)
-  local vim = _G.tryptic_mock_vim or vim
+  local vim = _G.triptych_mock_vim or vim
   local path = vim.fs.normalize(_path)
 
   local tree = {
@@ -36,7 +36,7 @@ local function get_path_details(_path)
     table.insert(children, { child_name, child_type })
   end
 
-  if vim.g.tryptic_config.options.dirs_first then
+  if vim.g.triptych_config.options.dirs_first then
     table.sort(children, function(a, b)
       if a[2] == 'directory' and b[2] ~= 'directory' then
         return true

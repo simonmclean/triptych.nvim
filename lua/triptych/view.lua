@@ -1,9 +1,9 @@
-local icons = require 'tryptic.icons'
-local u = require 'tryptic.utils'
-local float = require 'tryptic.float'
-local fs = require 'tryptic.fs'
-local git = require 'tryptic.git'
-local diagnostics = require 'tryptic.diagnostics'
+local icons = require 'triptych.icons'
+local u = require 'triptych.utils'
+local float = require 'triptych.float'
+local fs = require 'triptych.fs'
+local git = require 'triptych.git'
+local diagnostics = require 'triptych.diagnostics'
 
 local M = {}
 
@@ -44,7 +44,7 @@ local function filter_and_encrich_dir_contents(path_details, show_hidden, Diagno
 end
 
 ---Take a PathDetails and return lines and highlights for an nvim buffer
----@param State TrypticState
+---@param State TriptychState
 ---@param path_details PathDetails
 ---@return string[] # Lines including icons
 ---@return string[] # Highlights for icons
@@ -93,19 +93,19 @@ local function path_details_to_lines(State, path_details)
 end
 
 ---Get the PathDetails that correspond to the path under the cursor
----@param State TrypticState
+---@param State TriptychState
 ---@return PathDetails
 function M.get_target_under_cursor(State)
-  local vim = _G.tryptic_mock_vim or vim
+  local vim = _G.triptych_mock_vim or vim
   local line_number = vim.api.nvim_win_get_cursor(0)[1]
   return State.windows.current.contents.children[line_number]
 end
 
 ---Get a list of PathDetails that correspond to all the paths under the visual selection
----@param State TrypticState
+---@param State TriptychState
 ---@return PathDetails[]
 function M.get_targets_in_selection(State)
-  local vim = _G.tryptic_mock_vim or vim
+  local vim = _G.triptych_mock_vim or vim
   local from = vim.fn.getpos('v')[2]
   local to = vim.api.nvim_win_get_cursor(0)[1]
   local results = {}
@@ -138,7 +138,7 @@ end
 ---@param path string
 ---@return string?
 local function get_title_postfix(path)
-  local vim = _G.tryptic_mock_vim or vim
+  local vim = _G.triptych_mock_vim or vim
   if path == vim.fn.getcwd() then
     return '(cwd)'
   end
@@ -160,7 +160,7 @@ end
 ---@param group string # see :h sign-group
 ---@return nil
 local function set_sign_columns(buf, children, group)
-  local vim = _G.tryptic_mock_vim or vim
+  local vim = _G.triptych_mock_vim or vim
   vim.fn.sign_unplace(group)
   for index, entry in ipairs(children) do
     if entry.git_status then
@@ -186,14 +186,14 @@ local function get_dir_contents(path, show_hidden, Diagnostics, Git)
   return filter_and_encrich_dir_contents(contents, show_hidden, Diagnostics, Git)
 end
 
----@param State TrypticState
+---@param State TriptychState
 ---@param target_dir string
 ---@param Diagnostics? Diagnostics
 ---@param Git? Git
 ---@param cursor_target? string full path
 ---@return nil
 function M.nav_to(State, target_dir, Diagnostics, Git, cursor_target)
-  local vim = _G.tryptic_mock_vim or vim
+  local vim = _G.triptych_mock_vim or vim
 
   local focused_win = State.windows.current.win
   local parent_win = State.windows.parent.win
@@ -213,8 +213,8 @@ function M.nav_to(State, target_dir, Diagnostics, Git, cursor_target)
   float.win_set_lines(parent_win, parent_lines)
   float.win_set_lines(focused_win, focused_lines, true)
 
-  set_sign_columns(focused_buf, focused_contents.children, 'tryptic_sign_col_focused')
-  set_sign_columns(parent_buf, parent_contents.children, 'tryptic_sign_col_parent')
+  set_sign_columns(focused_buf, focused_contents.children, 'triptych_sign_col_focused')
+  set_sign_columns(parent_buf, parent_contents.children, 'triptych_sign_col_parent')
 
   float.win_set_title(parent_win, parent_title, '', 'Directory', get_title_postfix(parent_path))
   float.win_set_title(focused_win, focused_title, '', 'Directory', get_title_postfix(target_dir))
@@ -256,13 +256,13 @@ function M.nav_to(State, target_dir, Diagnostics, Git, cursor_target)
   }
 end
 
----@param State TrypticState
+---@param State TriptychState
 ---@param path_details PathDetails
 ---@param Diagnostics? Diagnostics
 ---@param Git? Git
 ---@return nil
 function M.update_child_window(State, path_details, Diagnostics, Git)
-  local vim = _G.tryptic_mock_vim or vim
+  local vim = _G.triptych_mock_vim or vim
   local buf = vim.api.nvim_win_get_buf(State.windows.child.win)
 
   State.windows.child.path = u.cond(path_details == nil, {
@@ -285,10 +285,10 @@ function M.update_child_window(State, path_details, Diagnostics, Git)
     )
     local contents = get_dir_contents(path_details.path, State.show_hidden, Diagnostics, Git)
     local lines, highlights = path_details_to_lines(State, contents)
-    vim.api.nvim_buf_set_option(buf, 'filetype', 'tryptic')
+    vim.api.nvim_buf_set_option(buf, 'filetype', 'triptych')
     float.buf_set_lines(buf, lines)
     float.buf_apply_highlights(buf, highlights)
-    set_sign_columns(buf, contents.children, 'tryptic_sign_col_child')
+    set_sign_columns(buf, contents.children, 'triptych_sign_col_child')
   else
     local filetype = fs.get_filetype_from_path(path_details.path) -- TODO: De-dupe this
     local icon, highlight = icons.get_icon_by_filetype(filetype)
@@ -297,11 +297,11 @@ function M.update_child_window(State, path_details, Diagnostics, Git)
   end
 end
 
----@param State TrypticState
+---@param State TriptychState
 ---@param path string
 ---@return nil
 function M.jump_cursor_to(State, path)
-  local vim = _G.tryptic_mock_vim or vim
+  local vim = _G.triptych_mock_vim or vim
   local line_num
   for index, item in ipairs(State.windows.current.contents.children) do
     if item.path == path then
@@ -314,7 +314,7 @@ function M.jump_cursor_to(State, path)
   end
 end
 
----@param State TrypticState
+---@param State TriptychState
 ---@param Diagnostics? Diagnostics
 ---@param Git? Git
 ---@return nil

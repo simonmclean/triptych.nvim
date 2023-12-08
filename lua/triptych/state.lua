@@ -1,11 +1,11 @@
-local u = require 'tryptic.utils'
+local u = require 'triptych.utils'
 
-local TrypticState = {}
+local TriptychState = {}
 
----@return TrypticState
-function TrypticState.new(config, opening_win)
+---@return TriptychState
+function TriptychState.new(config, opening_win)
   local instance = {}
-  setmetatable(instance, { __index = TrypticState })
+  setmetatable(instance, { __index = TriptychState })
 
   instance.show_hidden = config.options.show_hidden
   instance.windows = {
@@ -33,7 +33,7 @@ end
 ---@param list_type 'cut' | 'copy'
 ---@param item_to_add PathDetails
 ---@return nil
-function TrypticState:list_add(list_type, item_to_add)
+function TriptychState:list_add(list_type, item_to_add)
   local list = u.cond(list_type == 'cut', {
     when_true = self.cut_list,
     when_false = self.copy_list,
@@ -49,7 +49,7 @@ end
 ---@param list_type 'cut' | 'copy'
 ---@param item_to_remove PathDetails
 ---@return nil
-function TrypticState:list_remove(list_type, item_to_remove)
+function TriptychState:list_remove(list_type, item_to_remove)
   local list = u.cond(list_type == 'cut', {
     when_true = self.cut_list,
     when_false = self.copy_list,
@@ -64,7 +64,7 @@ end
 
 ---@param list_type 'cut' | 'copy'
 ---@return nil
-function TrypticState:list_remove_all(list_type)
+function TriptychState:list_remove_all(list_type)
   if list_type == 'cut' then
     self.cut_list = {}
   else
@@ -75,7 +75,7 @@ end
 ---@param list_type 'cut' | 'copy'
 ---@param item PathDetails
 ---@return boolean
-function TrypticState:list_contains(list_type, item)
+function TriptychState:list_contains(list_type, item)
   local list = u.cond(list_type == 'cut', {
     when_true = self.cut_list,
     when_false = self.copy_list,
@@ -91,7 +91,7 @@ end
 ---@param list_type 'cut' | 'copy'
 ---@param item PathDetails
 ---@return nil
-function TrypticState:list_toggle(list_type, item)
+function TriptychState:list_toggle(list_type, item)
   if self:list_contains(list_type, item) then
     self:list_remove(list_type, item)
   else
@@ -100,5 +100,5 @@ function TrypticState:list_toggle(list_type, item)
 end
 
 return {
-  new = TrypticState.new,
+  new = TriptychState.new,
 }

@@ -1,4 +1,4 @@
-local autocmds = require 'tryptic.autocmds'
+local autocmds = require 'triptych.autocmds'
 
 local mock_state = { 'mock_state' }
 local mock_diagnostic = { 'mock_diagnostic' }
@@ -9,7 +9,7 @@ describe('AutoCommands.new', function()
     local autocmd_spy = {}
     local handle_cursor_moved_spy = {}
     local handle_buf_leave_spy = {}
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       api = {
         nvim_create_autocmd = function(name, config)
           table.insert(autocmd_spy, { name, config })
@@ -56,7 +56,7 @@ describe('AutoCommands:destroy_autocommands', function()
   it('destroys the autocommands', function()
     local spy = {}
     local i = 0
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       api = {
         nvim_create_autocmd = function(_, _)
           i = i + 1

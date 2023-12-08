@@ -1,17 +1,17 @@
----@class TrypticConfig
----@field mappings TrypticConfigMappings
+---@class TriptychConfig
+---@field mappings TriptychConfigMappings
 ---@field extension_mappings { [string]: ExtensionMapping }
----@field options TrypticConfigOptions
----@field git_signs TrypticConfigGitSigns
----@field diagnostic_signs TrypticConfigDiagnostic
+---@field options TriptychConfigOptions
+---@field git_signs TriptychConfigGitSigns
+---@field diagnostic_signs TriptychConfigDiagnostic
 
----@class TrypticState
----@field new fun(config: TrypticConfig, opening_win: integer): TrypticState
----@field list_add fun(self: TrypticState, list_type: 'cut' | 'copy', item: PathDetails): nil
----@field list_remove fun(self: TrypticState, list_type: 'cut' | 'copy', item: PathDetails): nil
----@field list_remove_all fun(self: TrypticState, list_type: 'cut' | 'copy'): nil
----@field list_toggle fun(self: TrypticState, list_type: 'cut' | 'copy', item: PathDetails): nil
----@field list_contains fun(self: TrypticState, list_type: 'cut' | 'copy', item: PathDetails): nil
+---@class TriptychState
+---@field new fun(config: TriptychConfig, opening_win: integer): TriptychState
+---@field list_add fun(self: TriptychState, list_type: 'cut' | 'copy', item: PathDetails): nil
+---@field list_remove fun(self: TriptychState, list_type: 'cut' | 'copy', item: PathDetails): nil
+---@field list_remove_all fun(self: TriptychState, list_type: 'cut' | 'copy'): nil
+---@field list_toggle fun(self: TriptychState, list_type: 'cut' | 'copy', item: PathDetails): nil
+---@field list_contains fun(self: TriptychState, list_type: 'cut' | 'copy', item: PathDetails): nil
 ---@field windows ViewState
 ---@field cut_list PathDetails[]
 ---@field copy_list PathDetails[]
@@ -20,12 +20,12 @@
 ---@field show_hidden boolean
 
 ---@class AutoCommands
----@field new fun(state: TrypticState): AutoCommands
+---@field new fun(state: TriptychState): AutoCommands
 ---@field destroy_autocommands fun(): nil
 ---@field autocmds integer[]
 
----@class TrypticConfigMappings
----@field open_tryptic KeyMapping
+---@class TriptychConfigMappings
+---@field open_triptych KeyMapping
 ---@field show_help KeyMapping
 ---@field jump_to_cwd KeyMapping
 ---@field nav_left KeyMapping
@@ -43,26 +43,26 @@
 ---@field mode string
 ---@field fn fun(contents: PathDetails): nil
 
----@class TrypticConfigOptions
+---@class TriptychConfigOptions
 ---@field dirs_first boolean
 ---@field show_hidden boolean
----@field line_numbers TrypticConfigLineNumbers
+---@field line_numbers TriptychConfigLineNumbers
 
----@class TrypticConfigLineNumbers
+---@class TriptychConfigLineNumbers
 ---@field enabled boolean
 ---@field relative boolean
 
----@class TrypticConfigGitSigns
+---@class TriptychConfigGitSigns
 ---@field enabled boolean
----@field signs TrypticConfigGitSignsSigns
+---@field signs TriptychConfigGitSignsSigns
 
----@class TrypticConfigGitSignsSigns
+---@class TriptychConfigGitSignsSigns
 ---@field add string
 ---@field modify string
 ---@field rename string
 ---@field untracked string
 
----@class TrypticConfigDiagnostic
+---@class TriptychConfigDiagnostic
 ---@field enabled boolean
 
 ---@alias KeyMapping (string | string[])

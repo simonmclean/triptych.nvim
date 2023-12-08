@@ -1,10 +1,10 @@
-local u = require 'tryptic.utils'
+local u = require 'triptych.utils'
 --
----@type TrypticConfig
+---@type TriptychConfig
 local default_config = {
   mappings = {
-    -- Everything below is buffer-local, meaning it will only apply to Tryptic windows
-    open_tryptic = '<leader>-',
+    -- Everything below is buffer-local, meaning it will only apply to Triptych windows
+    open_triptych = '<leader>-',
     show_help = 'g?',
     jump_to_cwd = '.', -- Pressing again will toggle back
     nav_left = 'h',
@@ -42,7 +42,7 @@ local default_config = {
 }
 
 ---@param user_config table
----@return TrypticConfig
+---@return TriptychConfig
 local create_merged_config = function(user_config)
   return u.merge_tables(default_config, user_config)
 end

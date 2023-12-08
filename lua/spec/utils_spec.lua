@@ -1,4 +1,4 @@
-local u = require 'tryptic.utils'
+local u = require 'triptych.utils'
 
 describe('set', function()
   it('returns a copy of the table with the specified value changed', function()
