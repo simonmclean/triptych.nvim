@@ -48,4 +48,4 @@ jobs:
     - name: run tests
       run: |
         cd $HOME/$TRYPTIC_DIR
-        $HOME/nvim-linux64/bin/nvim --headless -c "PlenaryCustedDirectory lua/spec/"
+        $HOME/nvim-linux64/bin/nvim --headless -c "PlenaryBustedDirectory lua/spec/"
