@@ -139,9 +139,4 @@ For example, if you want to make `<c-f>` search the file or directory under the 
 
 ## 🛠️ TODO
 
-- Project
-    - Github Action
-        - Formating
-        - Linting
-        - Testing
-    - Test a different machine with a vanilla Neovim config
+- Test a different machine with a vanilla Neovim config
