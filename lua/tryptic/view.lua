@@ -1,4 +1,4 @@
-local devicons_installed, devicons = pcall(require, 'nvim-web-devicons')
+local icons = require 'tryptic.icons'
 local u = require 'tryptic.utils'
 local float = require 'tryptic.float'
 local fs = require 'tryptic.fs'
@@ -55,23 +55,16 @@ local function path_details_to_lines(State, path_details)
   for _, child in ipairs(path_details.children) do
     local line, highlight_name = u.cond(child.is_dir, {
       when_true = function()
-        local line = ''
-        if devicons_installed then
-          line = line .. ' '
-        end
-        line = line .. child.display_name
+        local line = ' ' .. child.display_name
         return line, 'Directory'
       end,
       when_false = function()
-        if devicons_installed then
-          local maybe_icon, maybe_highlight = devicons.get_icon_by_filetype(child.filetype)
-          local highlight = maybe_highlight or 'Comment'
-          local fallback_icon = ''
-          local icon = maybe_icon or fallback_icon
-          local line = icon .. ' ' .. child.display_name
-          return line, highlight
-        end
-        return child.display_name
+        local maybe_icon, maybe_highlight = icons.get_icon_by_filetype(child.filetype)
+        local highlight = maybe_highlight or 'Comment'
+        local fallback_icon = ''
+        local icon = maybe_icon or fallback_icon
+        local line = icon .. ' ' .. child.display_name
+        return line, highlight
       end,
     })
 
@@ -298,14 +291,7 @@ function M.update_child_window(State, path_details, Diagnostics, Git)
     set_sign_columns(buf, contents.children, 'tryptic_sign_col_child')
   else
     local filetype = fs.get_filetype_from_path(path_details.path) -- TODO: De-dupe this
-    local icon, highlight = u.cond(devicons_installed, {
-      when_true = function()
-        return devicons.get_icon_by_filetype(filetype)
-      end,
-      when_false = function()
-        return nil, nil
-      end,
-    })
+    local icon, highlight = icons.get_icon_by_filetype(filetype)
     float.win_set_title(State.windows.child.win, path_details.basename, icon, highlight)
     float.buf_set_lines_from_path(buf, path_details.path)
   end

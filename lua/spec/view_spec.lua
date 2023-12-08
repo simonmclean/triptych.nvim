@@ -2,6 +2,7 @@ local view = require 'tryptic.view'
 local float = require 'tryptic.float'
 local diagnostics = require 'tryptic.diagnostics'
 local fs = require 'tryptic.fs'
+local icons = require 'tryptic.icons'
 
 describe('refresh_view', function()
   it('calls nav_to', function()
@@ -92,6 +93,9 @@ describe('update_child_window', function()
         get_sign = {},
         get = {},
       },
+      icons = {
+        get_icon_by_filetype = {}
+      }
     }
 
     _G.tryptic_mock_vim = {
@@ -121,6 +125,12 @@ describe('update_child_window', function()
         end,
       },
     }
+
+    icons.get_icon_by_filetype = function(ft)
+      table.insert(spies.icons.get_icon_by_filetype, ft)
+      return 'x'
+    end
+
     float.win_set_title = function(winid, title, icon, highlight, postfix)
       table.insert(spies.float.win_set_title, { winid, title, icon, highlight, postfix })
     end
@@ -216,11 +226,11 @@ describe('update_child_window', function()
     assert.same({ '/hello/' }, spies.git.status_of)
     assert.same({ '/hello/' }, spies.diagnostics.get)
     assert.same({ { 11, {
-      'a/',
-      'b',
-      'c',
+      ' a/',
+      'x b',
+      'x c',
     } } }, spies.float.buf_set_lines)
-    assert.same({ { 11, { 'Directory' } } }, spies.float.buf_apply_highlights)
+    assert.same({ { 11, { 'Directory', 'Comment', 'Comment' } } }, spies.float.buf_apply_highlights)
     assert.same({ 'tryptic_sign_col_child' }, spies.fn.sign_unplace)
     assert.same({ '🎸', '🎸', '🎸' }, spies.diagnostics.get_sign)
   end)
@@ -432,14 +442,14 @@ describe('nav_to', function()
       {
         2,
         {
-          'level_3/',
-          'file_a.js',
+          ' level_3/',
+          'x file_a.js',
         },
       },
       {
         1,
         {
-          'file_b.js',
+          'x file_b.js',
         },
         true,
       },
@@ -449,8 +459,8 @@ describe('nav_to', function()
       { 1, 'level_3', '', 'Directory' },
     }, spies.float.win_set_title)
     assert.same({
-      { 7, {} },
-      { 8, { 'Directory' } },
+      { 7, { 'Comment' } },
+      { 8, { 'Directory', 'Comment' } },
     }, spies.float.buf_apply_highlights)
     assert.same({ 7 }, spies.vim.api.nvim_buf_line_count)
     assert.same({
