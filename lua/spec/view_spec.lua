@@ -94,8 +94,8 @@ describe('update_child_window', function()
         get = {},
       },
       icons = {
-        get_icon_by_filetype = {}
-      }
+        get_icon_by_filetype = {},
+      },
     }
 
     _G.tryptic_mock_vim = {
