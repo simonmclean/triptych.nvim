@@ -126,7 +126,7 @@ For example, if you want to make `<c-f>` search the file or directory under the 
 {
   extension_mappings = {
     ['<c-f>'] = {
-      mode 'n',
+      mode = 'n',
       fn = function(target)
         require 'telescope.builtin'.live_grep {
           search_dirs = { target.path }
