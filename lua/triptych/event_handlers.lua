@@ -1,10 +1,10 @@
----@param State TrypticState
+---@param State TriptychState
 ---@param Diagnostics? Diagnostics
 ---@param Git? Git
 ---@return nil
 local function handle_cursor_moved(State, Diagnostics, Git)
-  local vim = _G.tryptic_mock_vim or vim
-  local view = _G.tryptic_mock_view or require 'tryptic.view'
+  local vim = _G.triptych_mock_vim or vim
+  local view = _G.triptych_mock_view or require 'triptych.view'
   local target = view.get_target_under_cursor(State)
   local current_dir = State.windows.current.path
   local line_number = vim.api.nvim_win_get_cursor(0)[1]
@@ -16,7 +16,7 @@ end
 
 ---@return nil
 local function handle_buf_leave()
-  vim.g.tryptic_close()
+  vim.g.triptych_close()
 end
 
 return {

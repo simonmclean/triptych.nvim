@@ -1,11 +1,11 @@
-local config = require 'tryptic.config'
-local u = require 'tryptic.utils'
+local config = require 'triptych.config'
+local u = require 'triptych.utils'
 
----@return TrypticConfig
+---@return TriptychConfig
 local function get_default_config()
   return {
     mappings = {
-      open_tryptic = '<leader>-',
+      open_triptych = '<leader>-',
       show_help = 'g?',
       jump_to_cwd = '.',
       nav_left = 'h',
@@ -52,7 +52,7 @@ describe('create_merged_config', function()
     local default_config = get_default_config()
     local user_config = {
       mappings = {
-        open_tryptic = 'H',
+        open_triptych = 'H',
       },
       git_signs = {
         enabled = false,
@@ -60,7 +60,7 @@ describe('create_merged_config', function()
     }
     local expected = u.eval(function()
       local result = default_config
-      result.mappings.open_tryptic = 'H'
+      result.mappings.open_triptych = 'H'
       result.git_signs.enabled = false
       return result
     end)

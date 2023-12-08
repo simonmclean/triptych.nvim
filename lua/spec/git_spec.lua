@@ -1,7 +1,7 @@
-local git = require 'tryptic.git'
-local u = require 'tryptic.utils'
+local git = require 'triptych.git'
+local u = require 'triptych.utils'
 local tu = require 'spec.test_utils'
-local config = require 'tryptic.config'
+local config = require 'triptych.config'
 
 local mocks = {
   git_status = 'M  lua/foo.lua\nA  lua/bar.lua\nR  docs/README.md\n?? .DS_Store',
@@ -15,9 +15,9 @@ describe('Git.new', function()
       sign_getdefined = {},
       sign_define = {},
     }
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       g = {
-        tryptic_config = config.create_merged_config {},
+        triptych_config = config.create_merged_config {},
       },
       fn = {
         getcwd = function()
@@ -58,7 +58,7 @@ describe('Git.new', function()
     }, Git.status)
     table.sort(spies.sign_getdefined)
     assert.same(
-      { 'TrypticGitAdd', 'TrypticGitModify', 'TrypticGitRename', 'TrypticGitUntracked' },
+      { 'TriptychGitAdd', 'TriptychGitModify', 'TriptychGitRename', 'TriptychGitUntracked' },
       spies.sign_getdefined
     )
   end)
@@ -66,9 +66,9 @@ end)
 
 describe('Git:status_of', function()
   it('returns the git status of a path', function()
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       g = {
-        tryptic_config = config.create_merged_config {},
+        triptych_config = config.create_merged_config {},
       },
       fn = {
         getcwd = function()
@@ -110,9 +110,9 @@ describe('Git:filter_ignored', function()
     }
     local combined_paths = u.list_concat(ignored_paths, not_ignored_paths)
     local spy = {}
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       g = {
-        tryptic_config = config.create_merged_config {},
+        triptych_config = config.create_merged_config {},
       },
       fn = {
         getcwd = function()

@@ -1,9 +1,9 @@
-local help = require 'tryptic.help'
+local help = require 'triptych.help'
 
 describe('help_lines', function()
   it('returns key bindings', function()
     local mappings = {
-      open_tryptic = 'O',
+      open_triptych = 'O',
       show_help = 'g?',
       jump_to_cwd = '.',
       nav_left = '<',
@@ -18,9 +18,9 @@ describe('help_lines', function()
       toggle_hidden = '<leader>,',
     }
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       g = {
-        tryptic_config = {
+        triptych_config = {
           mappings = mappings,
         },
       },
@@ -29,13 +29,13 @@ describe('help_lines', function()
     local result = help.help_lines()
 
     assert.same({
-      'Tryptic key bindings',
+      'Triptych key bindings',
       '',
       '[.]             : jump_to_cwd',
       '[<]             : nav_left',
       '[<leader>,]     : toggle_hidden',
       '[>]             : nav_right',
-      '[O]             : open_tryptic',
+      '[O]             : open_triptych',
       '[a, A]          : add',
       '[c]             : copy',
       '[d]             : delete',

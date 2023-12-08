@@ -1,7 +1,7 @@
-local mappings = require 'tryptic.mappings'
-local tryptic_config = require 'tryptic.config'
-local view = require 'tryptic.view'
-local u = require 'tryptic.utils'
+local mappings = require 'triptych.mappings'
+local triptych_config = require 'triptych.config'
+local view = require 'triptych.view'
+local u = require 'triptych.utils'
 
 describe('new', function()
   it('sets up the expected key bindings', function()
@@ -10,8 +10,8 @@ describe('new', function()
 
     local spies = {
       keymap_set = {},
-      tryptic_close = {},
-      tryptic_get_state = {},
+      triptych_close = {},
+      triptych_get_state = {},
       isdirectory = {},
       view = {
         nav_to = {},
@@ -20,14 +20,14 @@ describe('new', function()
       },
     }
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       g = {
-        tryptic_config = tryptic_config.create_merged_config {},
-        tryptic_close = function()
-          table.insert(spies.tryptic_close, nil)
+        triptych_config = triptych_config.create_merged_config {},
+        triptych_close = function()
+          table.insert(spies.triptych_close, nil)
         end,
-        tryptic_get_state = function()
-          table.insert(spies.tryptic_get_state, nil)
+        triptych_get_state = function()
+          table.insert(spies.triptych_get_state, nil)
         end,
       },
       keymap = {
@@ -57,7 +57,7 @@ describe('new', function()
 
     local assert_mapping = function(name, mode)
       local results = u.filter(spies.keymap_set, function(entry)
-        return entry[2] == _G.tryptic_mock_vim.g.tryptic_config.mappings[name]
+        return entry[2] == _G.triptych_mock_vim.g.triptych_config.mappings[name]
       end)
       assert.same(1, #results)
       local result = results[1]
@@ -74,9 +74,9 @@ describe('new', function()
       get_target_under_cursor = {},
       ext_fn = {},
     }
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       g = {
-        tryptic_config = tryptic_config.create_merged_config {
+        triptych_config = triptych_config.create_merged_config {
           extension_mappings = {
             ['<leader>xxx'] = {
               mode = 'v',
@@ -93,7 +93,7 @@ describe('new', function()
         end,
       },
     }
-    local mock_state = { 'mock_state' } ---@as TrypticState
+    local mock_state = { 'mock_state' } ---@as TriptychState
     local mock_target = { 'mock_target' } ---@as PathDetails
     view.get_target_under_cursor = function(s)
       table.insert(spies.get_target_under_cursor, s)

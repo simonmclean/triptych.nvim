@@ -1,19 +1,19 @@
-local init = require 'tryptic.init'
-local config = require 'tryptic.config'
-local float = require 'tryptic.float'
-local autocmds = require 'tryptic.autocmds'
-local state = require 'tryptic.state'
-local mappings = require 'tryptic.mappings'
-local actions = require 'tryptic.actions'
-local view = require 'tryptic.view'
-local git = require 'tryptic.git'
-local diagnostics = require 'tryptic.diagnostics'
-local event_handlers = require 'tryptic.event_handlers'
+local init = require 'triptych.init'
+local config = require 'triptych.config'
+local float = require 'triptych.float'
+local autocmds = require 'triptych.autocmds'
+local state = require 'triptych.state'
+local mappings = require 'triptych.mappings'
+local actions = require 'triptych.actions'
+local view = require 'triptych.view'
+local git = require 'triptych.git'
+local diagnostics = require 'triptych.diagnostics'
+local event_handlers = require 'triptych.event_handlers'
 
 describe('setup', function()
   it('creates config and keymap for open', function()
     local spy = {}
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       g = {},
       keymap = {
         set = function(mode, key, cmd)
@@ -23,12 +23,12 @@ describe('setup', function()
     }
     init.setup {}
     local expected_config = config.create_merged_config {}
-    assert.same(expected_config, _G.tryptic_mock_vim.g.tryptic_config)
-    assert.same({ { 'n', expected_config.mappings.open_tryptic, ':lua require"tryptic".open_tryptic()<CR>' } }, spy)
+    assert.same(expected_config, _G.triptych_mock_vim.g.triptych_config)
+    assert.same({ { 'n', expected_config.mappings.open_triptych, ':lua require"triptych".open_triptych()<CR>' } }, spy)
   end)
 end)
 
-describe('open_tryptic', function()
+describe('open_triptych', function()
   it('makes the expected calls', function()
     local spies = {
       state = {
@@ -68,9 +68,9 @@ describe('open_tryptic', function()
       },
     }
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       g = {
-        tryptic_config = config.create_merged_config {},
+        triptych_config = config.create_merged_config {},
       },
       api = {
         nvim_buf_get_name = function(bufid)
@@ -139,10 +139,10 @@ describe('open_tryptic', function()
       return { 4, 5, 6 }
     end
 
-    init.open_tryptic()
+    init.open_triptych()
 
     assert.same({
-      { _G.tryptic_mock_vim.g.tryptic_config, 66 },
+      { _G.triptych_mock_vim.g.triptych_config, 66 },
     }, spies.state.new)
     assert.same(1, spies.git.new)
     assert.same(1, spies.diagnostics.new)
@@ -178,9 +178,9 @@ describe('open_tryptic', function()
       nvim_set_current_win = {},
     }
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       g = {
-        tryptic_config = config.create_merged_config {},
+        triptych_config = config.create_merged_config {},
       },
       api = {
         nvim_buf_get_name = function(_)
@@ -243,9 +243,9 @@ describe('open_tryptic', function()
       table.insert(spies.close_floats, winids)
     end
 
-    init.open_tryptic()
+    init.open_triptych()
 
-    _G.tryptic_mock_vim.g.tryptic_close()
+    _G.triptych_mock_vim.g.triptych_close()
 
     assert.same(1, spies.autocmd_destroy)
     assert.same({ { 4, 5, 6 } }, spies.close_floats)

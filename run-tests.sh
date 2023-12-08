@@ -2,10 +2,10 @@
 
 all_tests_pass=true
 
-for test_path in ~/.local/share/nvim/site/pack/simonmclean/start/tryptic/lua/spec/*
+for test_path in ./lua/spec/*
 do
   echo "Running tests in $test_path"
-  ~/nvim-linux64/bin/nvim --headless -c "PlenaryBustedFile $test_path" | grep "Failed" | grep -v "0" > /dev/null
+  nvim --headless -c "PlenaryBustedFile $test_path" | grep "Failed" | grep -v "0" > /dev/null
   if [ $? -eq 0 ]
   then
     all_tests_pass=false

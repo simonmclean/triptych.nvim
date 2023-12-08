@@ -1,14 +1,14 @@
-local au_group = vim.api.nvim_create_augroup('TrypticAutoCmd', { clear = true })
+local au_group = vim.api.nvim_create_augroup('TriptychAutoCmd', { clear = true })
 
 local AutoCommands = {}
 
 ---@param event_handlers any
----@param State TrypticState
+---@param State TriptychState
 ---@param Diagnostics? Diagnostics
 ---@param Git? Git
 ---@return AutoCommands
 function AutoCommands.new(event_handlers, State, Diagnostics, Git)
-  local vim = _G.tryptic_mock_vim or vim
+  local vim = _G.triptych_mock_vim or vim
   local instance = {}
   setmetatable(instance, { __index = AutoCommands })
   instance.autocmds = {
@@ -28,7 +28,7 @@ function AutoCommands.new(event_handlers, State, Diagnostics, Git)
 end
 
 function AutoCommands:destroy_autocommands()
-  local vim = _G.tryptic_mock_vim or vim
+  local vim = _G.triptych_mock_vim or vim
   for _, autocmd in pairs(self.autocmds) do
     vim.api.nvim_del_autocmd(autocmd)
   end

@@ -1,5 +1,5 @@
-local float = require 'tryptic.float'
-local fs = require 'tryptic.fs'
+local float = require 'triptych.float'
+local fs = require 'triptych.fs'
 
 describe('create_three_floating_windows', function()
   it('makes the expected nvim api calls', function()
@@ -16,7 +16,7 @@ describe('create_three_floating_windows', function()
     local winid = 0
 
     -- mocks
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       o = {
         lines = 40,
         columns = 60,
@@ -56,9 +56,9 @@ describe('create_three_floating_windows', function()
     }, nvim_create_buf_spy)
 
     assert.same({
-      { 1, 'filetype', 'tryptic' },
-      { 2, 'filetype', 'tryptic' },
-      { 3, 'filetype', 'tryptic' },
+      { 1, 'filetype', 'triptych' },
+      { 2, 'filetype', 'triptych' },
+      { 3, 'filetype', 'triptych' },
     }, nvim_buf_set_option_spy)
 
     assert.same({
@@ -135,7 +135,7 @@ describe('close_floats', function()
     local nvim_buf_delete_spy = {}
 
     local bufindex = 0
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       api = {
         nvim_win_get_buf = function(winid)
           table.insert(nvim_win_get_buf_spy, winid)
@@ -164,7 +164,7 @@ describe('buf_set_lines', function()
     local nvim_buf_set_lines_spy = {}
     local nvim_buf_set_option_spy = {}
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       api = {
         nvim_buf_set_lines = function(bufid, from, to, strict, lines)
           table.insert(nvim_buf_set_lines_spy, { bufid, from, to, strict, lines })
@@ -207,7 +207,7 @@ describe('buf_set_lines_from_path', function()
     local get_filetype_from_path_spy = {}
     local get_file_size_in_kb_spy = {}
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       cmd = {
         read = function(path)
           table.insert(cmd_read_spy, path)
@@ -270,7 +270,7 @@ describe('win_set_lines', function()
 
     local mock_buf_id = 12
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       api = {
         nvim_buf_set_lines = function(bufid, from, to, strict, lines)
           table.insert(nvim_buf_set_lines_spy, { bufid, from, to, strict, lines })
@@ -313,7 +313,7 @@ describe('win_set_lines', function()
 
     local mock_buf_id = 12
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       api = {
         nvim_buf_set_lines = function(_, _, _, _, _) end,
         nvim_buf_set_option = function(_, _, _) end,
@@ -345,7 +345,7 @@ describe('win_set_title', function()
       nvim_win_call = {},
     }
 
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       wo = {
         winbar = '',
       },
@@ -360,14 +360,14 @@ describe('win_set_title', function()
     float.win_set_title(6, 'monkey', '+', 'FooHi', '>')
 
     assert.same({ 6 }, spies.nvim_win_call)
-    assert.same('%=%#FooHi#+ %#WinBar#monkey %#Comment#>%=', _G.tryptic_mock_vim.wo.winbar)
+    assert.same('%=%#FooHi#+ %#WinBar#monkey %#Comment#>%=', _G.triptych_mock_vim.wo.winbar)
   end)
 end)
 
 describe('buf_apply_highlights', function()
   it('applies highlights to a buffer', function()
     local nvim_buf_add_highlight_spy = {}
-    _G.tryptic_mock_vim = {
+    _G.triptych_mock_vim = {
       api = {
         nvim_buf_add_highlight = function(budid, ns_id, hl_group, line, col_start, col_end)
           table.insert(nvim_buf_add_highlight_spy, { budid, ns_id, hl_group, line, col_start, col_end })
