@@ -7,6 +7,7 @@ local view = require 'triptych.view'
 local git = require 'triptych.git'
 local diagnostics = require 'triptych.diagnostics'
 local event_handlers = require 'triptych.event_handlers'
+local u = require 'triptych.utils'
 
 ---@return nil
 local function open_triptych()
@@ -15,8 +16,11 @@ local function open_triptych()
   local State = state.new(config, vim.api.nvim_get_current_win())
   local Git = config.git_signs.enabled and git.Git.new() or nil
   local Diagnostics = config.diagnostic_signs.enabled and diagnostics.new() or nil
-  local buf = vim.api.nvim_buf_get_name(0)
-  local buf_dir = vim.fs.dirname(buf)
+  local buf_name = vim.api.nvim_buf_get_name(0)
+  local buf_dir = u.cond(u.is_defined(buf_name), {
+    when_true = vim.fs.dirname(buf_name),
+    when_false = vim.fn.getcwd(),
+  })
   local windows =
     float.create_three_floating_windows(config.options.line_numbers.enabled, config.options.line_numbers.relative)
 
@@ -55,7 +59,7 @@ local function open_triptych()
     vim.api.nvim_set_current_win(State.opening_win)
   end
 
-  view.nav_to(State, buf_dir, Diagnostics, Git, buf)
+  view.nav_to(State, buf_dir, Diagnostics, Git, buf_name)
 end
 
 ---@param user_config? table
