@@ -66,7 +66,12 @@ end
 local function setup(user_config)
   local vim = _G.triptych_mock_vim or vim
   vim.g.triptych_config = require('triptych.config').create_merged_config(user_config or {})
-  vim.keymap.set('n', vim.g.triptych_config.mappings.open_triptych, ':lua require"triptych".open_triptych()<CR>')
+  vim.keymap.set(
+    'n',
+    vim.g.triptych_config.mappings.open_triptych,
+    ':lua require"triptych".open_triptych()<CR>',
+    { silent = true }
+  )
 end
 
 return {
