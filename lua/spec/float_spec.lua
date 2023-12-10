@@ -360,7 +360,7 @@ describe('win_set_title', function()
     float.win_set_title(6, 'monkey', '+', 'FooHi', '>')
 
     assert.same({ 6 }, spies.nvim_win_call)
-    assert.same('%=%#FooHi#+ %#WinBar#monkey %#Comment#>%=', _G.triptych_mock_vim.wo.winbar)
+    assert.same('%#WinBar#%=%#FooHi#+ %#WinBar#monkey %#Comment#>%=', _G.triptych_mock_vim.wo.winbar)
   end)
 end)
 

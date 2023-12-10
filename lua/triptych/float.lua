@@ -72,7 +72,7 @@ local function win_set_title(win, title, icon, highlight, postfix)
       safe_title = safe_title .. ' ' .. u.with_highlight_group('Comment', postfix)
     end
     local title_with_hi = u.with_highlight_group('WinBar', safe_title)
-    vim.wo.winbar = '%=' .. maybe_icon .. title_with_hi .. '%='
+    vim.wo.winbar = u.with_highlight_group('WinBar', '%=' .. maybe_icon .. title_with_hi .. '%=')
   end)
 end
 
