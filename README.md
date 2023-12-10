@@ -42,7 +42,7 @@ Example using [Lazy](https://github.com/folke/lazy.nvim).
 
 ```lua
 {
-  'simonmclean/triptych',
+  'simonmclean/triptych.nvim',
   event = 'VeryLazy',
   dependencies = {
     'nvim-lua/plenary.nvim', -- required
