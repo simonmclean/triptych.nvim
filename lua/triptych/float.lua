@@ -88,7 +88,11 @@ local function buf_set_lines_from_path(buf, path)
     if ft == '' or ft == nil then
       ft = 'triptych'
     end
-    vim.api.nvim_buf_set_option(buf, 'filetype', ft)
+    -- Setting the filetype can trigger autocommands which can blow up
+    local ft_success, _ = pcall(vim.api.nvim_buf_set_option, buf, 'filetype', ft)
+    if not ft_success then
+      vim.api.nvim_buf_set_option(buf, 'filetype', 'triptych')
+    end
     vim.api.nvim_buf_call(buf, function()
       local file_size = fs.get_file_size_in_kb(path)
       if file_size < 300 then
