@@ -65,6 +65,17 @@ end
 ---@param user_config? table
 local function setup(user_config)
   local vim = _G.triptych_mock_vim or vim
+
+  if vim.fn.has 'nvim-0.9.0' ~= 1 then
+    return vim.notify('triptych.nvim requires Neovim >= 0.9.0', vim.log.levels.WARN, { title = 'triptych.nvim' })
+  end
+
+  local plenary_installed, _ = pcall(require, 'plenary')
+
+  if not plenary_installed then
+    return vim.notify('triptych.nvim requires plenary.nvim', vim.log.levels.WARN, { title = 'triptych.nvim' })
+  end
+
   vim.g.triptych_config = require('triptych.config').create_merged_config(user_config or {})
   vim.keymap.set(
     'n',

@@ -12,19 +12,36 @@ local event_handlers = require 'triptych.event_handlers'
 
 describe('setup', function()
   it('creates config and keymap for open', function()
-    local spy = {}
+    local spies = {
+      keymap = {
+        set = {},
+      },
+      fn = {
+        has = {},
+      },
+    }
     _G.triptych_mock_vim = {
       g = {},
       keymap = {
         set = function(mode, key, cmd)
-          table.insert(spy, { mode, key, cmd })
+          table.insert(spies.keymap.set, { mode, key, cmd })
+        end,
+      },
+      fn = {
+        has = function(str)
+          table.insert(spies.fn.has, str)
+          return 1
         end,
       },
     }
     init.setup {}
     local expected_config = config.create_merged_config {}
+    assert.same({ 'nvim-0.9.0' }, spies.fn.has)
     assert.same(expected_config, _G.triptych_mock_vim.g.triptych_config)
-    assert.same({ { 'n', expected_config.mappings.open_triptych, ':lua require"triptych".open_triptych()<CR>' } }, spy)
+    assert.same(
+      { { 'n', expected_config.mappings.open_triptych, ':lua require"triptych".open_triptych()<CR>' } },
+      spies.keymap.set
+    )
   end)
 end)
 
