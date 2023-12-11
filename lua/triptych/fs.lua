@@ -10,9 +10,12 @@ local function get_file_size_in_kb(path)
 end
 
 ---@param path string
----@return string
+---@return string?
 local function get_filetype_from_path(path)
-  return plenary_filetype.detect(path)
+  local success, result = pcall(plenary_filetype.detect, path)
+  if success then
+    return result
+  end
 end
 
 ---@param _path string
