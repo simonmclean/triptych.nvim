@@ -264,10 +264,12 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
 
   M.nav_right = function()
     local target = view.get_target_under_cursor(State)
-    if vim.fn.isdirectory(target.path) == 1 then
-      view.nav_to(State, target.path, Diagnostics, Git)
-    else
-      M.edit_file(target.path)
+    if target then
+      if vim.fn.isdirectory(target.path) == 1 then
+        view.nav_to(State, target.path, Diagnostics, Git)
+      else
+        M.edit_file(target.path)
+      end
     end
   end
 
