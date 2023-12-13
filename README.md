@@ -24,9 +24,11 @@ You only ever control or focus the middle window.
 - Perform common actions on the filesystem
     - Rename
     - Delete (including bulk)
-    - Copy 'n' paste (including bulk)
-    - Cut 'n' paste (including bulk)
+    - Copy 'n' paste (including bulk) [^1]
+    - Cut 'n' paste (including bulk) [^1]
 - Extensible
+
+[^1]: These are not currently working on the Windows operating system
 
 ## ⚡️ Requirements
 
