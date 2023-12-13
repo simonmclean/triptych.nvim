@@ -50,6 +50,22 @@ local function win_set_lines(win, lines, attempt_scroll_top)
   end
 end
 
+--- Attempt to read file. If it fails, try again with autocommands disabled
+---@param path string
+---@return boolean - true if success
+---@return string|nil - nil on success, error message on fail
+local function read_file(path)
+  local vim = _G.triptych_mock_vim or vim
+  local attempt_1_success, attempt_1_err = pcall(vim.cmd.read, path)
+  if attempt_1_success then
+    return attempt_1_success, attempt_1_err
+  end
+  local attempt_2_success, attempt_2_err = pcall(function()
+    vim.cmd('noautocmd read ' .. path)
+  end)
+  return attempt_2_success, attempt_2_err
+end
+
 ---@param win number
 ---@param title string
 ---@param icon? string
@@ -89,25 +105,22 @@ local function buf_set_lines_from_path(buf, path)
       ft = 'triptych'
     end
     -- Setting the filetype can trigger autocommands which can blow up
-    local ft_success, _ = pcall(vim.api.nvim_buf_set_option, buf, 'filetype', ft)
+    local ft_success, ft_err = pcall(vim.api.nvim_buf_set_option, buf, 'filetype', ft)
     if not ft_success then
+      error(ft_err, vim.log.levels.WARN)
       vim.api.nvim_buf_set_option(buf, 'filetype', 'triptych')
     end
     vim.api.nvim_buf_call(buf, function()
       local file_size = fs.get_file_size_in_kb(path)
       if file_size < 300 then
-        local success, err = pcall(function()
-          vim.cmd.read(path)
-        end)
-        if success then
+        local read_success, read_err = read_file(path)
+        if read_success then
           --TODO: This is kind of hacky
           vim.api.nvim_exec2('normal! 1G0dd', {})
         else
+          error(read_err, vim.log.levels.WARN)
           local msg = '[Unable to preview file contents]'
           vim.api.nvim_buf_set_lines(buf, 0, -1, false, { '', msg })
-          if err then
-            vim.print(err)
-          end
         end
       else
         local msg = '[File size too large to preview]'

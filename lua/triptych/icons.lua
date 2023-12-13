@@ -4,11 +4,11 @@
 local devicons_installed, devicons = pcall(require, 'nvim-web-devicons')
 
 return {
-  ---@param filetype string
+  ---@param filetype string?
   ---@return string? icon
   ---@return string? highlight
   get_icon_by_filetype = function(filetype)
-    if devicons_installed then
+    if devicons_installed and filetype then
       local icon, highlight = devicons.get_icon_by_filetype(filetype)
       return icon, highlight
     end

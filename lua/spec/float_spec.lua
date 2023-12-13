@@ -208,6 +208,9 @@ describe('buf_set_lines_from_path', function()
     local get_file_size_in_kb_spy = {}
 
     _G.triptych_mock_vim = {
+      log = {
+        levels = vim.log.levels,
+      },
       cmd = {
         read = function(path)
           table.insert(cmd_read_spy, path)

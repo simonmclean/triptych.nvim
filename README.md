@@ -141,4 +141,5 @@ For example, if you want to make `<c-f>` search the file or directory under the 
 
 ## 🛠️ TODO
 
-- Test a different machine with a vanilla Neovim config
+- Add config option to enable/disable filetype icons (current if a nerd font isn't installed all icons look like [])
+
