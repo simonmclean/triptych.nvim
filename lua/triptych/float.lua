@@ -25,13 +25,13 @@ local function buf_set_lines(buf, lines)
 end
 
 ---@param buf number
----@param highlights string[]
+---@param highlights { highlight_name: string, char_count: number }[]
 ---@return nil
 local function buf_apply_highlights(buf, highlights)
   local vim = _G.triptych_mock_vim or vim
   for i, highlight in ipairs(highlights) do
     -- Col end is hard-coded to to 3 because this is only used to for the filetype icons
-    vim.api.nvim_buf_add_highlight(buf, 0, highlight, i - 1, 0, 3)
+    vim.api.nvim_buf_add_highlight(buf, 0, highlight.highlight_name, i - 1, 0, highlight.char_count)
   end
 end
 
@@ -76,7 +76,7 @@ local function win_set_title(win, title, icon, highlight, postfix)
   local vim = _G.triptych_mock_vim or vim
   vim.api.nvim_win_call(win, function()
     local maybe_icon = ''
-    if icon then
+    if vim.g.triptych_config.options.file_icons.enabled and icon then
       if highlight then
         maybe_icon = u.with_highlight_group(highlight, icon) .. ' '
       else

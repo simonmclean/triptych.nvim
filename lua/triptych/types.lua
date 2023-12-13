@@ -47,10 +47,16 @@
 ---@field dirs_first boolean
 ---@field show_hidden boolean
 ---@field line_numbers TriptychConfigLineNumbers
+---@field file_icons TriptychConfigFileIcons
 
 ---@class TriptychConfigLineNumbers
 ---@field enabled boolean
 ---@field relative boolean
+
+---@class TriptychConfigFileIcons
+---@field enabled boolean
+---@field directory_icon string
+---@field fallback_file_icon  string
 
 ---@class TriptychConfigGitSigns
 ---@field enabled boolean

@@ -349,6 +349,9 @@ describe('win_set_title', function()
     }
 
     _G.triptych_mock_vim = {
+      g = {
+        triptych_config = require('triptych.config').create_merged_config {},
+      },
       wo = {
         winbar = '',
       },
@@ -377,7 +380,11 @@ describe('buf_apply_highlights', function()
         end,
       },
     }
-    float.buf_apply_highlights(4, { 'hello', 'world', 'monkey' })
+    float.buf_apply_highlights(4, {
+      { highlight_name = 'hello', char_count = 3 },
+      { highlight_name = 'world', char_count = 3 },
+      { highlight_name = 'monkey', char_count = 3 },
+    })
     assert.same({
       { 4, 0, 'hello', 0, 0, 3 },
       { 4, 0, 'world', 1, 0, 3 },
