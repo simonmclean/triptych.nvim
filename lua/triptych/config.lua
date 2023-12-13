@@ -26,6 +26,11 @@ local default_config = {
       enabled = true,
       relative = false,
     },
+    file_icons = {
+      enabled = true,
+      directory_icon = '',
+      fallback_file_icon = '',
+    },
   },
   git_signs = {
     enabled = true,

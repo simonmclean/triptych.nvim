@@ -2,7 +2,7 @@ local config = require 'triptych.config'
 local u = require 'triptych.utils'
 
 ---@return TriptychConfig
-local function get_default_config()
+local function expected_default_config()
   return {
     mappings = {
       open_triptych = '<leader>-',
@@ -27,6 +27,11 @@ local function get_default_config()
         enabled = true,
         relative = false,
       },
+      file_icons = {
+        enabled = true,
+        directory_icon = '',
+        fallback_file_icon = '',
+      },
     },
     git_signs = {
       enabled = true,
@@ -45,11 +50,11 @@ end
 
 describe('create_merged_config', function()
   it('returns the default config when user config is empty', function()
-    assert.same(get_default_config(), config.create_merged_config {})
+    assert.same(expected_default_config(), config.create_merged_config {})
   end)
 
   it('merges partial user config with the default', function()
-    local default_config = get_default_config()
+    local default_config = expected_default_config()
     local user_config = {
       mappings = {
         open_triptych = 'H',

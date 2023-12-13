@@ -47,24 +47,32 @@ end
 ---@param State TriptychState
 ---@param path_details PathDetails
 ---@return string[] # Lines including icons
----@return string[] # Highlights for icons
+---@return { highlight_name: string, char_count: number }[] # Highlights for icons
 local function path_details_to_lines(State, path_details)
+  local vim = _G.triptych_mock_vim or vim
+  local icons_config = vim.g.triptych_config.options.file_icons
   local lines = {}
   local highlights = {}
 
   for _, child in ipairs(path_details.children) do
     local line, highlight_name = u.cond(child.is_dir, {
       when_true = function()
-        local line = ' ' .. child.display_name
-        return line, 'Directory'
+        if icons_config.enabled then
+          local line = icons_config.directory_icon .. ' ' .. child.display_name
+          return line, { highlight_name = 'Directory', char_count = string.len(icons_config.directory_icon) }
+        end
+        return child.display_name
       end,
       when_false = function()
-        local maybe_icon, maybe_highlight = icons.get_icon_by_filetype(child.filetype)
-        local highlight = maybe_highlight or 'Comment'
-        local fallback_icon = ''
-        local icon = maybe_icon or fallback_icon
-        local line = icon .. ' ' .. child.display_name
-        return line, highlight
+        if icons_config.enabled then
+          local maybe_icon, maybe_highlight = icons.get_icon_by_filetype(child.filetype)
+          local highlight = maybe_highlight or 'Comment'
+          local fallback_icon = icons_config.fallback_file_icon
+          local icon = maybe_icon or fallback_icon
+          local line = icon .. ' ' .. child.display_name
+          return line, { highlight_name = highlight, char_count = string.len(icon) }
+        end
+        return child.display_name
       end,
     })
 

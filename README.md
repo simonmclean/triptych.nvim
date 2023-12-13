@@ -89,6 +89,11 @@ require 'triptych'.setup {
       enabled = true,
       relative = false,
     },
+    file_icons = {
+      enabled = true,
+      directory_icon = '',
+      fallback_file_icon = ''
+    }
   },
   git_signs = {
     enabled = true,
@@ -138,8 +143,3 @@ For example, if you want to make `<c-f>` search the file or directory under the 
   }
 }
 ```
-
-## 🛠️ TODO
-
-- Add config option to enable/disable filetype icons (current if a nerd font isn't installed all icons look like [])
-
