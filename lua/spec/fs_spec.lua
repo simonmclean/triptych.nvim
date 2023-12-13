@@ -53,7 +53,13 @@ describe('get_path_details', function()
 
     local result = fs.get_path_details '/hello/world'
 
-    assert.are.same({ '/hello/world' }, spies.fs.normalize)
+    assert.are.same({
+      '/hello/world',
+      '/hello/world/d_file',
+      '/hello/world/a_file',
+      '/hello/world/b_dir',
+      '/hello/world/x_dir',
+    }, spies.fs.normalize)
 
     assert.same({ '/hello/world' }, spies.fs.dir)
 

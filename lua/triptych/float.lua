@@ -55,6 +55,7 @@ end
 ---@return boolean - true if success
 ---@return string|nil - nil on success, error message on fail
 local function read_file(path)
+  local vim = _G.triptych_mock_vim or vim
   local attempt_1_success, attempt_1_err = pcall(vim.cmd.read, path)
   if attempt_1_success then
     return attempt_1_success, attempt_1_err
@@ -106,7 +107,7 @@ local function buf_set_lines_from_path(buf, path)
     -- Setting the filetype can trigger autocommands which can blow up
     local ft_success, ft_err = pcall(vim.api.nvim_buf_set_option, buf, 'filetype', ft)
     if not ft_success then
-      vim.print('err setting filetype', ft_err)
+      error(ft_err, vim.log.levels.WARN)
       vim.api.nvim_buf_set_option(buf, 'filetype', 'triptych')
     end
     vim.api.nvim_buf_call(buf, function()
@@ -117,7 +118,7 @@ local function buf_set_lines_from_path(buf, path)
           --TODO: This is kind of hacky
           vim.api.nvim_exec2('normal! 1G0dd', {})
         else
-          vim.print('err reading file', read_err)
+          error(read_err, vim.log.levels.WARN)
           local msg = '[Unable to preview file contents]'
           vim.api.nvim_buf_set_lines(buf, 0, -1, false, { '', msg })
         end
