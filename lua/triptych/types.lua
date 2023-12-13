@@ -25,7 +25,6 @@
 ---@field autocmds integer[]
 
 ---@class TriptychConfigMappings
----@field open_triptych KeyMapping
 ---@field show_help KeyMapping
 ---@field jump_to_cwd KeyMapping
 ---@field nav_left KeyMapping

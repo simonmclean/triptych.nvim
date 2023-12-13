@@ -11,26 +11,26 @@ local diagnostics = require 'triptych.diagnostics'
 local event_handlers = require 'triptych.event_handlers'
 
 describe('setup', function()
-  it('creates config and keymap for open', function()
+  it('creates config and Triptych command', function()
     local spies = {
-      keymap = {
-        set = {},
-      },
       fn = {
         has = {},
+      },
+      api = {
+        nvim_create_user_command = {},
       },
     }
     _G.triptych_mock_vim = {
       g = {},
-      keymap = {
-        set = function(mode, key, cmd)
-          table.insert(spies.keymap.set, { mode, key, cmd })
-        end,
-      },
       fn = {
         has = function(str)
           table.insert(spies.fn.has, str)
           return 1
+        end,
+      },
+      api = {
+        nvim_create_user_command = function(name, fn, conf)
+          table.insert(spies.api.nvim_create_user_command, { name, fn, conf })
         end,
       },
     }
@@ -38,10 +38,12 @@ describe('setup', function()
     local expected_config = config.create_merged_config {}
     assert.same({ 'nvim-0.9.0' }, spies.fn.has)
     assert.same(expected_config, _G.triptych_mock_vim.g.triptych_config)
-    assert.same(
-      { { 'n', expected_config.mappings.open_triptych, ':lua require"triptych".open_triptych()<CR>' } },
-      spies.keymap.set
-    )
+    assert.same(1, #spies.api.nvim_create_user_command)
+    local create_cmd_args = spies.api.nvim_create_user_command[1]
+    assert.same('Triptych', create_cmd_args[1])
+    assert.same('function', type(create_cmd_args[2]))
+    assert.same({}, create_cmd_args[3])
+    assert.same(false, _G.triptych_mock_vim.g.triptych_is_open)
   end)
 end)
 

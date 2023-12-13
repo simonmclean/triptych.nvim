@@ -12,6 +12,11 @@ local u = require 'triptych.utils'
 ---@return nil
 local function open_triptych()
   local vim = _G.triptych_mock_vim or vim
+
+  if vim.g.triptych_is_open then
+    return
+  end
+
   local config = vim.g.triptych_config
   local State = state.new(config, vim.api.nvim_get_current_win())
   local Git = config.git_signs.enabled and git.Git.new() or nil
@@ -48,6 +53,7 @@ local function open_triptych()
   mappings.new(State, Actions)
 
   vim.g.triptych_close = function()
+    vim.g.triptych_is_open = false
     -- Need to destroy autocmds before the floating windows
     AutoCmds:destroy_autocommands()
     local wins = State.windows
@@ -60,6 +66,8 @@ local function open_triptych()
   end
 
   view.nav_to(State, buf_dir, Diagnostics, Git, buf_name)
+
+  vim.g.triptych_is_open = true
 end
 
 ---@param user_config? table
@@ -76,13 +84,11 @@ local function setup(user_config)
     return vim.notify('triptych.nvim requires plenary.nvim', vim.log.levels.WARN, { title = 'triptych.nvim' })
   end
 
+  vim.g.triptych_is_open = false
+
+  vim.api.nvim_create_user_command('Triptych', open_triptych, {})
+
   vim.g.triptych_config = require('triptych.config').create_merged_config(user_config or {})
-  vim.keymap.set(
-    'n',
-    vim.g.triptych_config.mappings.open_triptych,
-    ':lua require"triptych".open_triptych()<CR>',
-    { silent = true }
-  )
 end
 
 return {

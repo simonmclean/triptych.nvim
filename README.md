@@ -31,9 +31,9 @@ You only ever control or focus the middle window.
 ## ⚡️ Requirements
 
 - Neovim >= 0.9.0
-- `nvim-lua/plenary.nvim` plugin
+- [nvim-lua/plenary.nvim](https://github.com/nvim-lua/plenary.nvim) plugin
 - Optional, if you want fancy icons
-    - `nvim-tree/nvim-web-devicons` plugin
+    - [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons) plugin
     -  A [Nerd Font](https://www.nerdfonts.com/)
 
 ## 📦 Installation
@@ -57,6 +57,12 @@ Then call the `setup` function somewhere in your Neovim config to initialise it 
 require 'triptych'.setup()
 ```
 
+Launch using the `:Triptych` command. You may want to create a binding for this.
+
+```lua
+vim.keymap.set('n', '<leader>-', ':Triptych<CR>', { silent = true })
+```
+
 ## ⚙️ Configuration
 
 Below is the default configuration. Feel free to override any of these.
@@ -66,7 +72,6 @@ Key mappings can either be a string, or a table of strings if you want multiple 
 ```lua
 require 'triptych'.setup {
   mappings = {
-    open_triptych = '<leader>-',
     -- Everything below is buffer-local, meaning it will only apply to Triptych windows
     show_help = 'g?',
     jump_to_cwd = '.',  -- Pressing again will toggle back

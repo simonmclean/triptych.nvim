@@ -5,7 +5,6 @@ local u = require 'triptych.utils'
 local function expected_default_config()
   return {
     mappings = {
-      open_triptych = '<leader>-',
       show_help = 'g?',
       jump_to_cwd = '.',
       nav_left = 'h',
@@ -57,7 +56,7 @@ describe('create_merged_config', function()
     local default_config = expected_default_config()
     local user_config = {
       mappings = {
-        open_triptych = 'H',
+        rename = 'H',
       },
       git_signs = {
         enabled = false,
@@ -65,7 +64,7 @@ describe('create_merged_config', function()
     }
     local expected = u.eval(function()
       local result = default_config
-      result.mappings.open_triptych = 'H'
+      result.mappings.rename = 'H'
       result.git_signs.enabled = false
       return result
     end)

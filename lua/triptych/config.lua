@@ -4,7 +4,6 @@ local u = require 'triptych.utils'
 local default_config = {
   mappings = {
     -- Everything below is buffer-local, meaning it will only apply to Triptych windows
-    open_triptych = '<leader>-',
     show_help = 'g?',
     jump_to_cwd = '.', -- Pressing again will toggle back
     nav_left = 'h',
