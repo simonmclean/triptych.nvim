@@ -828,7 +828,7 @@ describe('paste', function()
       table.insert(spies.state.list_remove_all, list_type)
     end
 
-    state_instance.cut_list = {
+    state_instance.copy_list = {
       ---@diagnostic disable-next-line: missing-fields
       {
         basename = 'foo.js',
@@ -892,25 +892,13 @@ describe('paste', function()
         interactive = true,
       },
     }, spies.plenary_path.copy)
-    assert.same({
-      {
-        {
-          state_instance.cut_list[1],
-          state_instance.cut_list[2],
-        },
-        true,
-      },
-    }, spies.actions.bulk_delete)
+    assert.same({ { {}, true } }, spies.actions.bulk_delete)
     assert.same({ { state_instance, '/hello/world/wow' } }, spies.view.jump_cursor_to)
     assert.same({ 'cut', 'copy' }, spies.state.list_remove_all)
     assert.same(1, spies.refresh)
   end)
 
   it('pastes the items in the cut list', function()
-    _G.triptych_mock_vim = {
-      print = vim.print,
-    }
-
     local spies = {
       view = {
         get_target_under_cursor = {},
@@ -923,7 +911,21 @@ describe('paste', function()
       state = {
         list_remove_all = {},
       },
+      vim = {
+        fn = {
+          delete = {},
+        },
+      },
       refresh = 0,
+    }
+
+    _G.triptych_mock_vim = {
+      print = vim.print,
+      fn = {
+        delete = function(path, flags)
+          table.insert(spies.vim.fn.delete, { path, flags })
+        end,
+      },
     }
 
     local config = require('triptych.config').create_merged_config {}
@@ -933,7 +935,7 @@ describe('paste', function()
       table.insert(spies.state.list_remove_all, list_type)
     end
 
-    state_instance.copy_list = {
+    state_instance.cut_list = {
       ---@diagnostic disable-next-line: missing-fields
       {
         basename = 'foo.js',
@@ -964,6 +966,7 @@ describe('paste', function()
       return {
         copy = function(_, opts)
           table.insert(spies.plenary_path.copy, opts)
+          return { ['whatever'] = true }
         end,
       }
     end
@@ -995,6 +998,7 @@ describe('paste', function()
     }, spies.plenary_path.copy)
     assert.same({ { state_instance, '/hello/world/wow' } }, spies.view.jump_cursor_to)
     assert.same({ 'cut', 'copy' }, spies.state.list_remove_all)
+    assert.same({ { '/hello/world/foo.js', 'rf' }, { '/hello/world/bar.js', 'rf' } }, spies.vim.fn.delete)
     assert.same(2, spies.refresh) -- TODO: Look into duplicate refresh calls
   end)
 end)
