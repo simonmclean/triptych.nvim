@@ -139,15 +139,21 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
 
   ---@param target PathDetails
   ---@param destination string
+  ---@param callback? fun(boolean) - Callback indicting whether an item an copied
   ---@return nil
-  M.duplicate_file_or_dir = function(target, destination)
+  M.duplicate_file_or_dir = function(target, destination, callback)
     local p = plenary_path:new(target.path)
-    p:copy {
+    local results = p:copy {
       destination = destination,
       recursive = true,
       override = false,
       interactive = true,
     }
+    if callback then
+      for _, v in pairs(results) do
+        callback(v)
+      end
+    end
   end
 
   M.bulk_toggle_copy = function()
@@ -202,11 +208,16 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
       for _, item in ipairs(State.cut_list) do
         local destination = u.path_join(destination_dir, item.basename)
         if item.path ~= destination then
-          -- TODO: Don't add to delete list unless the copy was successful
-          M.duplicate_file_or_dir(item, destination)
-          table.insert(delete_list, item)
+          M.duplicate_file_or_dir(item, destination, function(was_copied)
+            -- Note that we don't want to error when was_copied is false
+            -- This is because it could mean that the user declined to override an existing file, which obviously isn't an error.
+            if was_copied then
+              table.insert(delete_list, item)
+            end
+          end)
         end
       end
+      M.bulk_delete(delete_list, true)
       -- Handle copy items
       for _, item in ipairs(State.copy_list) do
         local destination = u.path_join(destination_dir, item.basename)
@@ -214,7 +225,6 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
           M.duplicate_file_or_dir(item, destination)
         end
       end
-      M.bulk_delete(delete_list, true)
       view.jump_cursor_to(State, destination_dir)
     end)
     if not success then
