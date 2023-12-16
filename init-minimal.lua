@@ -70,7 +70,7 @@ local function cycle_themes(go_back)
   end
 end
 
-require 'plugin-configs/lazy' {
+local plugins = {
   {
     'simonmclean/triptych.nvim',
     dir = '~/code/triptych',
@@ -107,6 +107,8 @@ require 'plugin-configs/lazy' {
     end,
   },
 }
+
+require 'lazy'.setup(plugins, {})
 
 ---------------------------
 -- Mappings ---------------
