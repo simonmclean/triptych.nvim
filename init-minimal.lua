@@ -73,7 +73,7 @@ end
 require 'plugin-configs/lazy' {
   {
     'simonmclean/triptych.nvim',
-    dir = '~/code/tryptic',
+    dir = '~/code/triptych',
     dev = true,
     dependencies = {
       'nvim-lua/plenary.nvim',
