@@ -25,13 +25,15 @@ local function buf_set_lines(buf, lines)
 end
 
 ---@param buf number
----@param highlights { highlight_name: string, char_count: number }[]
+---@param highlights HighlightDetails[]
 ---@return nil
 local function buf_apply_highlights(buf, highlights)
   local vim = _G.triptych_mock_vim or vim
+  -- Apply icon highlight
   for i, highlight in ipairs(highlights) do
-    -- Col end is hard-coded to to 3 because this is only used to for the filetype icons
-    vim.api.nvim_buf_add_highlight(buf, 0, highlight.highlight_name, i - 1, 0, highlight.char_count)
+    vim.api.nvim_buf_add_highlight(buf, 0, highlight.icon.highlight_name, i - 1, 0, highlight.icon.length)
+    -- Apply file or directory highlight
+    vim.api.nvim_buf_add_highlight(buf, 0, highlight.text.highlight_name, i - 1, highlight.text.starts, -1)
   end
 end
 

@@ -381,14 +381,32 @@ describe('buf_apply_highlights', function()
       },
     }
     float.buf_apply_highlights(4, {
-      { highlight_name = 'hello', char_count = 3 },
-      { highlight_name = 'world', char_count = 3 },
-      { highlight_name = 'monkey', char_count = 3 },
+      {
+        icon = {
+          highlight_name = 'icon_hl',
+          length = 5,
+        },
+        text = {
+          highlight_name = 'text_hl',
+          starts = 2,
+        },
+      },
+      {
+        icon = {
+          highlight_name = 'icon_hl_2',
+          length = 4,
+        },
+        text = {
+          highlight_name = 'text_hl_2',
+          starts = 1,
+        },
+      },
     })
     assert.same({
-      { 4, 0, 'hello', 0, 0, 3 },
-      { 4, 0, 'world', 1, 0, 3 },
-      { 4, 0, 'monkey', 2, 0, 3 },
+      { 4, 0, 'icon_hl', 0, 0, 5 },
+      { 4, 0, 'text_hl', 0, 2, -1 },
+      { 4, 0, 'icon_hl_2', 1, 0, 4 },
+      { 4, 0, 'text_hl_2', 1, 1, -1 },
     }, nvim_buf_add_highlight_spy)
   end)
 end)
