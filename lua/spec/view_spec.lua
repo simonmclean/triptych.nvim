@@ -230,9 +230,9 @@ describe('update_child_window', function()
       {
         11,
         {
-          { highlight_name = 'Directory', char_count = 3 },
-          { highlight_name = 'Comment', char_count = 1 },
-          { highlight_name = 'Comment', char_count = 1 },
+          { icon = { highlight_name = 'Directory', length = 3 }, text = { highlight_name = 'NONE', starts = 3 } },
+          { icon = { highlight_name = 'Comment', length = 3 }, text = { highlight_name = 'NONE', starts = 3 } },
+          { icon = { highlight_name = 'Comment', length = 3 }, text = { highlight_name = 'NONE', starts = 3 } },
         },
       },
     }, spies.float.buf_apply_highlights)
@@ -460,8 +460,28 @@ describe('nav_to', function()
       { 1, 'level_3', '', 'Directory' },
     }, spies.float.win_set_title)
     assert.same({
-      { 7, { { highlight_name = 'Comment', char_count = 1 } } },
-      { 8, { { highlight_name = 'Directory', char_count = 3 }, { highlight_name = 'Comment', char_count = 1 } } },
+      {
+        7,
+        {
+          {
+            icon = { highlight_name = 'Comment', length = 3 },
+            text = { highlight_name = 'NONE', starts = 3 },
+          },
+        },
+      },
+      {
+        8,
+        {
+          {
+            icon = { highlight_name = 'Directory', length = 3 },
+            text = { highlight_name = 'NONE', starts = 3 },
+          },
+          {
+            icon = { highlight_name = 'Comment', length = 3 },
+            text = { highlight_name = 'NONE', starts = 3 },
+          },
+        },
+      },
     }, spies.float.buf_apply_highlights)
     assert.same({ 7 }, spies.vim.api.nvim_buf_line_count)
     assert.same({

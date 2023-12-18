@@ -48,6 +48,11 @@
 ---@field line_numbers TriptychConfigLineNumbers
 ---@field file_icons TriptychConfigFileIcons
 ---@field column_widths number[]
+---@field highlights TriptychConfigHighlights
+
+---@class TriptychConfigHighlights
+---@field file_names string
+---@field directory_names string
 
 ---@class TriptychConfigLineNumbers
 ---@field enabled boolean
@@ -118,6 +123,18 @@
 ---@field enable_cursorline boolean
 ---@field show_numbers boolean
 ---@field relative_numbers boolean
+
+---@class HighlightDetails
+---@field icon HighlightDetailsIcon
+---@field text HighlightDetailsText
+
+---@class HighlightDetailsIcon
+---@field highlight_name string
+---@field length number
+
+---@class HighlightDetailsText
+---@field highlight_name string
+---@field starts number
 
 ---@class Diagnostics
 ---@field new fun(): Diagnostics

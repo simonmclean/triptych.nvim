@@ -32,6 +32,10 @@ local function expected_default_config()
         fallback_file_icon = '',
       },
       column_widths = { 0.25, 0.25, 0.5 },
+      highlights = {
+        file_names = 'NONE',
+        directory_names = 'NONE',
+      },
     },
     git_signs = {
       enabled = true,
