@@ -55,11 +55,7 @@ local validate_column_widths = function(user_config)
   if user_config and user_config.options and user_config.options.column_widths then
     local col_widths = user_config.options.column_widths
     local function set_to_default()
-      u.merge_tables(user_config, {
-        options = {
-          column_widths = { 0.25, 0.25, 0.5 },
-        },
-      })
+      user_config.options.column_widths = default_config().options.column_widths
     end
     if #col_widths ~= 3 then
       set_to_default()
