@@ -47,7 +47,7 @@ describe('create_three_floating_windows', function()
       },
     }
 
-    float.create_three_floating_windows(true, false)
+    float.create_three_floating_windows(true, false, { 0.25, 0.25, 0.5 })
 
     assert.same({
       { false, true },
@@ -66,7 +66,7 @@ describe('create_three_floating_windows', function()
         1,
         true,
         {
-          width = 16,
+          width = 11,
           height = 28,
           relative = 'editor',
           col = 4,
@@ -81,10 +81,10 @@ describe('create_three_floating_windows', function()
         2,
         true,
         {
-          width = 16,
+          width = 11,
           height = 28,
           relative = 'editor',
-          col = 22,
+          col = 17,
           row = 4,
           border = 'single',
           style = 'minimal',
@@ -96,10 +96,10 @@ describe('create_three_floating_windows', function()
         3,
         true,
         {
-          width = 16,
+          width = 26,
           height = 28,
           relative = 'editor',
-          col = 40,
+          col = 30,
           row = 4,
           border = 'single',
           style = 'minimal',

@@ -264,6 +264,11 @@ local function string_contains(str, search)
   return string.find(str, search, 1, true) ~= nil
 end
 
+local function round(value, num_of_decimal_places)
+  local mult = 10 ^ (num_of_decimal_places or 0)
+  return math.floor(value * mult + 0.5) / mult
+end
+
 return {
   cond = cond,
   eval = eval,
@@ -286,4 +291,5 @@ return {
   path_split = path_split,
   set = set,
   get = get,
+  round = round,
 }

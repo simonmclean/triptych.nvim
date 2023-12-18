@@ -100,7 +100,8 @@ require 'triptych'.setup {
       enabled = true,
       directory_icon = '',
       fallback_file_icon = ''
-    }
+    },
+    column_widths = { .25, .25, .5 }, -- Must add up to 1 after rounding to 2 decimal places
   },
   git_signs = {
     enabled = true,

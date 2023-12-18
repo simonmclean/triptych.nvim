@@ -166,39 +166,44 @@ end
 
 ---@param show_numbers boolean
 ---@param relative_numbers boolean
+---@param column_widths number[]
 ---@return { [1]: number, [2]: number, [3]: number }
-local function create_three_floating_windows(show_numbers, relative_numbers)
+local function create_three_floating_windows(show_numbers, relative_numbers, column_widths)
   local vim = _G.triptych_mock_vim or vim
-  local max_width = 220
+  local max_total_width = 220 -- width of all 3 windows combined
   local max_height = 45
   local screen_height = vim.o.lines
   local screen_width = vim.o.columns
   local padding = 4
-  local max_float_width = math.floor(max_width / 3)
-  local float_width = math.min(math.floor((screen_width / 3)) - padding, max_float_width)
+
+  local float_widths = u.map(column_widths, function(percentage)
+    local max = math.floor(max_total_width * percentage)
+    local result = math.min(math.floor((screen_width * percentage)) - padding, max)
+    return result
+  end)
+
   local float_height = math.min(screen_height - (padding * 3), max_height)
 
   local wins = {}
 
-  local x_pos = u.cond(screen_width > (max_width + (padding * 2)), {
-    when_true = math.floor((screen_width - max_width) / 2),
+  local x_pos = u.cond(screen_width > (max_total_width + (padding * 2)), {
+    when_true = math.floor((screen_width - max_total_width) / 2),
     when_false = padding,
   })
   local y_pos = u.cond(screen_height > (max_height + (padding * 2)), {
     when_true = math.floor((screen_height - max_height) / 2),
     when_false = padding,
   })
+
   for i = 1, 3, 1 do
     local is_parent = i == 1
     local is_primary = i == 2
     local is_child = i == 3
-    if is_primary then
-      x_pos = x_pos + float_width + 2
-    elseif is_child then
-      x_pos = x_pos + float_width + 2
+    if is_primary or is_child then
+      x_pos = x_pos + float_widths[i - 1] + 2
     end
     local win = create_floating_window {
-      width = float_width,
+      width = float_widths[i],
       height = float_height,
       y_pos = y_pos,
       x_pos = x_pos,
