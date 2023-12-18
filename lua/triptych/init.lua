@@ -26,8 +26,11 @@ local function open_triptych()
     when_true = vim.fs.dirname(buf_name),
     when_false = vim.fn.getcwd(),
   })
-  local windows =
-    float.create_three_floating_windows(config.options.line_numbers.enabled, config.options.line_numbers.relative)
+  local windows = float.create_three_floating_windows(
+    config.options.line_numbers.enabled,
+    config.options.line_numbers.relative,
+    config.options.column_widths
+  )
 
   State.windows = {
     parent = {

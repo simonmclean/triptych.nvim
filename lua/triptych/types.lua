@@ -47,6 +47,7 @@
 ---@field show_hidden boolean
 ---@field line_numbers TriptychConfigLineNumbers
 ---@field file_icons TriptychConfigFileIcons
+---@field column_widths number[]
 
 ---@class TriptychConfigLineNumbers
 ---@field enabled boolean
