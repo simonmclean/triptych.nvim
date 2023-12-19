@@ -52,22 +52,6 @@ local function win_set_lines(win, lines, attempt_scroll_top)
   end
 end
 
---- Attempt to read file. If it fails, try again with autocommands disabled
----@param path string
----@return boolean - true if success
----@return string|nil - nil on success, error message on fail
-local function read_file(path)
-  local vim = _G.triptych_mock_vim or vim
-  local attempt_1_success, attempt_1_err = pcall(vim.cmd.read, path)
-  if attempt_1_success then
-    return attempt_1_success, attempt_1_err
-  end
-  local attempt_2_success, attempt_2_err = pcall(function()
-    vim.cmd('noautocmd read ' .. path)
-  end)
-  return attempt_2_success, attempt_2_err
-end
-
 ---@param win number
 ---@param title string
 ---@param icon? string
@@ -94,7 +78,35 @@ local function win_set_title(win, title, icon, highlight, postfix)
   end)
 end
 
---- Read the contents of a file into the buffer
+--- Attempt to use treesitter for highlighting. Fall back to using the regex engine
+---@param buf number
+---@param filetype? string
+---@return nil
+local function apply_highlighting(buf, filetype)
+  local vim = _G.triptych_mock_vim or vim
+
+  if u.is_empty(filetype) then
+    vim.treesitter.stop()
+    vim.api.nvim_buf_set_option(buf, 'syntax', 'off')
+    return
+  end
+
+  local treesitter_applied = false
+  local lang = vim.treesitter.language.get_lang(filetype)
+  if lang then
+    local success, _ = vim.treesitter.get_parser(buf, lang)
+    if success then
+      vim.treesitter.start(buf, lang)
+      treesitter_applied = true
+    end
+  end
+  if not treesitter_applied then
+    -- Fallback to regex syntax highlighting
+    vim.api.nvim_buf_set_option(buf, 'syntax', filetype)
+  end
+end
+
+--- Read the contents of a file into the buffer and apply syntax highlighting
 ---@param buf number
 ---@param path string
 ---@return nil
@@ -103,22 +115,13 @@ local function buf_set_lines_from_path(buf, path)
   modify_locked_buffer(buf, function()
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, {})
     local ft = fs.get_filetype_from_path(path)
-    if ft == '' or ft == nil then
-      ft = 'triptych'
-    end
-    -- Setting the filetype can trigger autocommands which can blow up
-    local ft_success, ft_err = pcall(vim.api.nvim_buf_set_option, buf, 'filetype', ft)
-    if not ft_success then
-      error(ft_err, vim.log.levels.WARN)
-      vim.api.nvim_buf_set_option(buf, 'filetype', 'triptych')
-    end
     vim.api.nvim_buf_call(buf, function()
       local file_size = fs.get_file_size_in_kb(path)
       if file_size < 300 then
-        local read_success, read_err = read_file(path)
+        local read_success, read_err = vim.cmd('noautocmd read ' .. path)
         if read_success then
-          --TODO: This is kind of hacky
-          vim.api.nvim_exec2('normal! 1G0dd', {})
+          vim.api.nvim_buf_set_lines(buf, 0, 1, false, {})
+          apply_highlighting(buf, ft)
         else
           error(read_err, vim.log.levels.WARN)
           local msg = '[Unable to preview file contents]'
@@ -136,7 +139,6 @@ end
 local function create_new_buffer()
   local vim = _G.triptych_mock_vim or vim
   local buf = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_buf_set_option(buf, 'filetype', 'triptych')
   return buf
 end
 
