@@ -96,6 +96,9 @@ describe('update_child_window', function()
       icons = {
         get_icon_by_filetype = {},
       },
+      treesitter = {
+        stop = {},
+      },
     }
 
     _G.triptych_mock_vim = {
@@ -118,6 +121,11 @@ describe('update_child_window', function()
         getcwd = function()
           spies.fn.getcwd = spies.fn.getcwd + 1
           return '/wow/'
+        end,
+      },
+      treesitter = {
+        stop = function(bufid)
+          table.insert(spies.treesitter.stop, bufid)
         end,
       },
     }
@@ -215,7 +223,8 @@ describe('update_child_window', function()
       '',
       'Directory',
     } }, spies.float.win_set_title)
-    assert.same({ { 11, 'filetype', 'triptych' } }, spies.api.nvim_buf_set_option)
+    assert.same({ 11 }, spies.treesitter.stop)
+    assert.same({ { 11, 'syntax', 'off' } }, spies.api.nvim_buf_set_option)
     assert.same(1, spies.fn.getcwd)
     assert.same({ '/hello/' }, spies.fs.get_path_details)
     assert.same({}, spies.git.filter_ignored)

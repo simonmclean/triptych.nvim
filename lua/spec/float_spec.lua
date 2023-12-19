@@ -9,7 +9,6 @@ describe('create_three_floating_windows', function()
     local nvim_create_buf_spy = {}
     local nvim_set_current_win_spy = {}
     local nvim_buf_set_lines_spy = {}
-    local nvim_buf_set_option_spy = {}
 
     -- incrementing indexes used for window and buffer ids
     local bufid = 0
@@ -29,9 +28,6 @@ describe('create_three_floating_windows', function()
         end,
         nvim_buf_set_lines = function(bid, from, to, strict, lines)
           table.insert(nvim_buf_set_lines_spy, { bid, from, to, strict, lines })
-        end,
-        nvim_buf_set_option = function(bid, opt, value)
-          table.insert(nvim_buf_set_option_spy, { bid, opt, value })
         end,
         nvim_open_win = function(bif, enter, config)
           table.insert(nvim_open_win_spy, { bif, enter, config })
@@ -54,12 +50,6 @@ describe('create_three_floating_windows', function()
       { false, true },
       { false, true },
     }, nvim_create_buf_spy)
-
-    assert.same({
-      { 1, 'filetype', 'triptych' },
-      { 2, 'filetype', 'triptych' },
-      { 3, 'filetype', 'triptych' },
-    }, nvim_buf_set_option_spy)
 
     assert.same({
       {
@@ -202,24 +192,22 @@ describe('buf_set_lines_from_path', function()
     local nvim_buf_set_lines_spy = {}
     local nvim_buf_set_option_spy = {}
     local nvim_buf_call_spy = {}
-    local cmd_read_spy = {}
-    local nvim_exec2_spy = {}
+    local cmd_spy = {}
     local get_filetype_from_path_spy = {}
     local get_file_size_in_kb_spy = {}
+    local treesitter_get_lang_spy = {}
+    local treesitter_get_parser_spy = {}
+    local treesitter_start_spy = {}
 
     _G.triptych_mock_vim = {
       log = {
         levels = vim.log.levels,
       },
-      cmd = {
-        read = function(path)
-          table.insert(cmd_read_spy, path)
-        end,
-      },
+      cmd = function(path)
+        table.insert(cmd_spy, path)
+        return true
+      end,
       api = {
-        nvim_exec2 = function(cmd, config)
-          table.insert(nvim_exec2_spy, { cmd, config })
-        end,
         nvim_buf_set_lines = function(bufid, from, to, strict, lines)
           table.insert(nvim_buf_set_lines_spy, { bufid, from, to, strict, lines })
         end,
@@ -229,6 +217,21 @@ describe('buf_set_lines_from_path', function()
         nvim_buf_call = function(bufid, fn)
           table.insert(nvim_buf_call_spy, { bufid, fn })
           fn()
+        end,
+      },
+      treesitter = {
+        language = {
+          get_lang = function(filetype)
+            table.insert(treesitter_get_lang_spy, filetype)
+            return filetype
+          end,
+        },
+        get_parser = function(bufid, lang)
+          table.insert(treesitter_get_parser_spy, { bufid, lang })
+          return {}
+        end,
+        start = function(buf, lang)
+          table.insert(treesitter_start_spy, { buf, lang })
         end,
       },
     }
@@ -254,14 +257,13 @@ describe('buf_set_lines_from_path', function()
     assert.same({
       { 4, 'readonly', false },
       { 4, 'modifiable', true },
-      { 4, 'filetype', 'javascript' },
       { 4, 'readonly', true },
       { 4, 'modifiable', false },
     }, nvim_buf_set_option_spy)
     assert.same({
       { 4, 0, -1, false, {} },
+      { 4, 0, 1, false, {} },
     }, nvim_buf_set_lines_spy)
-    assert.same({ { 'normal! 1G0dd', {} } }, nvim_exec2_spy)
   end)
 end)
 
