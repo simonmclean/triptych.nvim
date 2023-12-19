@@ -78,8 +78,19 @@ local function win_set_title(win, title, icon, highlight, postfix)
   end)
 end
 
+--- Attempt to use treesitter for highlighting. Fall back to using the regex engine
+---@param buf number
+---@param filetype? string
+---@return nil
 local function apply_highlighting(buf, filetype)
   local vim = _G.triptych_mock_vim or vim
+
+  if u.is_empty(filetype) then
+    vim.treesitter.stop()
+    vim.api.nvim_buf_set_option(buf, 'syntax', 'off')
+    return
+  end
+
   local treesitter_applied = false
   local lang = vim.treesitter.language.get_lang(filetype)
   if lang then
@@ -110,9 +121,7 @@ local function buf_set_lines_from_path(buf, path)
         local read_success, read_err = vim.cmd('noautocmd read ' .. path)
         if read_success then
           vim.api.nvim_buf_set_lines(buf, 0, 1, false, {})
-          if u.is_defined(ft) then
-            apply_highlighting(buf, ft)
-          end
+          apply_highlighting(buf, ft)
         else
           error(read_err, vim.log.levels.WARN)
           local msg = '[Unable to preview file contents]'
