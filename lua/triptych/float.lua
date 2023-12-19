@@ -94,7 +94,7 @@ local function apply_highlighting(buf, filetype)
   local treesitter_applied = false
   local lang = vim.treesitter.language.get_lang(filetype)
   if lang then
-    local success, _ = vim.treesitter.get_parser(buf, lang)
+    local success, _ = pcall(vim.treesitter.get_parser, buf, lang)
     if success then
       vim.treesitter.start(buf, lang)
       treesitter_applied = true
