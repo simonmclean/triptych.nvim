@@ -36,6 +36,7 @@ local function expected_default_config()
         file_names = 'NONE',
         directory_names = 'NONE',
       },
+      syntax_highlighting = true,
     },
     git_signs = {
       enabled = true,

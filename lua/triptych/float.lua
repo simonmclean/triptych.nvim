@@ -121,7 +121,9 @@ local function buf_set_lines_from_path(buf, path)
         local read_success, read_err = vim.cmd('noautocmd read ' .. path)
         if read_success then
           vim.api.nvim_buf_set_lines(buf, 0, 1, false, {})
-          apply_highlighting(buf, ft)
+          if vim.g.triptych_config.options.syntax_highlighting then
+            apply_highlighting(buf, ft)
+          end
         else
           error(read_err, vim.log.levels.WARN)
           local msg = '[Unable to preview file contents]'

@@ -49,6 +49,7 @@
 ---@field file_icons TriptychConfigFileIcons
 ---@field column_widths number[]
 ---@field highlights TriptychConfigHighlights
+---@field syntax_highlighting boolean
 
 ---@class TriptychConfigHighlights
 ---@field file_names string

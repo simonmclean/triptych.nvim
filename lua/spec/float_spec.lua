@@ -203,6 +203,9 @@ describe('buf_set_lines_from_path', function()
       log = {
         levels = vim.log.levels,
       },
+      g = {
+        triptych_config = require('triptych.config').create_merged_config {},
+      },
       cmd = function(path)
         table.insert(cmd_spy, path)
         return true
