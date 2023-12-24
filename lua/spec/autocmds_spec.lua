@@ -3,6 +3,7 @@ local autocmds = require 'triptych.autocmds'
 local mock_state = { 'mock_state' }
 local mock_diagnostic = { 'mock_diagnostic' }
 local mock_git = { 'mock_git' }
+local mock_file_reader = { 'mock_file_reader' }
 
 describe('AutoCommands.new', function()
   it('creates the expected autocommands', function()
@@ -17,14 +18,14 @@ describe('AutoCommands.new', function()
       },
     }
     local event_handlers = {
-      handle_cursor_moved = function(state, diag, git)
-        table.insert(handle_cursor_moved_spy, { state, diag, git })
+      handle_cursor_moved = function(state, file_reader, diag, git)
+        table.insert(handle_cursor_moved_spy, { state, file_reader, diag, git })
       end,
       handle_buf_leave = function()
         table.insert(handle_buf_leave_spy, {})
       end,
     }
-    autocmds.new(event_handlers, mock_state, mock_diagnostic, mock_git)
+    autocmds.new(event_handlers, mock_file_reader, mock_state, mock_diagnostic, mock_git)
 
     -- Test CursorMoved autocommand is created
     local cursor_moved_autocmd = autocmd_spy[1]
@@ -43,8 +44,9 @@ describe('AutoCommands.new', function()
     -- Test the CursorMoved callback calls the event handler
     cursor_moved_autocmd_config.callback()
     assert.equal(mock_state, handle_cursor_moved_spy[1][1])
-    assert.equal(mock_diagnostic, handle_cursor_moved_spy[1][2])
-    assert.equal(mock_git, handle_cursor_moved_spy[1][3])
+    assert.equal(mock_file_reader, handle_cursor_moved_spy[1][2])
+    assert.equal(mock_diagnostic, handle_cursor_moved_spy[1][3])
+    assert.equal(mock_git, handle_cursor_moved_spy[1][4])
 
     -- Test the BufLeave callback calls the event handler
     buf_leave_autocmd_config.callback()

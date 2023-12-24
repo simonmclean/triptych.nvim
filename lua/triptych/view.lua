@@ -293,23 +293,44 @@ function M.nav_to(State, target_dir, Diagnostics, Git, cursor_target)
       contents = focused_contents,
       win = focused_win,
     },
-    child = {
+    child = { -- This all gets populated by update_child_window
       path = '',
+      is_dir = State.windows.child.is_dir,
       contents = nil,
-      lines = nil,
       win = child_win,
     },
   }
 end
 
 ---@param State TriptychState
+---@param FileReader FileReader
 ---@param path_details PathDetails
 ---@param Diagnostics? Diagnostics
 ---@param Git? Git
 ---@return nil
-function M.update_child_window(State, path_details, Diagnostics, Git)
+function M.update_child_window(State, FileReader, path_details, Diagnostics, Git)
   local vim = _G.triptych_mock_vim or vim
   local buf = vim.api.nvim_win_get_buf(State.windows.child.win)
+  local is_current_path_a_directory = State.windows.child.is_dir
+  -- TODO: Can we make path_details mandatory to avoid the repeated checks
+
+  vim.api.nvim_buf_set_var(
+    buf,
+    'triptych_path',
+    u.cond(path_details == nil, {
+      when_true = nil,
+      when_false = function()
+        return path_details.path
+      end,
+    })
+  )
+
+  State.windows.child.is_dir = u.cond(path_details == nil, {
+    when_true = false,
+    when_false = function()
+      return path_details.is_dir
+    end,
+  })
 
   State.windows.child.path = u.cond(path_details == nil, {
     when_true = nil,
@@ -340,7 +361,7 @@ function M.update_child_window(State, path_details, Diagnostics, Git)
     local filetype = fs.get_filetype_from_path(path_details.path) -- TODO: De-dupe this
     local icon, highlight = icons.get_icon_by_filetype(filetype)
     float.win_set_title(State.windows.child.win, path_details.basename, icon, highlight)
-    float.buf_set_lines_from_path(buf, path_details.path)
+    FileReader:read(buf, path_details.path, is_current_path_a_directory)
   end
 end
 

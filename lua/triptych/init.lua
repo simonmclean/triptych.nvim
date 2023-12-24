@@ -7,6 +7,7 @@ local view = require 'triptych.view'
 local git = require 'triptych.git'
 local diagnostics = require 'triptych.diagnostics'
 local event_handlers = require 'triptych.event_handlers'
+local file_reader = require 'triptych.file_reader'
 local u = require 'triptych.utils'
 
 ---@return nil
@@ -21,6 +22,8 @@ local function open_triptych()
   local State = state.new(config, vim.api.nvim_get_current_win())
   local Git = config.git_signs.enabled and git.Git.new() or nil
   local Diagnostics = config.diagnostic_signs.enabled and diagnostics.new() or nil
+  local FileReader = file_reader.new(config.options.syntax_highlighting.debounce_ms)
+
   local buf_name = vim.api.nvim_buf_get_name(0)
   local buf_dir = u.cond(u.is_defined(buf_name), {
     when_true = vim.fs.dirname(buf_name),
@@ -44,11 +47,12 @@ local function open_triptych()
     },
     child = {
       win = windows[3],
+      is_dir = false,
     },
   }
 
   -- Autocmds need to be created after the above state is set
-  local AutoCmds = autocmds.new(event_handlers, State, Diagnostics, Git)
+  local AutoCmds = autocmds.new(event_handlers, FileReader, State, Diagnostics, Git)
   local refresh_fn = function()
     view.refresh_view(State, Diagnostics, Git)
   end
@@ -66,6 +70,7 @@ local function open_triptych()
       wins.child.win,
     }
     vim.api.nvim_set_current_win(State.opening_win)
+    FileReader:destroy()
   end
 
   view.nav_to(State, buf_dir, Diagnostics, Git, buf_name)

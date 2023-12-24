@@ -72,6 +72,7 @@ describe('update_child_window', function()
       api = {
         nvim_win_get_buf = {},
         nvim_buf_set_option = {},
+        nvim_buf_set_var = {},
       },
       float = {
         win_set_title = {},
@@ -112,6 +113,9 @@ describe('update_child_window', function()
         end,
         nvim_buf_set_option = function(bufid, opt, value)
           table.insert(spies.api.nvim_buf_set_option, { bufid, opt, value })
+        end,
+        nvim_buf_set_var = function(buf, varname, value)
+          table.insert(spies.api.nvim_buf_set_var, { buf, varname, value })
         end,
       },
       fn = {
@@ -197,6 +201,7 @@ describe('update_child_window', function()
       cut_list = {},
       copy_list = {},
     }
+
     local mock_git = {
       filter_ignored = function(_, paths)
         table.insert(spies.git.filter_ignored, paths)
@@ -207,6 +212,7 @@ describe('update_child_window', function()
         return 'M'
       end,
     }
+
     local mock_diagnostics = {
       get = function(_, path)
         table.insert(spies.diagnostics.get, path)
@@ -214,7 +220,9 @@ describe('update_child_window', function()
       end,
     }
 
-    view.update_child_window(mock_state, mock_state.windows.child, mock_diagnostics, mock_git)
+    local mock_file_reader = {}
+
+    view.update_child_window(mock_state, mock_file_reader, mock_state.windows.child, mock_diagnostics, mock_git)
 
     assert.same({ 6 }, spies.api.nvim_win_get_buf)
     assert.same({ {

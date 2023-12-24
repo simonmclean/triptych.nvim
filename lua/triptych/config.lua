@@ -36,7 +36,10 @@ local function default_config()
         file_names = 'NONE',
         directory_names = 'NONE',
       },
-      syntax_highlighting = true,
+      syntax_highlighting = {
+        enabled = true,
+        debounce_ms = 100,
+      },
     },
     git_signs = {
       enabled = true,

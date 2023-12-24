@@ -4,10 +4,11 @@ local AutoCommands = {}
 
 ---@param event_handlers any
 ---@param State TriptychState
+---@param FileReader FileReader
 ---@param Diagnostics? Diagnostics
 ---@param Git? Git
 ---@return AutoCommands
-function AutoCommands.new(event_handlers, State, Diagnostics, Git)
+function AutoCommands.new(event_handlers, FileReader, State, Diagnostics, Git)
   local vim = _G.triptych_mock_vim or vim
   local instance = {}
   setmetatable(instance, { __index = AutoCommands })
@@ -15,7 +16,7 @@ function AutoCommands.new(event_handlers, State, Diagnostics, Git)
     vim.api.nvim_create_autocmd('CursorMoved', {
       group = au_group,
       callback = function()
-        event_handlers.handle_cursor_moved(State, Diagnostics, Git)
+        event_handlers.handle_cursor_moved(State, FileReader, Diagnostics, Git)
       end,
     }),
 

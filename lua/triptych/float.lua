@@ -1,5 +1,6 @@
 local u = require 'triptych.utils'
 local fs = require 'triptych.fs'
+local syntax_highlighting = require 'triptych.syntax_highlighting'
 
 ---Modify a buffer which is readonly and not modifiable
 ---@param buf number
@@ -24,6 +25,7 @@ local function buf_set_lines(buf, lines)
   end)
 end
 
+--- Add highlights for icons and file/directory names. Not to be confused with the syntax highlighting for preview buffers
 ---@param buf number
 ---@param highlights HighlightDetails[]
 ---@return nil
@@ -78,51 +80,35 @@ local function win_set_title(win, title, icon, highlight, postfix)
   end)
 end
 
---- Attempt to use treesitter for highlighting. Fall back to using the regex engine
----@param buf number
----@param filetype? string
----@return nil
-local function apply_highlighting(buf, filetype)
-  local vim = _G.triptych_mock_vim or vim
-
-  if u.is_empty(filetype) then
-    vim.treesitter.stop()
-    vim.api.nvim_buf_set_option(buf, 'syntax', 'off')
-    return
-  end
-
-  local treesitter_applied = false
-  local lang = vim.treesitter.language.get_lang(filetype)
-  if lang then
-    local success, _ = pcall(vim.treesitter.get_parser, buf, lang)
-    if success then
-      vim.treesitter.start(buf, lang)
-      treesitter_applied = true
-    end
-  end
-  if not treesitter_applied then
-    -- Fallback to regex syntax highlighting
-    vim.api.nvim_buf_set_option(buf, 'syntax', filetype)
-  end
-end
-
 --- Read the contents of a file into the buffer and apply syntax highlighting
 ---@param buf number
 ---@param path string
 ---@return nil
 local function buf_set_lines_from_path(buf, path)
   local vim = _G.triptych_mock_vim or vim
+
+  -- Avoid things blowing up when we call this function asyncronously
+  if not vim.api.nvim_buf_is_valid(buf) then
+    return
+  end
+
+  -- Do nothing if we've moved on to a different file or directory
+  if vim.api.nvim_buf_get_var(buf, 'triptych_path') ~= path then
+    return
+  end
+
   modify_locked_buffer(buf, function()
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, {})
     local ft = fs.get_filetype_from_path(path)
     vim.api.nvim_buf_call(buf, function()
+      syntax_highlighting.stop(buf)
       local file_size = fs.get_file_size_in_kb(path)
       if file_size < 300 then
         local read_success, read_err = vim.cmd('noautocmd read ' .. path)
         if read_success then
           vim.api.nvim_buf_set_lines(buf, 0, 1, false, {})
-          if vim.g.triptych_config.options.syntax_highlighting then
-            apply_highlighting(buf, ft)
+          if vim.g.triptych_config.options.syntax_highlighting.enabled then
+            syntax_highlighting.start(buf, ft)
           end
         else
           error(read_err, vim.log.levels.WARN)
