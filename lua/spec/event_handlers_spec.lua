@@ -21,6 +21,7 @@ describe('handle_cursor_moved', function()
         ['a/b/c'] = 2,
       },
     }
+    local mock_file_reader = { 'mock_file_reader' }
     _G.triptych_mock_vim = {
       api = {
         nvim_win_get_cursor = function(winid)
@@ -34,15 +35,15 @@ describe('handle_cursor_moved', function()
         table.insert(get_target_under_cursor_spy, s)
         return mock_target
       end,
-      update_child_window = function(s, t, d, g)
-        table.insert(update_child_window_spy, { s, t, d, g })
+      update_child_window = function(s, f, t, d, g)
+        table.insert(update_child_window_spy, { s, f, t, d, g })
       end,
     }
 
-    -- test
-    event_handlers.handle_cursor_moved(mock_state, mock_diagnostic, mock_git)
+    event_handlers.handle_cursor_moved(mock_state, mock_file_reader, mock_diagnostic, mock_git)
+
     assert.same({ 0 }, nvim_win_get_cursor_spy)
-    assert.same({ { mock_state, mock_target, mock_diagnostic, mock_git } }, update_child_window_spy)
+    assert.same({ { mock_state, mock_file_reader, mock_target, mock_diagnostic, mock_git } }, update_child_window_spy)
     assert.same({ mock_state }, get_target_under_cursor_spy)
     assert.same(13, mock_state.path_to_line_map['a/b/c'])
   end)

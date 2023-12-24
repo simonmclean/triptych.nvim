@@ -106,6 +106,10 @@ require 'triptych'.setup {
       file_names = 'NONE',
       directory_names = 'NONE',
     },
+    syntax_highlighting = { -- Applies to file previews
+      enabled = true,
+      debounce_ms = 100,
+    },
   },
   git_signs = {
     enabled = true,

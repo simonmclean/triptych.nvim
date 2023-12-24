@@ -1,5 +1,6 @@
 local float = require 'triptych.float'
 local fs = require 'triptych.fs'
+local syntax_highlighting = require 'triptych.syntax_highlighting'
 
 describe('create_three_floating_windows', function()
   it('makes the expected nvim api calls', function()
@@ -192,22 +193,36 @@ describe('buf_set_lines_from_path', function()
     local nvim_buf_set_lines_spy = {}
     local nvim_buf_set_option_spy = {}
     local nvim_buf_call_spy = {}
+    local nvim_buf_is_valid_spy = {}
+    local nvim_buf_get_var_spy = {}
     local cmd_spy = {}
     local get_filetype_from_path_spy = {}
     local get_file_size_in_kb_spy = {}
     local treesitter_get_lang_spy = {}
     local treesitter_get_parser_spy = {}
     local treesitter_start_spy = {}
+    local syntax_highlighting_stop_spy = {}
 
     _G.triptych_mock_vim = {
       log = {
         levels = vim.log.levels,
+      },
+      g = {
+        triptych_config = require('triptych.config').create_merged_config {},
       },
       cmd = function(path)
         table.insert(cmd_spy, path)
         return true
       end,
       api = {
+        nvim_buf_is_valid = function(bufid)
+          table.insert(nvim_buf_is_valid_spy, bufid)
+          return true
+        end,
+        nvim_buf_get_var = function(bufid, varname)
+          table.insert(nvim_buf_get_var_spy, { bufid, varname })
+          return '/hello/world.txt'
+        end,
         nvim_buf_set_lines = function(bufid, from, to, strict, lines)
           table.insert(nvim_buf_set_lines_spy, { bufid, from, to, strict, lines })
         end,
@@ -236,6 +251,10 @@ describe('buf_set_lines_from_path', function()
       },
     }
 
+    syntax_highlighting.stop = function(buf)
+      table.insert(syntax_highlighting_stop_spy, buf)
+    end
+
     fs.get_file_size_in_kb = function(_)
       return 66
     end
@@ -252,8 +271,11 @@ describe('buf_set_lines_from_path', function()
 
     float.buf_set_lines_from_path(4, '/hello/world.txt')
 
+    assert.same({ 4 }, syntax_highlighting_stop_spy)
     assert.same({ '/hello/world.txt' }, get_file_size_in_kb_spy)
     assert.same({ '/hello/world.txt' }, get_filetype_from_path_spy)
+    assert.same({ 4, 4 }, nvim_buf_is_valid_spy)
+    assert.same({ { 4, 'triptych_path' } }, nvim_buf_get_var_spy)
     assert.same({
       { 4, 'readonly', false },
       { 4, 'modifiable', true },

@@ -9,6 +9,7 @@ local view = require 'triptych.view'
 local git = require 'triptych.git'
 local diagnostics = require 'triptych.diagnostics'
 local event_handlers = require 'triptych.event_handlers'
+local file_reader = require 'triptych.file_reader'
 
 describe('setup', function()
   it('creates config and Triptych command', function()
@@ -69,6 +70,9 @@ describe('open_triptych', function()
         new = {},
       },
       mappings = {
+        new = {},
+      },
+      file_reader = {
         new = {},
       },
       view = {
@@ -139,14 +143,19 @@ describe('open_triptych', function()
       return 'mock_diagnostic'
     end
 
-    autocmds.new = function(h, s, d, g)
-      table.insert(spies.autocmds.new, { h, s, d, g })
+    autocmds.new = function(h, f, s, d, g)
+      table.insert(spies.autocmds.new, { h, f, s, d, g })
       return 'mock_autocmds'
     end
 
     actions.new = function(_state, refresh_fn)
       table.insert(spies.actions.new, { _state, refresh_fn })
       return 'mock_actions'
+    end
+
+    file_reader.new = function(debounce_ms)
+      table.insert(spies.file_reader.new, debounce_ms)
+      return 'mock_file_reader'
     end
 
     view.refresh_view = function(s, d, g)
@@ -173,6 +182,7 @@ describe('open_triptych', function()
     }, spies.state.new)
     assert.same(1, spies.git.new)
     assert.same(1, spies.diagnostics.new)
+    assert.same({ 100 }, spies.file_reader.new)
     assert.same({ 0 }, spies.vim.api.nvim_buf_get_name)
     assert.same(1, spies.vim.fn.getcwd)
     assert.same({ '/hello/world' }, spies.vim.fs.dirname)
@@ -189,11 +199,15 @@ describe('open_triptych', function()
           win = 5,
         },
         child = {
+          is_dir = false,
           win = 6,
         },
       },
     }, mock_state)
-    assert.same({ { event_handlers, mock_state, 'mock_diagnostic', 'mock_git' } }, spies.autocmds.new)
+    assert.same(
+      { { event_handlers, 'mock_file_reader', mock_state, 'mock_diagnostic', 'mock_git' } },
+      spies.autocmds.new
+    )
     assert.same(mock_state, spies.actions.new[1][1])
     assert.same({ { mock_state, 'mock_actions' } }, spies.mappings.new)
     assert.same({ { mock_state, '/hello', 'mock_diagnostic', 'mock_git', '/hello/world' } }, spies.view.nav_to)
@@ -204,6 +218,7 @@ describe('open_triptych', function()
       autocmd_destroy = 0,
       close_floats = {},
       nvim_set_current_win = {},
+      file_reader_destroy = 0,
     }
 
     _G.triptych_mock_vim = {
@@ -248,6 +263,14 @@ describe('open_triptych', function()
       return 'mock_diagnostic'
     end
 
+    file_reader.new = function(_)
+      return {
+        destroy = function()
+          spies.file_reader_destroy = spies.file_reader_destroy + 1
+        end,
+      }
+    end
+
     autocmds.new = function(_, _, _, _)
       return {
         destroy_autocommands = function(_)
@@ -279,6 +302,7 @@ describe('open_triptych', function()
     _G.triptych_mock_vim.g.triptych_close()
 
     assert.same(1, spies.autocmd_destroy)
+    assert.same(1, spies.file_reader_destroy)
     assert.same({ { 4, 5, 6 } }, spies.close_floats)
     assert.same({ 9 }, spies.nvim_set_current_win)
   end)

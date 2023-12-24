@@ -49,10 +49,15 @@
 ---@field file_icons TriptychConfigFileIcons
 ---@field column_widths number[]
 ---@field highlights TriptychConfigHighlights
+---@field syntax_highlighting TriptychConfigSyntaxHighlighting
 
 ---@class TriptychConfigHighlights
 ---@field file_names string
 ---@field directory_names string
+
+---@class TriptychConfigSyntaxHighlighting
+---@field enabled boolean
+---@field debounce_ms number
 
 ---@class TriptychConfigLineNumbers
 ---@field enabled boolean
@@ -112,7 +117,7 @@
 ---@field previous_path string
 
 ---@class ViewStateChildWindow: ViewStateWindow
----@field lines? string[]
+---@field is_dir boolean
 
 ---@class FloatingWindowConfig
 ---@field width number
@@ -139,3 +144,8 @@
 ---@class Diagnostics
 ---@field new fun(): Diagnostics
 ---@field get fun(self: Diagnostics, path: string): integer | nil
+
+---@class FileReader
+---@field new fun(debounce_ms: number): FileReader
+---@field read fun(self: FileReader, buf: number, path: string, bypass_debounce?: boolean): FileReader
+---@field destroy fun(self: FileReader): FileReader

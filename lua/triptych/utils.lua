@@ -264,9 +264,41 @@ local function string_contains(str, search)
   return string.find(str, search, 1, true) ~= nil
 end
 
+---@param value number
+---@param num_of_decimal_places number
+---@return number
 local function round(value, num_of_decimal_places)
   local mult = 10 ^ (num_of_decimal_places or 0)
   return math.floor(value * mult + 0.5) / mult
+end
+
+--- Returns the debounced function and an instance of vim.loop.new_timer
+--- Must call timer:close() when no longer needed in order to avoid memory leaks
+--- Based on https://gist.github.com/runiq/31aa5c4bf00f8e0843cd267880117201
+---@param fn function Function to debounce
+---@param ms number Timeout in ms
+---@return function
+---@return table
+local function debounce_trailing(fn, ms)
+  local timer = vim.loop.new_timer()
+  local wrapped_fn
+  local first_time = true
+
+  wrapped_fn = function(...)
+    local argv = { ... }
+    local argc = select('#', ...)
+    local wait_ms = cond(first_time, {
+      when_true = 0,
+      when_false = ms,
+    })
+    timer:start(wait_ms, 0, function()
+      first_time = false
+      ---@diagnostic disable-next-line: deprecated
+      pcall(vim.schedule_wrap(fn), unpack(argv, 1, argc))
+    end)
+  end
+
+  return wrapped_fn, timer
 end
 
 return {
@@ -292,4 +324,5 @@ return {
   set = set,
   get = get,
   round = round,
+  debounce_trailing = debounce_trailing,
 }
