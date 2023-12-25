@@ -66,6 +66,8 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     name: generate docs
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v2
       - name: panvimdoc
