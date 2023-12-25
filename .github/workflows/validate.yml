@@ -63,3 +63,13 @@ jobs:
       run: |
         cd $HOME/$TRIPTYCH_DIR
         $HOME/nvim-linux64-0.9.4/bin/nvim --headless -c "PlenaryBustedDirectory lua/spec/"
+  docs:
+    runs-on: ubuntu-latest
+    name: generate docs
+    steps:
+      - uses: actions/checkout@v2
+      - name: panvimdoc
+        uses: kdheepak/panvimdoc@main
+        with:
+          vimdoc: triptych.nvim
+          demojify: true
