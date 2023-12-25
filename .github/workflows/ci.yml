@@ -1,4 +1,4 @@
-name: Validate
+name: CI
 
 env:
   TRIPTYCH_DIR: .local/share/nvim/site/pack/simonmclean/start/triptych
@@ -63,3 +63,19 @@ jobs:
       run: |
         cd $HOME/$TRIPTYCH_DIR
         $HOME/nvim-linux64-0.9.4/bin/nvim --headless -c "PlenaryBustedDirectory lua/spec/"
+  docs:
+    runs-on: ubuntu-latest
+    name: generate docs
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: panvimdoc
+        uses: kdheepak/panvimdoc@main
+        with:
+          vimdoc: triptych.nvim
+          demojify: true
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "auto generate docs"
+          branch: ${{ github.head_ref }}

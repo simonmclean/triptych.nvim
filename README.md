@@ -1,10 +1,13 @@
+<!-- panvimdoc-ignore-start -->
 <h1 align="center">Triptych.nvim</h1>
 
 <p align="center">Directory viewer for Neovim, inspired by <a href="https://github.com/ranger/ranger">Ranger</a></p>
 
 ![Triptych screenshot](screenshot.jpg?raw=true "Triptych screenshot")
 
-[![Validate](https://github.com/simonmclean/triptych.nvim/actions/workflows/validate.yml/badge.svg)](https://github.com/simonmclean/triptych.nvim/actions/workflows/validate.yml)
+[![CI](https://github.com/simonmclean/triptych.nvim/actions/workflows/ci.yml/badge.svg)](https://github.com/simonmclean/triptych.nvim/actions/workflows/ci.yml)
+
+<!-- panvimdoc-ignore-end -->
 
 The UI consists of 3 floating windows. In the center is the currently focused directory. On the left is the parent directory.
 The right window contains either a child directory, or a file preview.
