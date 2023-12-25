@@ -1,4 +1,4 @@
-name: Validate
+name: CI
 
 env:
   TRIPTYCH_DIR: .local/share/nvim/site/pack/simonmclean/start/triptych
