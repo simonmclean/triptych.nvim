@@ -9,6 +9,8 @@
 
 <!-- panvimdoc-ignore-end -->
 
+<!-- panvimdoc-include-comment ## How it works -->
+
 The UI consists of 3 floating windows. In the center is the currently focused directory. On the left is the parent directory.
 The right window contains either a child directory, or a file preview.
 
