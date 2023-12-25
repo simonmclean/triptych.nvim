@@ -1,12 +1,16 @@
-*triptych.nvim.txt*        For NVIM v0.8.0       Last change: 2023 December 25
+*triptych.nvim.txt*        For NVIM v0.9.0       Last change: 2023 December 25
 
 ==============================================================================
 Table of Contents                            *triptych.nvim-table-of-contents*
 
+  - How it works                                  |triptych.nvim-how-it-works|
   - Features                                          |triptych.nvim-features|
   - Requirements                                  |triptych.nvim-requirements|
   - Installation                                  |triptych.nvim-installation|
   - Configuration                                |triptych.nvim-configuration|
+
+HOW IT WORKS                                      *triptych.nvim-how-it-works*
+
 The UI consists of 3 floating windows. In the center is the currently focused
 directory. On the left is the parent directory. The right window contains
 either a child directory, or a file preview.
