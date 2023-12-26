@@ -10,9 +10,20 @@ local event_handlers = require 'triptych.event_handlers'
 local file_reader = require 'triptych.file_reader'
 local u = require 'triptych.utils'
 
+---@param msg string
 ---@return nil
-local function open_triptych()
+local function warn(msg)
+  vim.notify(msg, vim.log.levels.WARN, { title = 'triptych' })
+end
+
+---@param dir? string Path of directory to open. If omitted will be the directory containing the current buffer
+---@return fun()|nil
+local function open_triptych(dir)
   local vim = _G.triptych_mock_vim or vim
+
+  if dir and not vim.fn.isdirectory(dir) then
+    return warn(tostring(dir) .. ' is not a directory')
+  end
 
   if vim.g.triptych_is_open then
     return
@@ -24,11 +35,15 @@ local function open_triptych()
   local Diagnostics = config.diagnostic_signs.enabled and diagnostics.new() or nil
   local FileReader = file_reader.new(config.options.syntax_highlighting.debounce_ms)
 
-  local buf_name = vim.api.nvim_buf_get_name(0)
-  local buf_dir = u.cond(u.is_defined(buf_name), {
-    when_true = vim.fs.dirname(buf_name),
-    when_false = vim.fn.getcwd(),
+  local maybe_buf_name = u.cond(dir, {
+    when_true = nil,
+    when_false = vim.api.nvim_buf_get_name(0),
   })
+  local opening_dir = dir
+    or u.cond(u.is_defined(maybe_buf_name), {
+      when_true = vim.fs.dirname(maybe_buf_name),
+      when_false = vim.fn.getcwd(),
+    })
   local windows = float.create_three_floating_windows(
     config.options.line_numbers.enabled,
     config.options.line_numbers.relative,
@@ -59,7 +74,7 @@ local function open_triptych()
   local Actions = actions.new(State, refresh_fn, Diagnostics, Git)
   mappings.new(State, Actions)
 
-  vim.g.triptych_close = function()
+  local close = function()
     vim.g.triptych_is_open = false
     -- Need to destroy autocmds before the floating windows
     AutoCmds:destroy_autocommands()
@@ -73,9 +88,12 @@ local function open_triptych()
     FileReader:destroy()
   end
 
-  view.nav_to(State, buf_dir, Diagnostics, Git, buf_name)
+  view.nav_to(State, opening_dir, Diagnostics, Git, maybe_buf_name)
 
   vim.g.triptych_is_open = true
+  vim.g.triptych_close = close
+
+  return close
 end
 
 ---@param user_config? table
@@ -83,18 +101,20 @@ local function setup(user_config)
   local vim = _G.triptych_mock_vim or vim
 
   if vim.fn.has 'nvim-0.9.0' ~= 1 then
-    return vim.notify('triptych.nvim requires Neovim >= 0.9.0', vim.log.levels.WARN, { title = 'triptych.nvim' })
+    return warn 'triptych.nvim requires Neovim >= 0.9.0'
   end
 
   local plenary_installed, _ = pcall(require, 'plenary')
 
   if not plenary_installed then
-    return vim.notify('triptych.nvim requires plenary.nvim', vim.log.levels.WARN, { title = 'triptych.nvim' })
+    return warn 'triptych.nvim requires plenary.nvim'
   end
 
   vim.g.triptych_is_open = false
 
-  vim.api.nvim_create_user_command('Triptych', open_triptych, {})
+  vim.api.nvim_create_user_command('Triptych', function()
+    open_triptych()
+  end, {})
 
   vim.g.triptych_config = require('triptych.config').create_merged_config(user_config or {})
 end

@@ -7,6 +7,7 @@ describe('create_three_floating_windows', function()
     -- spies
     local nvim_open_win_spy = {}
     local nvim_win_set_option_spy = {}
+    local nvim_win_set_var_spy = {}
     local nvim_create_buf_spy = {}
     local nvim_set_current_win_spy = {}
     local nvim_buf_set_lines_spy = {}
@@ -37,6 +38,9 @@ describe('create_three_floating_windows', function()
         end,
         nvim_win_set_option = function(wid, opt, value)
           table.insert(nvim_win_set_option_spy, { wid, opt, value })
+        end,
+        nvim_win_set_var = function(wid, opt, value)
+          table.insert(nvim_win_set_var_spy, { wid, opt, value })
         end,
         nvim_set_current_win = function(wid)
           table.insert(nvim_set_current_win_spy, wid)
@@ -99,7 +103,11 @@ describe('create_three_floating_windows', function()
         },
       },
     }, nvim_open_win_spy)
-
+    assert.same({
+      { 1, 'triptych_role', 'parent' },
+      { 2, 'triptych_role', 'primary' },
+      { 3, 'triptych_role', 'child' },
+    }, nvim_win_set_var_spy)
     assert.same({
       -- first win
       { 1, 'cursorline', true },

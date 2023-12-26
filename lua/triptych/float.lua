@@ -146,6 +146,7 @@ local function create_floating_window(config)
     noautocmd = true,
     focusable = config.is_focusable,
   })
+  vim.api.nvim_win_set_var(win, 'triptych_role', config.role)
   vim.api.nvim_win_set_option(win, 'cursorline', config.enable_cursorline)
   vim.api.nvim_win_set_option(win, 'number', config.show_numbers)
   vim.api.nvim_win_set_option(win, 'relativenumber', config.relative_numbers)
@@ -194,6 +195,14 @@ local function create_three_floating_windows(show_numbers, relative_numbers, col
     if is_primary or is_child then
       x_pos = x_pos + float_widths[i - 1] + 2
     end
+    local role = u.eval(function()
+      if is_parent then
+        return 'parent'
+      elseif is_primary then
+        return 'primary'
+      end
+      return 'child'
+    end)
     local win = create_floating_window {
       width = float_widths[i],
       height = float_height,
@@ -205,6 +214,7 @@ local function create_three_floating_windows(show_numbers, relative_numbers, col
       is_focusable = is_primary,
       show_numbers = show_numbers and is_primary,
       relative_numbers = show_numbers and relative_numbers and is_primary,
+      role = role,
     }
 
     table.insert(wins, win)
