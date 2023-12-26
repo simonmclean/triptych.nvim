@@ -63,14 +63,14 @@ jobs:
       run: |
         cd $HOME/$TRIPTYCH_DIR
         $HOME/nvim-linux64-0.9.4/bin/nvim --headless -c "PlenaryBustedDirectory lua/spec/"
-    - name: run UI tests against neovim 0.9.0
-      run: |
-        cd $HOME/$TRIPTYCH_DIR
-        $HOME/nvim-linux64-0.9.0/bin/nvim --headless -c "PlenaryBustedFile ui_tests/tests.lua"
     - name: run UI tests against latest stable neovim
       run: |
         cd $HOME/$TRIPTYCH_DIR
         $HOME/nvim-linux64-0.9.4/bin/nvim --headless -c "PlenaryBustedFile ui_tests/tests.lua"
+    - name: run UI tests against neovim 0.9.0
+      run: |
+        cd $HOME/$TRIPTYCH_DIR
+        $HOME/nvim-linux64-0.9.0/bin/nvim --headless -c "PlenaryBustedFile ui_tests/tests.lua"
   docs:
     runs-on: ubuntu-latest
     name: generate docs
