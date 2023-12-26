@@ -24,7 +24,7 @@ describe('triptych', function()
       },
     }
     close_triptych = tryptic.open_triptych(test_setup.test_playground_path .. '/level_1_dir_1/level_2_dir_1')
-    test_setup.wait()
+    tu.wait()
   end)
 
   after_each(function()
