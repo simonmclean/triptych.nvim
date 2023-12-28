@@ -1,5 +1,5 @@
 local fs = require 'triptych.fs'
-local tu = require 'spec.test_utils'
+local tu = require 'unit_tests.test_utils'
 local plenary_filetype = require 'plenary.filetype'
 
 describe('get_path_details', function()

@@ -1,5 +1,5 @@
 local diagnostics = require 'triptych.diagnostics'
-local tu = require 'spec.test_utils'
+local tu = require 'unit_tests.test_utils'
 
 describe('get_sign', function()
   it('returns the sign name for a diagnostic severity', function()

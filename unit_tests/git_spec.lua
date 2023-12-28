@@ -1,6 +1,6 @@
 local git = require 'triptych.git'
 local u = require 'triptych.utils'
-local tu = require 'spec.test_utils'
+local tu = require 'unit_tests.test_utils'
 local config = require 'triptych.config'
 
 local mocks = {
