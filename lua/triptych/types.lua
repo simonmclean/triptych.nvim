@@ -128,6 +128,7 @@
 ---@field enable_cursorline boolean
 ---@field show_numbers boolean
 ---@field relative_numbers boolean
+---@field role 'parent' | 'primary' | 'child'
 
 ---@class HighlightDetails
 ---@field icon HighlightDetailsIcon
