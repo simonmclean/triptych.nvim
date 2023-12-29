@@ -33,7 +33,8 @@ function M.user_input(inputs)
     when_false = { inputs },
   })
   for _, input in ipairs(input_list) do
-    vim.api.nvim_input(input)
+    local input_parsed = vim.api.nvim_replace_termcodes(input, true, true, true)
+    vim.api.nvim_feedkeys(input_parsed, 'normal', false)
     M.wait()
   end
 end
@@ -50,6 +51,7 @@ function M.move(direction)
   elseif direction == 'up' then
     M.user_input 'k'
   end
+  M.wait()
 end
 
 return M

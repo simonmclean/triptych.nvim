@@ -139,7 +139,6 @@ You simply provide a key mapping, a vim mode, and a function. When the mapped ke
 ```lua
 {
   basename, -- e.g. bar.js
-  children, -- table containing directory contents (if applicable)
   dirname, -- e.g. /User/Name/foo
   display_name -- same as basename (redundant field)
   filetype, -- e.g. 'javascript'
