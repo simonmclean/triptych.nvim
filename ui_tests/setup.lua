@@ -56,19 +56,12 @@ function M.setup()
   local files_and_dirs = {
     dir = test_playground_dirname,
     children = {
-      { file = 'level_1_file_1.js', lines = M.js_lines },
-      { file = 'level_1_file_2.ts' },
-      { file = 'level_1_file_3.lua' },
       {
         dir = 'level_1_dir_1',
         children = {
-          { file = 'level_2_file_1.java', lines = M.java_lines },
-          { file = 'level_2_file_2.sh' },
-          { file = 'level_2_file_3.php' },
           {
             dir = 'level_2_dir_1',
             children = {
-              { file = 'level_3_file_1.java', lines = M.java_lines },
               {
                 dir = 'level_3_dir_1',
                 children = {
@@ -81,10 +74,17 @@ function M.setup()
                   { file = 'level_4_file_1.js', lines = M.js_lines },
                 },
               },
+              { file = 'level_3_file_1.java', lines = M.java_lines },
             },
           },
+          { file = 'level_2_file_1.java', lines = M.java_lines },
+          { file = 'level_2_file_2.sh' },
+          { file = 'level_2_file_3.php' },
         },
       },
+      { file = 'level_1_file_1.js', lines = M.js_lines },
+      { file = 'level_1_file_2.ts' },
+      { file = 'level_1_file_3.lua' },
       { dir = 'level_1_dir_2', children = {} },
     },
   }
