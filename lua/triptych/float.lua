@@ -233,6 +233,9 @@ local function close_floats(wins)
   for _, win in ipairs(wins) do
     local buf = vim.api.nvim_win_get_buf(win)
     vim.api.nvim_buf_delete(buf, { force = true })
+    -- In some circumstances the window can remain after the buffer is deleted
+    -- But we need to wrap this in pcall to suppress errors when this isn't the case
+    pcall(vim.api.nvim_win_close, win, { force = true })
   end
 end
 
