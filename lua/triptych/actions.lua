@@ -196,10 +196,15 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
   ---@return nil
   M.paste = function()
     local cursor_target = view.get_target_under_cursor(State)
-    local destination_dir = u.cond(cursor_target.is_dir, {
-      when_true = cursor_target.path,
-      when_false = cursor_target.dirname,
-    })
+    local destination_dir = u.eval(function()
+      if not cursor_target then
+        return State.windows.current.path
+      end
+      if cursor_target.is_dir then
+        return cursor_target.path
+      end
+      return cursor_target.dirname
+    end)
     ---@type PathDetails[]
     local delete_list = {}
 
