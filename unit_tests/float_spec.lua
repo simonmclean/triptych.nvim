@@ -131,6 +131,7 @@ end)
 describe('close_floats', function()
   it('closes a list of floating windows', function()
     local nvim_win_get_buf_spy = {}
+    local nvim_win_close_spy = {}
     local nvim_buf_delete_spy = {}
 
     local bufindex = 0
@@ -141,6 +142,9 @@ describe('close_floats', function()
           bufindex = bufindex + 1
           return bufindex
         end,
+        nvim_win_close = function(winid, conf)
+          table.insert(nvim_win_close_spy, { winid, conf })
+        end,
         nvim_buf_delete = function(bufid, config)
           table.insert(nvim_buf_delete_spy, { bufid, config })
         end,
@@ -150,6 +154,11 @@ describe('close_floats', function()
     float.close_floats { 3, 4, 5 }
 
     assert.same({ 3, 4, 5 }, nvim_win_get_buf_spy)
+    assert.same({
+      { 3, { force = true } },
+      { 4, { force = true } },
+      { 5, { force = true } },
+    }, nvim_win_close_spy)
     assert.same({
       { 1, { force = true } },
       { 2, { force = true } },
