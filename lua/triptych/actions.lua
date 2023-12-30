@@ -26,13 +26,15 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
   ---@return nil
   M.delete = function()
     local target = view.get_target_under_cursor(State)
-    local prompt = 'Are you sure you want to delete "' .. target.display_name .. '"?'
-    vim.ui.select({ 'Yes', 'No' }, { prompt = prompt }, function(response)
-      if u.is_defined(response) and response == 'Yes' then
-        vim.fn.delete(target.path, 'rf')
-        refresh_view()
-      end
-    end)
+    if target then
+      local prompt = 'Are you sure you want to delete "' .. target.display_name .. '"?'
+      vim.ui.select({ 'Yes', 'No' }, { prompt = prompt }, function(response)
+        if u.is_defined(response) and response == 'Yes' then
+          vim.fn.delete(target.path, 'rf')
+          refresh_view()
+        end
+      end)
+    end
   end
 
   ---@param _targets PathDetails[]
@@ -40,6 +42,10 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
   ---@return nil
   M.bulk_delete = function(_targets, skip_confirm)
     local targets = _targets or view.get_targets_in_selection(State)
+
+    if u.is_empty(targets) then
+      return
+    end
 
     if skip_confirm then
       for _, target in ipairs(targets) do
@@ -182,14 +188,16 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
   ---@return nil
   M.rename = function()
     local target = view.get_target_under_cursor(State)
-    local display_name = u.cond(target.is_dir, {
-      when_true = u.trim_last_char(target.display_name),
-      when_false = target.display_name,
-    })
-    local response = vim.fn.trim(vim.fn.input('Enter new name for "' .. display_name .. '": '))
-    if u.is_defined(response) and response ~= target.display_name then
-      vim.fn.rename(target.path, u.path_join(target.dirname, response))
-      refresh_view()
+    if target then
+      local display_name = u.cond(target.is_dir, {
+        when_true = u.trim_last_char(target.display_name),
+        when_false = target.display_name,
+      })
+      local response = vim.fn.trim(vim.fn.input('Enter new name for "' .. display_name .. '": '))
+      if u.is_defined(response) and response ~= target.display_name then
+        vim.fn.rename(target.path, u.path_join(target.dirname, response))
+        refresh_view()
+      end
     end
   end
 
