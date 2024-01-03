@@ -1,7 +1,7 @@
 <!-- panvimdoc-ignore-start -->
 <h1 align="center">Triptych.nvim</h1>
 
-<p align="center">Directory viewer for Neovim, inspired by <a href="https://github.com/ranger/ranger">Ranger</a></p>
+<p align="center">Directory browser for Neovim, inspired by <a href="https://github.com/ranger/ranger">Ranger</a></p>
 
 ![Triptych screenshot](screenshot.jpg?raw=true "Triptych screenshot")
 
