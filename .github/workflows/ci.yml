@@ -3,12 +3,21 @@ name: CI
 env:
   TRIPTYCH_DIR: .local/share/nvim/site/pack/simonmclean/start/triptych
   LUA_LS_LOG_PATH: /home/runner/lua-language-server/logs
+  LATEST_NVIM_VERSION: "0.9.5"
 
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'lua/**'
+      - 'unit_tests/**'
+      - 'ui_tests/**'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'lua/**'
+      - 'unit_tests/**'
+      - 'ui_tests/**'
 
 jobs:
   validate:
@@ -26,11 +35,11 @@ jobs:
     - name: install latest stable neovim
       run: |
         cd $HOME
-        curl -OJL https://github.com/neovim/neovim/releases/download/v0.9.4/nvim-linux64.tar.gz
+        curl -OJL https://github.com/neovim/neovim/releases/download/v$LATEST_NVIM_VERSION/nvim-linux64.tar.gz
         tar xzf *.tar.gz
-        mv $HOME/nvim-linux64 $HOME/nvim-linux64-0.9.4
+        mv $HOME/nvim-linux64 $HOME/nvim-linux64-$LATEST_NVIM_VERSION
         rm nvim-linux64.tar.gz
-        $HOME/nvim-linux64-0.9.4/bin/nvim --version
+        $HOME/nvim-linux64-$LATEST_NVIM_VERSION/bin/nvim --version
     - name: install neovim plugins
       run: |
         git config --global advice.detachedHead false
@@ -62,7 +71,7 @@ jobs:
     - name: run unit tests against latest stable neovim
       run: |
         cd $HOME/$TRIPTYCH_DIR
-        $HOME/nvim-linux64-0.9.4/bin/nvim --headless -c "PlenaryBustedDirectory unit_tests/"
+        $HOME/nvim-linux64-$LATEST_NVIM_VERSION/bin/nvim --headless -c "PlenaryBustedDirectory unit_tests/"
     - name: run UI tests against neovim 0.9.0
       run: |
         cd $HOME/$TRIPTYCH_DIR
@@ -70,21 +79,4 @@ jobs:
     - name: run UI tests against latest stable neovim
       run: |
         cd $HOME/$TRIPTYCH_DIR
-        $HOME/nvim-linux64-0.9.4/bin/nvim --headless -c "PlenaryBustedFile ui_tests/tests.lua"
-  docs:
-    runs-on: ubuntu-latest
-    name: generate docs
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: panvimdoc
-        uses: kdheepak/panvimdoc@v4.0.0
-        with:
-          vimdoc: triptych.nvim
-          demojify: true
-          version: "NVIM v0.9.0"
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "auto generate docs"
-          branch: ${{ github.head_ref }}
+        $HOME/nvim-linux64-$LATEST_NVIM_VERSION/bin/nvim --headless -c "PlenaryBustedFile ui_tests/tests.lua"
