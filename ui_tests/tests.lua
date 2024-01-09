@@ -58,7 +58,7 @@ describe('triptych', function()
     test_setup.cleanup()
   end)
 
-  it('closes when user inputs the configured key (default q)', function()
+  it('closes when user inputs the configured key (default q).', function()
     local close = open_triptych()
     tu.user_input 'q'
     local success, _ = pcall(close)
