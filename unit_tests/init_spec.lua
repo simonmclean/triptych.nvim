@@ -319,5 +319,7 @@ describe('toggle_triptych', function()
     }
 
     init.toggle_triptych()
+
+    assert.same(1, close_spy)
   end)
 end)
