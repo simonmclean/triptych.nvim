@@ -48,8 +48,8 @@ describe('setup', function()
   end)
 end)
 
-describe('open_triptych', function()
-  it('makes the expected calls', function()
+describe('toggle_triptych', function()
+  it('opens triptych, making the expected calls', function()
     local spies = {
       state = {
         new = {},
@@ -175,7 +175,7 @@ describe('open_triptych', function()
       return { 4, 5, 6 }
     end
 
-    init.open_triptych()
+    init.toggle_triptych()
 
     assert.same({
       { _G.triptych_mock_vim.g.triptych_config, 66 },
@@ -297,7 +297,7 @@ describe('open_triptych', function()
       table.insert(spies.close_floats, winids)
     end
 
-    init.open_triptych()
+    init.toggle_triptych()
 
     _G.triptych_mock_vim.g.triptych_close()
 
@@ -305,5 +305,19 @@ describe('open_triptych', function()
     assert.same(1, spies.file_reader_destroy)
     assert.same({ { 4, 5, 6 } }, spies.close_floats)
     assert.same({ 9 }, spies.nvim_set_current_win)
+  end)
+
+  it("closes triptych if it's currently open", function()
+    local close_spy = 0
+    _G.triptych_mock_vim = {
+      g = {
+        triptych_is_open = true,
+        triptych_close = function()
+          close_spy = close_spy + 1
+        end,
+      },
+    }
+
+    init.toggle_triptych()
   end)
 end)
