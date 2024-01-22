@@ -3,7 +3,6 @@ local help = require 'triptych.help'
 describe('help_lines', function()
   it('returns key bindings', function()
     local mappings = {
-      open_triptych = 'O',
       show_help = 'g?',
       jump_to_cwd = '.',
       nav_left = '<',
@@ -35,7 +34,6 @@ describe('help_lines', function()
       '[<]             : nav_left',
       '[<leader>,]     : toggle_hidden',
       '[>]             : nav_right',
-      '[O]             : open_triptych',
       '[a, A]          : add',
       '[c]             : copy',
       '[d]             : delete',

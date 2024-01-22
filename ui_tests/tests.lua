@@ -33,7 +33,7 @@ end
 ---@return fun()
 local function open_triptych(config)
   tryptic.setup(config or test_config())
-  local close_fn = tryptic.open_triptych(test_setup.test_playground_path .. '/level_1_dir_1/level_2_dir_1')
+  local close_fn = tryptic.toggle_triptych(test_setup.test_playground_path .. '/level_1_dir_1/level_2_dir_1')
   tu.wait()
   ---@diagnostic disable-next-line: return-type-mismatch
   return close_fn
@@ -61,6 +61,13 @@ describe('triptych', function()
   it('closes when user inputs the configured key (default q).', function()
     local close = open_triptych()
     tu.user_input 'q'
+    local success, _ = pcall(close)
+    assert(success == false, 'Expected close to fail because triptic should already be closed')
+  end)
+
+  it('closes when user calls the Triptych() command and triptych is already open', function()
+    local close = open_triptych()
+    vim.cmd.Triptych()
     local success, _ = pcall(close)
     assert(success == false, 'Expected close to fail because triptic should already be closed')
   end)

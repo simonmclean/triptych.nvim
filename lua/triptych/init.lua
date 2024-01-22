@@ -18,7 +18,7 @@ end
 
 ---@param dir? string Path of directory to open. If omitted will be the directory containing the current buffer
 ---@return fun()|nil
-local function open_triptych(dir)
+local function toggle_triptych(dir)
   local vim = _G.triptych_mock_vim or vim
 
   if dir and not vim.fn.isdirectory(dir) then
@@ -26,7 +26,7 @@ local function open_triptych(dir)
   end
 
   if vim.g.triptych_is_open then
-    return
+    return vim.g.triptych_close()
   end
 
   local config = vim.g.triptych_config
@@ -113,13 +113,16 @@ local function setup(user_config)
   vim.g.triptych_is_open = false
 
   vim.api.nvim_create_user_command('Triptych', function()
-    open_triptych()
+    toggle_triptych()
   end, {})
 
   vim.g.triptych_config = require('triptych.config').create_merged_config(user_config or {})
 end
 
 return {
-  open_triptych = open_triptych,
+  toggle_triptych = toggle_triptych,
+  open_triptych = function()
+    warn 'open_triptych() is deprecated and will be removed in a future release. Please use toggle_triptych() instead.'
+  end,
   setup = setup,
 }
