@@ -64,7 +64,7 @@ Then call the `setup` function somewhere in your Neovim config to initialise it 
 require 'triptych'.setup()
 ```
 
-Launch using the `:Triptych` command. You may want to create a binding for this.
+Launch using the `:Triptych` command, which will toggle Triptych open/closed. You may want to create a binding for this.
 
 ```lua
 vim.keymap.set('n', '<leader>-', ':Triptych<CR>', { silent = true })
