@@ -121,8 +121,8 @@ end
 
 return {
   toggle_triptych = toggle_triptych,
-  open_triptych = function ()
-    warn('open_triptych() is deprecated and will be removed in a future release. Please use toggle_triptych() instead.')
+  open_triptych = function()
+    warn 'open_triptych() is deprecated and will be removed in a future release. Please use toggle_triptych() instead.'
   end,
   setup = setup,
 }
