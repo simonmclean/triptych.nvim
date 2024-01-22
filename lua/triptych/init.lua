@@ -113,7 +113,11 @@ local function setup(user_config)
   vim.g.triptych_is_open = false
 
   vim.api.nvim_create_user_command('Triptych', function()
-    open_triptych()
+    if vim.g.triptych_is_open then
+      vim.g.triptych_close()
+    else
+      open_triptych()
+    end
   end, {})
 
   vim.g.triptych_config = require('triptych.config').create_merged_config(user_config or {})
