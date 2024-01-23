@@ -157,8 +157,15 @@ and will receive a table containing the following:
     }
 <
 
-For example, if you want to make `<c-f>` search the file or directory under the
-cursor using Telescope <https://github.com/nvim-telescope/telescope.nvim>.
+
+EXAMPLES
+
+
+TELESCOPE INTEGRATION
+
+If you want to make `<c-f>` search the file or directory under the cursor using
+Telescope <https://github.com/nvim-telescope/telescope.nvim> try something
+like:
 
 >lua
     {
@@ -172,6 +179,37 @@ cursor using Telescope <https://github.com/nvim-telescope/telescope.nvim>.
           end
         }
       }
+    }
+<
+
+
+OPENING A FILE IN A SPLIT
+
+The simplest workflow would be to create the split before opening Triptych. But
+you could create bindings for this like so:
+
+>lua
+    {
+      extension_mappings = {
+        ['-'] = {
+          mode = 'n',
+          fn = function(target)
+            vim.cmd.Triptych()
+            vim.schedule(function()
+              vim.cmd.split(target.path)
+            end)
+          end,
+        },
+        ['|'] = {
+          mode = 'n',
+          fn = function(target)
+            vim.cmd.Triptych()
+            vim.schedule(function()
+              vim.cmd.vsplit(target.path)
+            end)
+          end,
+        },
+      },
     }
 <
 
