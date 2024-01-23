@@ -131,7 +131,7 @@ require 'triptych'.setup {
 }
 ```
 
-### Extending functionality
+## Extending functionality
 
 The `extension_mappings` property allows you add any arbitrary functionality based on the current cursor target.
 You simply provide a key mapping, a vim mode, and a function. When the mapped keys are pressed the function is invoked, and will receive a table containing the following:
@@ -147,9 +147,9 @@ You simply provide a key mapping, a vim mode, and a function. When the mapped ke
 }
 ```
 
-#### Examples
+### Examples
 
-##### Telescope integration
+#### Telescope integration
 
 If you want to make `<c-f>` search the file or directory under the cursor using [Telescope](https://github.com/nvim-telescope/telescope.nvim) try something like:
 
@@ -168,7 +168,7 @@ If you want to make `<c-f>` search the file or directory under the cursor using 
 }
 ```
 
-#### Opening a file in a split
+### Opening a file in a split
 
 The simplest workflow would be to create the split before opening Triptych. But you could create bindings for this like so:
 
