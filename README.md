@@ -147,7 +147,11 @@ You simply provide a key mapping, a vim mode, and a function. When the mapped ke
 }
 ```
 
-For example, if you want to make `<c-f>` search the file or directory under the cursor using [Telescope](https://github.com/nvim-telescope/telescope.nvim).
+#### Examples
+
+##### Telescope integration
+
+If you want to make `<c-f>` search the file or directory under the cursor using [Telescope](https://github.com/nvim-telescope/telescope.nvim) try something like:
 
 ```lua
 {
@@ -164,3 +168,31 @@ For example, if you want to make `<c-f>` search the file or directory under the 
 }
 ```
 
+#### Opening a file in a split
+
+The simplest workflow would be to create the split before opening Triptych. But you could create bindings for this like so:
+
+```lua
+{
+  extension_mappings = {
+    ['-'] = {
+      mode = 'n',
+      fn = function(target)
+        vim.cmd.Triptych()
+        vim.schedule(function()
+          vim.cmd.split(target.path)
+        end)
+      end,
+    },
+    ['|'] = {
+      mode = 'n',
+      fn = function(target)
+        vim.cmd.Triptych()
+        vim.schedule(function()
+          vim.cmd.vsplit(target.path)
+        end)
+      end,
+    },
+  },
+}
+```
