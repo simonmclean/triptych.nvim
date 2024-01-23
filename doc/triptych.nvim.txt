@@ -8,6 +8,7 @@ Table of Contents                            *triptych.nvim-table-of-contents*
   - Requirements                                  |triptych.nvim-requirements|
   - Installation                                  |triptych.nvim-installation|
   - Configuration                                |triptych.nvim-configuration|
+  - Extending functionality            |triptych.nvim-extending-functionality|
 
 HOW IT WORKS                                      *triptych.nvim-how-it-works*
 
@@ -139,7 +140,7 @@ bindings.
 <
 
 
-EXTENDING FUNCTIONALITY ~
+EXTENDING FUNCTIONALITY                *triptych.nvim-extending-functionality*
 
 The `extension_mappings` property allows you add any arbitrary functionality
 based on the current cursor target. You simply provide a key mapping, a vim
@@ -157,8 +158,15 @@ and will receive a table containing the following:
     }
 <
 
-For example, if you want to make `<c-f>` search the file or directory under the
-cursor using Telescope <https://github.com/nvim-telescope/telescope.nvim>.
+
+EXAMPLES ~
+
+
+TELESCOPE INTEGRATION
+
+If you want to make `<c-f>` search the file or directory under the cursor using
+Telescope <https://github.com/nvim-telescope/telescope.nvim> try something
+like:
 
 >lua
     {
@@ -172,6 +180,37 @@ cursor using Telescope <https://github.com/nvim-telescope/telescope.nvim>.
           end
         }
       }
+    }
+<
+
+
+OPENING A FILE IN A SPLIT ~
+
+The simplest workflow would be to create the split before opening Triptych. But
+you could create bindings for this like so:
+
+>lua
+    {
+      extension_mappings = {
+        ['-'] = {
+          mode = 'n',
+          fn = function(target)
+            vim.cmd.Triptych()
+            vim.schedule(function()
+              vim.cmd.split(target.path)
+            end)
+          end,
+        },
+        ['|'] = {
+          mode = 'n',
+          fn = function(target)
+            vim.cmd.Triptych()
+            vim.schedule(function()
+              vim.cmd.vsplit(target.path)
+            end)
+          end,
+        },
+      },
     }
 <
 
