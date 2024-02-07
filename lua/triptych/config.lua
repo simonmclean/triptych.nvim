@@ -49,6 +49,12 @@ local function default_config()
         rename = 'r',
         untracked = '?',
       },
+      colors = {
+        add = { fg = '#98c379' },
+        modify = { fg = '#e5c07b' },
+        rename = { fg = '#61afef' },
+        untracked = { fg = '#e06c75' },
+      },
     },
     diagnostic_signs = {
       enabled = true,
