@@ -27,13 +27,13 @@ function Git.new()
   local git_status = u.multiline_str_to_table(vim.fn.system 'git status --porcelain')
   local result = {}
 
-  local signs_config = vim.g.triptych_config.git_signs
+  local signs_config = vim.g.triptych_config.git_signs.signs
 
   local signs_to_text = {
-    ['TriptychGitAdd'] = signs_config.signs.add,
-    ['TriptychGitModify'] = signs_config.signs.modify,
-    ['TriptychGitRename'] = signs_config.signs.rename,
-    ['TriptychGitUntracked'] = signs_config.signs.untracked,
+    ['TriptychGitAdd'] = signs_config.add,
+    ['TriptychGitModify'] = signs_config.modify,
+    ['TriptychGitRename'] = signs_config.rename,
+    ['TriptychGitUntracked'] = signs_config.untracked,
   }
 
   -- Register the signs if they're not already
