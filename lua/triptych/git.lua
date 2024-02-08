@@ -30,33 +30,20 @@ function Git.new()
   local signs_config = vim.g.triptych_config.git_signs
 
   local signs_to_text = {
-    ['TriptychGitAdd'] = {
-      text = signs_config.signs.add,
-      texthl = 'TriptychSignGitAdd',
-      hl = signs_config.colors.add,
-    },
-    ['TriptychGitModify'] = {
-      text = signs_config.signs.modify,
-      texthl = 'TriptychSignGitModify',
-      hl = signs_config.colors.modify,
-    },
-    ['TriptychGitRename'] = {
-      text = signs_config.signs.rename,
-      texthl = 'TriptychSignGitRename',
-      hl = signs_config.colors.rename,
-    },
-    ['TriptychGitUntracked'] = {
-      text = signs_config.signs.untracked,
-      texthl = 'TriptychSignGitUntracked',
-      hl = signs_config.colors.untracked,
-    },
+    ['TriptychGitAdd'] = signs_config.signs.add,
+    ['TriptychGitModify'] = signs_config.signs.modify,
+    ['TriptychGitRename'] = signs_config.signs.rename,
+    ['TriptychGitUntracked'] = signs_config.signs.untracked,
   }
 
   -- Register the signs if they're not already
   for sign_name, opts in pairs(signs_to_text) do
     if u.is_empty(vim.fn.sign_getdefined(sign_name)) then
-      vim.fn.sign_define(sign_name, { text = opts.text, texthl = opts.texthl })
-      vim.api.nvim_set_hl(0, opts.texthl, opts.hl)
+      if type(opts) == 'string' then
+        vim.fn.sign_define(sign_name, { text = opts })
+      elseif type(opts) == 'table' then
+        vim.fn.sign_define(sign_name, opts)
+      end
     end
   end
 

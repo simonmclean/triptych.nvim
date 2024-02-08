@@ -71,23 +71,20 @@
 ---@class TriptychConfigGitSigns
 ---@field enabled boolean
 ---@field signs TriptychConfigGitSignsSigns
----@field colors TriptychConfigGitSignsColors
 
 ---@class TriptychConfigGitSignsSigns
----@field add string
----@field modify string
----@field rename string
----@field untracked string
+---@field add string | TriptychConfigGitSignDefineOptions
+---@field modify string | TriptychConfigGitSignDefineOptions
+---@field rename string | TriptychConfigGitSignDefineOptions
+---@field untracked string | TriptychConfigGitSignDefineOptions
 
----@class TriptychConfigGitSignsColors
----@field add TriptychNvimHLParams
----@field modify TriptychNvimHLParams
----@field rename TriptychNvimHLParams
----@field untracked TriptychNvimHLParams
-
----@class TriptychNvimHLParams
----@field fg string
----@field bg string
+---@class TriptychConfigGitSignDefineOptions
+---@field icon? string
+---@field linehl? string
+---@field numhl? string
+---@field text? string
+---@field texthl? string
+---@field culhl? string
 
 ---@class TriptychConfigDiagnostic
 ---@field enabled boolean
