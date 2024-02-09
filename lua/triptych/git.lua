@@ -37,9 +37,13 @@ function Git.new()
   }
 
   -- Register the signs if they're not already
-  for sign_name, text in pairs(signs_to_text) do
+  for sign_name, opts in pairs(signs_to_text) do
     if u.is_empty(vim.fn.sign_getdefined(sign_name)) then
-      vim.fn.sign_define(sign_name, { text = text })
+      if type(opts) == 'string' then
+        vim.fn.sign_define(sign_name, { text = opts })
+      elseif type(opts) == 'table' then
+        vim.fn.sign_define(sign_name, opts)
+      end
     end
   end
 

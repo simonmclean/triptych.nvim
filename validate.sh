@@ -24,6 +24,14 @@ fi
 
 echo "Checking formatting..."
 npx @johnnymorganz/stylua-bin --check .
+formatting_exit_code=$?
+
+if [ $formatting_exit_code -ne 0 ]; then
+  echo "❌ 1 or more files are not formatted correctly. Formatting...";
+  stylua --config-path stylua.toml --respect-ignores ./
+else
+  echo "✅ All files are formatted correctly";
+fi
 
 echo "Check diagnostics..."
 ~/.local/share/nvim/mason/bin/lua-language-server --check .

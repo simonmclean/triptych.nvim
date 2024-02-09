@@ -119,6 +119,9 @@ require 'triptych'.setup {
   git_signs = {
     enabled = true,
     signs = {
+      -- The value can be either a string or a table.
+      -- If a string, will be basic text. If a table, will be passed as the {dict} argument to vim.fn.sign_define
+      -- If you want to add color, you can specify a highlight group in the table.
       add = '+',
       modify = '~',
       rename = 'r',
