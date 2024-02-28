@@ -799,10 +799,6 @@ end)
 
 describe('paste', function()
   it('pastes the items in the copy list', function()
-    _G.triptych_mock_vim = {
-      print = vim.print,
-    }
-
     local spies = {
       view = {
         get_target_under_cursor = {},
@@ -818,7 +814,20 @@ describe('paste', function()
       state = {
         list_remove_all = {},
       },
+      fn = {
+        filereadable = 0,
+      },
       refresh = 0,
+    }
+
+    _G.triptych_mock_vim = {
+      print = vim.print,
+      fn = {
+        filereadable = function(_)
+          spies.fn.filereadable = spies.fn.filereadable + 1
+          return 0
+        end,
+      },
     }
 
     local config = require('triptych.config').create_merged_config {}
@@ -896,6 +905,120 @@ describe('paste', function()
     assert.same({ { state_instance, '/hello/world/wow' } }, spies.view.jump_cursor_to)
     assert.same({ 'cut', 'copy' }, spies.state.list_remove_all)
     assert.same(1, spies.refresh)
+  end)
+
+  it('handles already existing files by appending a _copy<index> postfix', function()
+    local spies = {
+      plenary_path = {
+        new = {},
+        copy = {},
+      },
+      fn = {
+        filereadable = {},
+      },
+    }
+
+    _G.triptych_mock_vim = {
+      print = vim.print,
+      fn = {
+        fnamemodify = vim.fn.fnamemodify,
+        filereadable = function(path)
+          table.insert(spies.fn.filereadable, path)
+          local i = #spies.fn.filereadable
+          local exists = 1
+          local does_not_exist = 0
+          if i == 1 then -- foo.js
+            return exists
+          elseif i == 2 then -- foo_copy1.js
+            return does_not_exist
+          elseif i == 3 then -- foo.js
+            return exists
+          elseif i == 4 then -- foo_copy1.js
+            return exists
+          elseif i == 5 then -- foo.js
+            return exists
+          elseif i == 6 then -- foo_copy2.js
+            return does_not_exist
+          end
+          error 'Unexpected call to filereadable'
+        end,
+      },
+    }
+
+    local config = require('triptych.config').create_merged_config {}
+    local state_instance = require('triptych.state').new(config, 2)
+
+    state_instance.copy_list = {
+      ---@diagnostic disable-next-line: missing-fields
+      {
+        basename = 'foo.js',
+        path = '/hello/world/foo.js',
+      },
+    }
+
+    view.get_target_under_cursor = function(_)
+      return {
+        is_dir = false,
+        path = '/hello/world/foo.js',
+        dirname = '/hello/world',
+      }
+    end
+
+    view.jump_cursor_to = function(_, _) end
+
+    plenary_path.new = function(_, path)
+      table.insert(spies.plenary_path.new, path)
+      return {
+        copy = function(_, opts)
+          table.insert(spies.plenary_path.copy, opts)
+        end,
+      }
+    end
+
+    local mock_refresh = function() end
+
+    ---@diagnostic disable-next-line: missing-fields
+    local actions_instance = actions.new(state_instance, mock_refresh, {}, {})
+
+    actions_instance.bulk_delete = function(_, _) end
+
+    -- First paste action
+    actions_instance.paste()
+
+    -- Now repopulate the copy list before pasting again
+    state_instance.copy_list = {
+      ---@diagnostic disable-next-line: missing-fields
+      {
+        basename = 'foo.js',
+        path = '/hello/world/foo.js',
+      },
+    }
+    -- Second paste action (so we can test for _copy1 and _copy2)
+    actions_instance.paste()
+
+    assert.same({
+      '/hello/world/foo.js',
+      '/hello/world/foo_copy1.js',
+      '/hello/world/foo.js',
+      '/hello/world/foo_copy1.js',
+      '/hello/world/foo.js',
+      '/hello/world/foo_copy2.js',
+    }, spies.fn.filereadable)
+    assert.same({ '/hello/world/foo.js', '/hello/world/foo.js' }, spies.plenary_path.new)
+    assert.same({
+      {
+        destination = '/hello/world/foo_copy1.js',
+        recursive = true,
+        override = false,
+        interactive = true,
+      },
+      {
+        destination = '/hello/world/foo_copy2.js',
+        recursive = true,
+        override = false,
+        interactive = true,
+      },
+    }, spies.plenary_path.copy)
   end)
 
   it('pastes the items in the cut list', function()
