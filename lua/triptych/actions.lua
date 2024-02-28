@@ -201,6 +201,36 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
     end
   end
 
+  --- Checks if the path we're trying to copy-paste into already exists. If it doesn't then it returns the path unchanged.
+  --- Otherwise it recursively finds a unique path by appending  "_copy<index>.<extension>" to the filename,
+  ---@param target_path string
+  ---@param copy_increment? integer
+  ---@return string
+  local function get_copy_path(target_path, copy_increment)
+    -- If target path does not exist then return it
+    if vim.fn.filereadable(target_path) == 0 then
+      return target_path
+    end
+    -- Otherwise find a unique target path by appending "_copy<i>"
+    local i = copy_increment or 1
+    local dir = vim.fn.fnamemodify(target_path, ':p:h')
+    local extension = vim.fn.fnamemodify(target_path, ':e')
+    local filename_without_extension = vim.fn.fnamemodify(target_path, ':t:r')
+    local copy_path = u.string_join('', {
+      dir,
+      '/',
+      filename_without_extension,
+      '_copy',
+      tostring(i),
+      '.',
+      extension,
+    })
+    if vim.fn.filereadable(copy_path) == 0 then
+      return copy_path
+    end
+    return get_copy_path(target_path, i + 1)
+  end
+
   ---@return nil
   M.paste = function()
     local cursor_target = view.get_target_under_cursor(State)
@@ -233,10 +263,8 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
       M.bulk_delete(delete_list, true)
       -- Handle copy items
       for _, item in ipairs(State.copy_list) do
-        local destination = u.path_join(destination_dir, item.basename)
-        if item.path ~= destination then
-          M.duplicate_file_or_dir(item, destination)
-        end
+        local destination = get_copy_path(u.path_join(destination_dir, item.basename))
+        M.duplicate_file_or_dir(item, destination)
       end
       view.jump_cursor_to(State, destination_dir)
     end)
