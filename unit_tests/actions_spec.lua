@@ -982,8 +982,10 @@ describe('paste', function()
 
     actions_instance.bulk_delete = function(_, _) end
 
+    -- First paste action
     actions_instance.paste()
 
+    -- Now repopulate the copy list before pasting again
     state_instance.copy_list = {
       ---@diagnostic disable-next-line: missing-fields
       {
@@ -991,6 +993,7 @@ describe('paste', function()
         path = '/hello/world/foo.js',
       },
     }
+    -- Second paste action (so we can test for _copy1 and _copy2)
     actions_instance.paste()
 
     assert.same({
