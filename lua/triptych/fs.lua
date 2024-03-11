@@ -12,7 +12,8 @@ end
 ---@param path string
 ---@return string?
 local function get_filetype_from_path(path)
-  local success, result = pcall(plenary_filetype.detect, path)
+  -- Using Plenary to detect filetype, as dd
+  local success, result = pcall(plenary_filetype.detect, path, { fs_access = false })
   if success then
     return result
   end
