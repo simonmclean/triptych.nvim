@@ -308,7 +308,6 @@ function Actions.new(State, refresh_view)
   end
 
   M.nav_left = function()
-    local focused_path = State.windows.current.path -- TODO: Restore cursor pos functionality
     local parent_path = State.windows.parent.path
     if parent_path ~= '/' then
       view.nav_to(State, parent_path)
