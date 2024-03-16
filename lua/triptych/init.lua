@@ -88,7 +88,7 @@ local function toggle_triptych(dir)
     FileReader:destroy()
   end
 
-  view.nav_to(State, opening_dir)
+  view.set_primary_and_parent_window_targets(State, opening_dir)
 
   vim.g.triptych_is_open = true
   vim.g.triptych_close = close

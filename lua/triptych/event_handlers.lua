@@ -12,7 +12,7 @@ function M.handle_cursor_moved(State, FileReader)
   local line_number = vim.api.nvim_win_get_cursor(0)[1]
   State.path_to_line_map[current_dir] = line_number
   if target then
-    view.nav_to_child(State, FileReader, target)
+    view.set_child_window_target(State, FileReader, target)
   end
 end
 
@@ -42,9 +42,9 @@ function M.handle_path_read(State, path_details, win_type, FileReader, Diagnosti
   local vim = _G.triptych_mock_vim or vim
   local view = _G.triptych_mock_view or require 'triptych.view'
   if win_type == 'child' then
-    view.update_child_window(State, FileReader, path_details, Diagnostics, Git)
+    view.set_child_window_lines(State, FileReader, path_details, Diagnostics, Git)
   else
-    view.update_window_contents(State, path_details, win_type, Diagnostics, Git)
+    view.set_parent_or_primary_window_lines(State, path_details, win_type, Diagnostics, Git)
 
     -- Set cursor position
     local maybe_cached_line_num = State.path_to_line_map[path_details.path]

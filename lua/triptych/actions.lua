@@ -301,16 +301,16 @@ function Actions.new(State, refresh_view)
     local win = State.windows.current
     -- If we're already in the root directory, nav back to the previous directory (if we have that in memory)
     if win.path == cwd and u.is_defined(win.previous_path) then
-      view.nav_to(State, win.previous_path)
+      view.set_primary_and_parent_window_targets(State, win.previous_path)
     elseif cwd then
-      view.nav_to(State, cwd)
+      view.set_primary_and_parent_window_targets(State, cwd)
     end
   end
 
   M.nav_left = function()
     local parent_path = State.windows.parent.path
     if parent_path ~= '/' then
-      view.nav_to(State, parent_path)
+      view.set_primary_and_parent_window_targets(State, parent_path)
     end
   end
 
@@ -318,7 +318,7 @@ function Actions.new(State, refresh_view)
     local target = view.get_target_under_cursor(State)
     if target then
       if vim.fn.isdirectory(target.path) == 1 then
-        view.nav_to(State, target.path)
+        view.set_primary_and_parent_window_targets(State, target.path)
       else
         M.edit_file(target.path)
       end

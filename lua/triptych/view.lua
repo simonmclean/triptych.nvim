@@ -8,6 +8,7 @@ local autocmds = require 'triptych.autocmds'
 
 local M = {}
 
+--- Conditionally filter lines and apply git and diagnostic statuses
 ---@param path_details PathDetails
 ---@param show_hidden boolean
 ---@param Diagnostics? Diagnostics
@@ -44,6 +45,7 @@ local function filter_and_encrich_dir_contents(path_details, show_hidden, Diagno
   return path_details
 end
 
+--- Asyncronously read a directory, then publish the results to a User event
 ---@param path string
 ---@param win_type WinType
 local function read_path_async(path, win_type)
@@ -233,10 +235,11 @@ local function set_sign_columns(buf, children, group)
   end
 end
 
+--- On the parent and primary windows, update the title and state, then trigger async directory read
 ---@param State TriptychState
 ---@param target_dir string
 ---@return nil
-function M.nav_to(State, target_dir)
+function M.set_primary_and_parent_window_targets(State, target_dir)
   local vim = _G.triptych_mock_vim or vim
 
   local focused_win = State.windows.current.win
@@ -275,8 +278,7 @@ function M.nav_to(State, target_dir)
   read_path_async(target_dir, 'primary')
 end
 
--- TODO: Is cursor target used?
--- TODO: Name this more specifically, as it doesn't update child
+--- Set lines for the parent or primary window
 ---@param State TriptychState
 ---@param path_details PathDetails
 ---@param win_type 'parent' | 'primary'
@@ -284,7 +286,7 @@ end
 ---@param Git? Git
 ---@param cursor_target? string full path
 ---@return nil
-function M.update_window_contents(State, path_details, win_type, Diagnostics, Git, cursor_target)
+function M.set_parent_or_primary_window_lines(State, path_details, win_type, Diagnostics, Git, cursor_target)
   local vim = _G.triptych_mock_vim or vim
 
   local state = u.eval(function()
@@ -329,11 +331,12 @@ function M.update_window_contents(State, path_details, win_type, Diagnostics, Gi
   end
 end
 
+--- In the child/preview window, update the title and state, then trigger async directory or file read
 ---@param State TriptychState
 ---@param FileReader FileReader
 ---@param path_details PathDetails
 ---@return nil
-function M.nav_to_child(State, FileReader, path_details)
+function M.set_child_window_target(State, FileReader, path_details)
   local vim = _G.triptych_mock_vim or vim
   local buf = vim.api.nvim_win_get_buf(State.windows.child.win)
   local is_current_path_a_directory = State.windows.child.is_dir
@@ -385,26 +388,19 @@ function M.nav_to_child(State, FileReader, path_details)
   end
 end
 
+--- Set lines for the child/preview window
 ---@param State TriptychState
 ---@param FileReader FileReader
 ---@param path_details PathDetails
 ---@param Diagnostics? Diagnostics
 ---@param Git? Git
 ---@return nil
-function M.update_child_window(State, FileReader, path_details, Diagnostics, Git)
+function M.set_child_window_lines(State, FileReader, path_details, Diagnostics, Git)
   local buf = vim.api.nvim_win_get_buf(State.windows.child.win)
 
-  if path_details == nil then
-    float.win_set_title(State.windows.child.win, '[empty directory]')
-    float.buf_set_lines(buf, {})
-  elseif path_details.is_dir then
-    float.win_set_title(
-      State.windows.child.win,
-      path_details.display_name,
-      '',
-      'Directory',
-      get_title_postfix(path_details.path)
-    )
+  -- This function should only be called if we're handling a directory
+  -- TODO: Is there a way to make this clearer?
+  if path_details.is_dir then
     local contents = filter_and_encrich_dir_contents(path_details, State.show_hidden, Diagnostics, Git)
     local lines, highlights = path_details_to_lines(State, contents)
     vim.treesitter.stop(buf)
@@ -412,11 +408,6 @@ function M.update_child_window(State, FileReader, path_details, Diagnostics, Git
     float.buf_set_lines(buf, lines)
     float.buf_apply_highlights(buf, highlights)
     set_sign_columns(buf, contents.children, 'triptych_sign_col_child')
-  else
-    local filetype = fs.get_filetype_from_path(path_details.path) -- TODO: De-dupe this
-    local icon, highlight = icons.get_icon_by_filetype(filetype)
-    float.win_set_title(State.windows.child.win, path_details.display_name, icon, highlight)
-    FileReader:read(buf, path_details.path, State.windows.child.is_dir)
   end
 end
 
@@ -440,7 +431,7 @@ end
 ---@param State TriptychState
 ---@return nil
 function M.refresh_view(State)
-  M.nav_to(State, State.windows.current.path)
+  M.set_primary_and_parent_window_targets(State, State.windows.current.path)
 end
 
 return M

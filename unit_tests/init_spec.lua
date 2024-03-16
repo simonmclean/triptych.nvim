@@ -162,7 +162,7 @@ describe('toggle_triptych', function()
       table.insert(spies.view.refresh_view, { s, d, g })
     end
 
-    view.nav_to = function(s, buf_dir, d, g, buf)
+    view.set_primary_and_parent_window_targets = function(s, buf_dir, d, g, buf)
       table.insert(spies.view.nav_to, { s, buf_dir, d, g, buf })
     end
 
@@ -285,7 +285,7 @@ describe('toggle_triptych', function()
 
     view.refresh_view = function(_, _, _) end
 
-    view.nav_to = function(_, _, _, _, _) end
+    view.set_primary_and_parent_window_targets = function(_, _, _, _, _) end
 
     mappings.new = function(_, _) end
 
