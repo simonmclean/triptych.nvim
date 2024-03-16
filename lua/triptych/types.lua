@@ -19,10 +19,13 @@
 ---@field opening_win integer
 ---@field show_hidden boolean
 
+---@alias AutoCommandMessage ('DirRead' | 'FileRead')
+
 ---@class AutoCommands
 ---@field new fun(state: TriptychState): AutoCommands
 ---@field destroy_autocommands fun(): nil
 ---@field autocmds integer[]
+---@field send fun()
 
 ---@class TriptychConfigMappings
 ---@field show_help KeyMapping
@@ -102,7 +105,6 @@
 ---@field path string
 ---@field display_name string
 ---@field dirname string # Parent directory path
----@field basename string
 ---@field is_dir boolean
 ---@field is_git_ignored boolean
 ---@field filetype? string
@@ -127,6 +129,8 @@
 ---@class ViewStateChildWindow: ViewStateWindow
 ---@field is_dir boolean
 
+---@alias WinType 'parent' | 'primary' | 'child'
+
 ---@class FloatingWindowConfig
 ---@field width number
 ---@field height number
@@ -136,7 +140,7 @@
 ---@field enable_cursorline boolean
 ---@field show_numbers boolean
 ---@field relative_numbers boolean
----@field role 'parent' | 'primary' | 'child'
+---@field role WinType
 
 ---@class HighlightDetails
 ---@field icon HighlightDetailsIcon

@@ -69,9 +69,9 @@ local function toggle_triptych(dir)
   -- Autocmds need to be created after the above state is set
   local AutoCmds = autocmds.new(event_handlers, FileReader, State, Diagnostics, Git)
   local refresh_fn = function()
-    view.refresh_view(State, Diagnostics, Git)
+    view.refresh_view(State)
   end
-  local Actions = actions.new(State, refresh_fn, Diagnostics, Git)
+  local Actions = actions.new(State, refresh_fn)
   mappings.new(State, Actions)
 
   local close = function()
@@ -88,7 +88,7 @@ local function toggle_triptych(dir)
     FileReader:destroy()
   end
 
-  view.nav_to(State, opening_dir, Diagnostics, Git, maybe_buf_name)
+  view.nav_to(State, opening_dir)
 
   vim.g.triptych_is_open = true
   vim.g.triptych_close = close
