@@ -1,6 +1,7 @@
-local M = {}
 local u = require 'triptych.utils'
 local float = require 'triptych.float'
+
+local M = {}
 
 ---@param State TriptychState
 ---@return nil
