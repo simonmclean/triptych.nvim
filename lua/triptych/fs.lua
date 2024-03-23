@@ -30,13 +30,9 @@ M.read_file_async = plenary_async.wrap(function(file_path, callback)
     return callback('File does not exist', nil)
   end
 
-  local content, err = file:read()
-
-  if err then
-    return callback(err, nil)
-  else
+  file:read(function(content)
     callback(nil, u.multiline_str_to_table(content))
-  end
+  end)
 end, 2)
 
 ---@param _path string
