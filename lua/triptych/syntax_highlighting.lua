@@ -6,7 +6,7 @@ local M = {}
 ---@return nil
 M.stop = function(buf)
   local vim = _G.triptych_mock_vim or vim
-  vim.treesitter.stop()
+  vim.treesitter.stop(buf)
   vim.api.nvim_buf_set_option(buf, 'syntax', 'off')
 end
 
