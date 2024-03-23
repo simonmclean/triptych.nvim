@@ -1,10 +1,14 @@
 local u = require 'triptych.utils'
 local plenary_filetype = require 'plenary.filetype'
 local plenary_scandir = require 'plenary.scandir'
+local plenary_path = require 'plenary.path'
+local plenary_async = require 'plenary.async'
+
+local M = {}
 
 ---@param path string
 ---@return number
-local function get_file_size_in_kb(path)
+function M.get_file_size_in_kb(path)
   local vim = _G.triptych_mock_vim or vim
   local bytes = vim.fn.getfsize(path)
   return bytes / 1000
@@ -12,16 +16,32 @@ end
 
 ---@param path string
 ---@return string?
-local function get_filetype_from_path(path)
+function M.get_filetype_from_path(path)
   local success, result = pcall(plenary_filetype.detect, path)
   if success then
     return result
   end
 end
 
+M.read_file_async = plenary_async.wrap(function(file_path, callback)
+  local file = plenary_path:new(file_path)
+
+  if not file:exists() then
+    return callback('File does not exist', nil)
+  end
+
+  local content, err = file:read()
+
+  if err then
+    return callback(err, nil)
+  else
+    callback(nil, u.multiline_str_to_table(content))
+  end
+end, 2)
+
 ---@param _path string
 ---@param callback fun(path_details: PathDetails): nil
-local function get_path_details(_path, callback)
+function M.get_path_details(_path, callback)
   local vim = _G.triptych_mock_vim or vim
   local path = vim.fs.normalize(_path)
 
@@ -72,7 +92,7 @@ local function get_path_details(_path, callback)
           filetype = u.cond(child.is_dir, {
             when_true = nil,
             when_false = function()
-              return get_filetype_from_path(child.path)
+              return M.get_filetype_from_path(child.path)
             end,
           }),
           basename = vim.fs.basename(child.path),
@@ -87,8 +107,4 @@ local function get_path_details(_path, callback)
   })
 end
 
-return {
-  get_path_details = get_path_details,
-  get_filetype_from_path = get_filetype_from_path,
-  get_file_size_in_kb = get_file_size_in_kb,
-}
+return M

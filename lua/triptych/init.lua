@@ -67,7 +67,7 @@ local function toggle_triptych(dir)
   }
 
   -- Autocmds need to be created after the above state is set
-  local AutoCmds = autocmds.new(event_handlers, FileReader, State, Diagnostics, Git)
+  local AutoCmds = autocmds.new(event_handlers, State, Diagnostics, Git)
   local refresh_fn = function()
     view.refresh_view(State)
   end

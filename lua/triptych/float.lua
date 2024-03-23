@@ -2,6 +2,8 @@ local u = require 'triptych.utils'
 local fs = require 'triptych.fs'
 local syntax_highlighting = require 'triptych.syntax_highlighting'
 
+local M = {}
+
 ---Modify a buffer which is readonly and not modifiable
 ---@param buf number
 ---@param fn fun(): nil
@@ -18,7 +20,7 @@ end
 ---@param buf number
 ---@param lines string[]
 ---@return nil
-local function buf_set_lines(buf, lines)
+function M.buf_set_lines(buf, lines)
   local vim = _G.triptych_mock_vim or vim
   modify_locked_buffer(buf, function()
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
@@ -29,7 +31,7 @@ end
 ---@param buf number
 ---@param highlights HighlightDetails[]
 ---@return nil
-local function buf_apply_highlights(buf, highlights)
+function M.buf_apply_highlights(buf, highlights)
   local vim = _G.triptych_mock_vim or vim
   -- Apply icon highlight
   for i, highlight in ipairs(highlights) do
@@ -43,10 +45,10 @@ end
 ---@param win number
 ---@param lines string[]
 ---@param attempt_scroll_top? boolean
-local function win_set_lines(win, lines, attempt_scroll_top)
+function M.win_set_lines(win, lines, attempt_scroll_top)
   local vim = _G.triptych_mock_vim or vim
   local buf = vim.api.nvim_win_get_buf(win)
-  buf_set_lines(buf, lines)
+  M.buf_set_lines(buf, lines)
   if attempt_scroll_top then
     vim.api.nvim_buf_call(buf, function()
       vim.api.nvim_exec2('normal! zb', {})
@@ -60,7 +62,7 @@ end
 ---@param highlight? string
 ---@param postfix? string
 ---@return nil
-local function win_set_title(win, title, icon, highlight, postfix)
+function M.win_set_title(win, title, icon, highlight, postfix)
   local vim = _G.triptych_mock_vim or vim
   vim.api.nvim_win_call(win, function()
     local maybe_icon = ''
@@ -80,47 +82,16 @@ local function win_set_title(win, title, icon, highlight, postfix)
   end)
 end
 
---- Read the contents of a file into the buffer and apply syntax highlighting
 ---@param buf number
 ---@param path string
----@return nil
-local function buf_set_lines_from_path(buf, path)
-  local vim = _G.triptych_mock_vim or vim
-
-  -- Avoid things blowing up when we call this function asyncronously
-  if not vim.api.nvim_buf_is_valid(buf) then
-    return
+---@param lines string[]
+function M.set_child_window_file_preview(buf, path, lines)
+  local ft = fs.get_filetype_from_path(path)
+  syntax_highlighting.stop(buf)
+  vim.api.nvim_buf_set_lines(buf, 0, 1, false, lines)
+  if vim.g.triptych_config.options.syntax_highlighting.enabled then
+    syntax_highlighting.start(buf, ft)
   end
-
-  -- Do nothing if we've moved on to a different file or directory
-  if vim.api.nvim_buf_get_var(buf, 'triptych_path') ~= path then
-    return
-  end
-
-  modify_locked_buffer(buf, function()
-    vim.api.nvim_buf_set_lines(buf, 0, -1, false, {})
-    local ft = fs.get_filetype_from_path(path)
-    vim.api.nvim_buf_call(buf, function()
-      syntax_highlighting.stop(buf)
-      local file_size = fs.get_file_size_in_kb(path)
-      if file_size < 300 then
-        local read_success, read_err = vim.cmd('noautocmd read ' .. path)
-        if read_success then
-          vim.api.nvim_buf_set_lines(buf, 0, 1, false, {})
-          if vim.g.triptych_config.options.syntax_highlighting.enabled then
-            syntax_highlighting.start(buf, ft)
-          end
-        else
-          error(read_err, vim.log.levels.WARN)
-          local msg = '[Unable to preview file contents]'
-          vim.api.nvim_buf_set_lines(buf, 0, -1, false, { '', msg })
-        end
-      else
-        local msg = '[File size too large to preview]'
-        vim.api.nvim_buf_set_lines(buf, 0, -1, false, { '', msg })
-      end
-    end)
-  end)
 end
 
 ---@return number
@@ -161,7 +132,7 @@ end
 ---@param relative_numbers boolean
 ---@param column_widths number[]
 ---@return { [1]: number, [2]: number, [3]: number }
-local function create_three_floating_windows(show_numbers, relative_numbers, column_widths)
+function M.create_three_floating_windows(show_numbers, relative_numbers, column_widths)
   local vim = _G.triptych_mock_vim or vim
   local max_total_width = 220 -- width of all 3 windows combined
   local max_height = 45
@@ -228,7 +199,7 @@ end
 
 ---@param wins number[]
 ---@return nil
-local function close_floats(wins)
+function M.close_floats(wins)
   local vim = _G.triptych_mock_vim or vim
   for _, win in ipairs(wins) do
     local buf = vim.api.nvim_win_get_buf(win)
@@ -239,12 +210,4 @@ local function close_floats(wins)
   end
 end
 
-return {
-  create_three_floating_windows = create_three_floating_windows,
-  close_floats = close_floats,
-  buf_set_lines = buf_set_lines,
-  buf_set_lines_from_path = buf_set_lines_from_path,
-  win_set_lines = win_set_lines,
-  win_set_title = win_set_title,
-  buf_apply_highlights = buf_apply_highlights,
-}
+return M

@@ -5,6 +5,8 @@ local fs = require 'triptych.fs'
 local git = require 'triptych.git'
 local diagnostics = require 'triptych.diagnostics'
 local autocmds = require 'triptych.autocmds'
+local plenary_async = require 'plenary.async'
+local syntax_highlighting = require 'triptych.syntax_highlighting'
 
 local M = {}
 
@@ -51,6 +53,21 @@ end
 local function read_path_async(path, win_type)
   fs.get_path_details(path, function(path_details)
     autocmds.send_path_read(path_details, win_type)
+  end)
+end
+
+---Asyncronously read a file, then publish the results to a User event
+---@param child_win_buf number
+---@param path string
+local function read_file_async(child_win_buf, path)
+  plenary_async.run(function()
+    fs.read_file_async(path, function (err, lines)
+      if err then
+        vim.print(err)
+      else
+        autocmds.send_file_read(child_win_buf, path, lines)
+      end
+    end)
   end)
 end
 
@@ -333,13 +350,13 @@ end
 
 --- In the child/preview window, update the title and state, then trigger async directory or file read
 ---@param State TriptychState
----@param FileReader FileReader
 ---@param path_details PathDetails
 ---@return nil
-function M.set_child_window_target(State, FileReader, path_details)
+function M.set_child_window_target(State, path_details)
   local vim = _G.triptych_mock_vim or vim
   local buf = vim.api.nvim_win_get_buf(State.windows.child.win)
-  local is_current_path_a_directory = State.windows.child.is_dir
+  vim.print('set_child_window_target', path_details)
+
   -- TODO: Can we make path_details mandatory to avoid the repeated checks
 
   vim.api.nvim_buf_set_var(
@@ -383,23 +400,26 @@ function M.set_child_window_target(State, FileReader, path_details)
     local filetype = fs.get_filetype_from_path(path_details.path) -- TODO: De-dupe this
     local icon, highlight = icons.get_icon_by_filetype(filetype)
     float.win_set_title(State.windows.child.win, path_details.display_name, icon, highlight)
-    -- TODO: Check if this is actually async
-    FileReader:read(buf, path_details.path, is_current_path_a_directory)
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, {})
+    local file_size = fs.get_file_size_in_kb(path_details.path)
+    if file_size < 300 then
+      read_file_async(buf, path_details.path)
+    else
+      local msg = '[File size too large to preview]'
+      vim.api.nvim_buf_set_lines(buf, 0, -1, false, { '', msg })
+    end
   end
 end
 
 --- Set lines for the child/preview window
 ---@param State TriptychState
----@param FileReader FileReader
 ---@param path_details PathDetails
 ---@param Diagnostics? Diagnostics
 ---@param Git? Git
 ---@return nil
-function M.set_child_window_lines(State, FileReader, path_details, Diagnostics, Git)
+function M.set_child_window_lines(State, path_details, Diagnostics, Git)
   local buf = vim.api.nvim_win_get_buf(State.windows.child.win)
 
-  -- This function should only be called if we're handling a directory
-  -- TODO: Is there a way to make this clearer?
   if path_details.is_dir then
     local contents = filter_and_encrich_dir_contents(path_details, State.show_hidden, Diagnostics, Git)
     local lines, highlights = path_details_to_lines(State, contents)
@@ -408,6 +428,13 @@ function M.set_child_window_lines(State, FileReader, path_details, Diagnostics, 
     float.buf_set_lines(buf, lines)
     float.buf_apply_highlights(buf, highlights)
     set_sign_columns(buf, contents.children, 'triptych_sign_col_child')
+  else
+    local ft = fs.get_filetype_from_path(path_details.path)
+    syntax_highlighting.stop(buf)
+    vim.api.nvim_buf_set_lines(buf, 0, 1, false, {})
+    if vim.g.triptych_config.options.syntax_highlighting.enabled then
+      syntax_highlighting.start(buf, ft)
+    end
   end
 end
 
