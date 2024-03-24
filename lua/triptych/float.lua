@@ -88,7 +88,7 @@ end
 function M.set_child_window_file_preview(buf, path, lines)
   local ft = fs.get_filetype_from_path(path)
   syntax_highlighting.stop(buf)
-  vim.api.nvim_buf_set_lines(buf, 0, 1, false, lines)
+  M.buf_set_lines(buf, lines)
   if vim.g.triptych_config.options.syntax_highlighting.enabled then
     syntax_highlighting.start(buf, ft)
   end

@@ -61,7 +61,7 @@ end
 ---@param path string
 local function read_file_async(child_win_buf, path)
   plenary_async.run(function()
-    fs.read_file_async(path, function (err, lines)
+    fs.read_file_async(path, function(err, lines)
       if err then
         vim.print(err)
       else
@@ -298,7 +298,7 @@ end
 --- Set lines for the parent or primary window
 ---@param State TriptychState
 ---@param path_details PathDetails
----@param win_type 'parent' | 'primary'
+---@param win_type WinType
 ---@param Diagnostics? Diagnostics
 ---@param Git? Git
 ---@param cursor_target? string full path
@@ -309,10 +309,13 @@ function M.set_parent_or_primary_window_lines(State, path_details, win_type, Dia
   local state = u.eval(function()
     if win_type == 'parent' then
       return State.windows.parent
+    elseif win_type == 'primary' then
+      return State.windows.current
     end
-    return State.windows.current
+    return State.windows.child
   end)
 
+  -- TODO: Add a similar check for file preview
   -- Because of async we may have moved onto a differnt path
   if path_details.path ~= state.path then
     return nil
@@ -331,7 +334,6 @@ function M.set_parent_or_primary_window_lines(State, path_details, win_type, Dia
   set_sign_columns(buf, contents.children, 'triptych_sign_col')
 
   if win_type == 'primary' then
-    ---@type integer
     local line_number = u.cond(cursor_target, {
       when_true = function()
         return line_number_of_path(cursor_target --[[@as string]], contents.children)
@@ -348,14 +350,14 @@ function M.set_parent_or_primary_window_lines(State, path_details, win_type, Dia
   end
 end
 
---- In the child/preview window, update the title and state, then trigger async directory or file read
+---In the child/preview window, update the title and state, then trigger async directory or file read
 ---@param State TriptychState
 ---@param path_details PathDetails
 ---@return nil
 function M.set_child_window_target(State, path_details)
   local vim = _G.triptych_mock_vim or vim
   local buf = vim.api.nvim_win_get_buf(State.windows.child.win)
-  vim.print('set_child_window_target', path_details)
+  vim.print('set_child_window_target', path_details.path)
 
   -- TODO: Can we make path_details mandatory to avoid the repeated checks
 
@@ -388,6 +390,7 @@ function M.set_child_window_target(State, path_details)
     float.win_set_title(State.windows.child.win, '[empty directory]')
     float.buf_set_lines(buf, {})
   elseif path_details.is_dir then
+    syntax_highlighting.stop(buf)
     float.win_set_title(
       State.windows.child.win,
       path_details.display_name,
@@ -400,7 +403,7 @@ function M.set_child_window_target(State, path_details)
     local filetype = fs.get_filetype_from_path(path_details.path) -- TODO: De-dupe this
     local icon, highlight = icons.get_icon_by_filetype(filetype)
     float.win_set_title(State.windows.child.win, path_details.display_name, icon, highlight)
-    vim.api.nvim_buf_set_lines(buf, 0, -1, false, {})
+    float.buf_set_lines(buf, {})
     local file_size = fs.get_file_size_in_kb(path_details.path)
     if file_size < 300 then
       read_file_async(buf, path_details.path)

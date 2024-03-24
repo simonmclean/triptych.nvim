@@ -34,7 +34,7 @@ end
 
 ---@param State TriptychState
 ---@param path_details PathDetails
----@param win_type 'parent' | 'primary'
+---@param win_type WinType
 ---@param Diagnostics? Diagnostics
 ---@param Git? Git
 ---@return nil
