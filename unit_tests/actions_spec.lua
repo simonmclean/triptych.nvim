@@ -1198,7 +1198,7 @@ describe('jump_to_cwd', function()
         end,
       },
     }
-    view.nav_to = function(s, dir, d, g)
+    view.set_primary_and_parent_window_targets = function(s, dir, d, g)
       table.insert(spies.view.nav_to, { s, dir, d, g })
     end
     local mock_state = {
@@ -1236,7 +1236,7 @@ describe('jump_to_cwd', function()
         end,
       },
     }
-    view.nav_to = function(s, dir, d, g)
+    view.set_primary_and_parent_window_targets = function(s, dir, d, g)
       table.insert(spies.view.nav_to, { s, dir, d, g })
     end
     local mock_state = {
@@ -1273,7 +1273,7 @@ describe('nav_left', function()
     }
     local mock_git = { 'git' }
     local mock_diagnostics = { 'diagnostic' }
-    view.nav_to = function(s, dir, d, g)
+    view.set_primary_and_parent_window_targets = function(s, dir, d, g)
       table.insert(spy, { s, dir, d, g })
     end
     actions.new(mock_state, noop, mock_diagnostics, mock_git).nav_left()
@@ -1302,7 +1302,7 @@ describe('nav_right', function()
     local mock_state = { 'state' }
     local mock_git = { 'git' }
     local mock_diagnostics = { 'diagnostic' }
-    view.nav_to = function(s, dir, d, g)
+    view.set_primary_and_parent_window_targets = function(s, dir, d, g)
       table.insert(spies.view.nav_to, { s, dir, d, g })
     end
     view.get_target_under_cursor = function(s)
@@ -1350,7 +1350,7 @@ describe('nav_right', function()
     local mock_state = { 'state' }
     local mock_git = { 'git' }
     local mock_diagnostics = { 'diagnostic' }
-    view.nav_to = function(s, dir, d, g)
+    view.set_primary_and_parent_window_targets = function(s, dir, d, g)
       table.insert(spies.view.nav_to, { s, dir, d, g })
     end
     view.get_target_under_cursor = function(s)

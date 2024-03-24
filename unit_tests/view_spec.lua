@@ -7,9 +7,9 @@ local icons = require 'triptych.icons'
 describe('refresh_view', function()
   it('calls nav_to', function()
     local spy = {}
-    local nav_to_actual = view.nav_to
+    local nav_to_actual = view.set_primary_and_parent_window_targets
 
-    view.nav_to = function(s, p, d, g)
+    view.set_primary_and_parent_window_targets = function(s, p, d, g)
       table.insert(spy, { s, p, d, g })
     end
 
@@ -27,7 +27,7 @@ describe('refresh_view', function()
 
     assert.same({ { mock_state, '/hello/', mock_diagnostics, mock_git } }, spy)
 
-    view.nav_to = nav_to_actual
+    view.set_primary_and_parent_window_targets = nav_to_actual
   end)
 end)
 
@@ -222,7 +222,7 @@ describe('update_child_window', function()
 
     local mock_file_reader = {}
 
-    view.update_child_window(mock_state, mock_file_reader, mock_state.windows.child, mock_diagnostics, mock_git)
+    view.set_child_window_lines(mock_state, mock_file_reader, mock_state.windows.child, mock_diagnostics, mock_git)
 
     assert.same({ 6 }, spies.api.nvim_win_get_buf)
     assert.same({ {
@@ -447,7 +447,7 @@ describe('nav_to', function()
       },
     }
 
-    require('triptych.view').nav_to(mock_state, '/level_1/level_2/level_3', mock_diagnostics, mock_git)
+    require('triptych.view').set_primary_and_parent_window_targets(mock_state, '/level_1/level_2/level_3', mock_diagnostics, mock_git)
 
     assert.same({ 1, 2 }, spies.vim.api.nvim_win_get_buf)
     assert.same({
