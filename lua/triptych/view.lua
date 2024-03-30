@@ -49,9 +49,10 @@ end
 
 --- Asyncronously read a directory, then publish the results to a User event
 ---@param path string
+---@param show_hidden boolean
 ---@param win_type WinType
-local function read_path_async(path, win_type)
-  fs.get_path_details(path, function(path_details)
+local function read_path_async(path, show_hidden, win_type)
+  fs.get_path_details(path, show_hidden, function(path_details)
     autocmds.send_path_read(path_details, win_type)
   end)
 end
@@ -291,8 +292,8 @@ function M.set_primary_and_parent_window_targets(State, target_dir)
     },
   }
 
-  read_path_async(parent_path, 'parent')
-  read_path_async(target_dir, 'primary')
+  read_path_async(parent_path, State.show_hidden, 'parent')
+  read_path_async(target_dir, State.show_hidden, 'primary')
 end
 
 --- Set lines for the parent or primary window
@@ -398,7 +399,7 @@ function M.set_child_window_target(State, path_details)
       'Directory',
       get_title_postfix(path_details.path)
     )
-    read_path_async(path_details.path, 'child')
+    read_path_async(path_details.path, State.show_hidden, 'child')
   else
     local filetype = fs.get_filetype_from_path(path_details.path) -- TODO: De-dupe this
     local icon, highlight = icons.get_icon_by_filetype(filetype)

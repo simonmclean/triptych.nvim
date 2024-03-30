@@ -36,8 +36,9 @@ M.read_file_async = plenary_async.wrap(function(file_path, callback)
 end, 2)
 
 ---@param _path string
+---@param show_hidden boolean
 ---@param callback fun(path_details: PathDetails): nil
-function M.get_path_details(_path, callback)
+function M.get_path_details(_path, show_hidden, callback)
   local vim = _G.triptych_mock_vim or vim
   local path = vim.fs.normalize(_path)
 
@@ -53,8 +54,8 @@ function M.get_path_details(_path, callback)
   plenary_scandir.scan_dir_async(path, {
     depth = 1,
     add_dirs = true,
-    respect_gitignore = true, -- TODO: Config
-    hidden = false, -- TODO: Config
+    respect_gitignore = not show_hidden,
+    hidden = show_hidden,
     silent = true,
     on_exit = function(children)
       ---@type { path: string, is_dir: boolean }[]
