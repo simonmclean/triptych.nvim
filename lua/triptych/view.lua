@@ -409,7 +409,7 @@ function M.set_child_window_target(State, path_details)
       read_file_async(buf, path_details.path)
     else
       local msg = '[File size too large to preview]'
-      vim.api.nvim_buf_set_lines(buf, 0, -1, false, { '', msg })
+      float.buf_set_lines(buf, { msg })
     end
   end
 end
@@ -434,7 +434,7 @@ function M.set_child_window_lines(State, path_details, Diagnostics, Git)
   else
     local ft = fs.get_filetype_from_path(path_details.path)
     syntax_highlighting.stop(buf)
-    vim.api.nvim_buf_set_lines(buf, 0, 1, false, {})
+    float.buf_set_lines(buf, {})
     if vim.g.triptych_config.options.syntax_highlighting.enabled then
       syntax_highlighting.start(buf, ft)
     end
