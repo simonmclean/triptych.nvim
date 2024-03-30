@@ -39,11 +39,7 @@ local function toggle_triptych(dir)
     when_true = nil,
     when_false = vim.api.nvim_buf_get_name(0),
   })
-  local opening_dir = dir
-    or u.cond(u.is_defined(maybe_buf_name), {
-      when_true = vim.fs.dirname(maybe_buf_name),
-      when_false = vim.fn.getcwd(),
-    })
+  local opening_dir = dir or vim.fn.getcwd()
   local windows = float.create_three_floating_windows(
     config.options.line_numbers.enabled,
     config.options.line_numbers.relative,
