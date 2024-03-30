@@ -3,6 +3,7 @@ local float = require 'triptych.float'
 
 local M = {}
 
+---When the cursor has moved trigger an update of the child/preview window
 ---@param State TriptychState
 ---@return nil
 function M.handle_cursor_moved(State)
@@ -32,13 +33,14 @@ local function line_number_of_path(path, path_details)
   return num
 end
 
+--Handles the result of a directroy read
 ---@param State TriptychState
 ---@param path_details PathDetails
 ---@param win_type WinType
 ---@param Diagnostics? Diagnostics
 ---@param Git? Git
 ---@return nil
-function M.handle_path_read(State, path_details, win_type, Diagnostics, Git)
+function M.handle_dir_read(State, path_details, win_type, Diagnostics, Git)
   local vim = _G.triptych_mock_vim or vim
   local view = _G.triptych_mock_view or require 'triptych.view'
   view.set_parent_or_primary_window_lines(State, path_details, win_type, Diagnostics, Git)
@@ -68,6 +70,7 @@ function M.handle_path_read(State, path_details, win_type, Diagnostics, Git)
   end
 end
 
+---Handle the result of a file read
 ---@param child_win_buf number
 ---@param path string
 ---@param lines string[]

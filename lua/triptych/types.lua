@@ -157,8 +157,3 @@
 ---@class Diagnostics
 ---@field new fun(): Diagnostics
 ---@field get fun(self: Diagnostics, path: string): integer | nil
-
----@class FileReader
----@field new fun(debounce_ms: number): FileReader
----@field read fun(self: FileReader, buf: number, path: string, bypass_debounce?: boolean): FileReader
----@field destroy fun(self: FileReader): FileReader

@@ -7,7 +7,6 @@ local view = require 'triptych.view'
 local git = require 'triptych.git'
 local diagnostics = require 'triptych.diagnostics'
 local event_handlers = require 'triptych.event_handlers'
-local file_reader = require 'triptych.file_reader'
 local u = require 'triptych.utils'
 
 ---@param msg string
@@ -33,7 +32,6 @@ local function toggle_triptych(dir)
   local State = state.new(config, vim.api.nvim_get_current_win())
   local Git = config.git_signs.enabled and git.Git.new() or nil
   local Diagnostics = config.diagnostic_signs.enabled and diagnostics.new() or nil
-  local FileReader = file_reader.new(config.options.syntax_highlighting.debounce_ms)
 
   local maybe_buf_name = u.cond(dir, {
     when_true = nil,
@@ -85,7 +83,6 @@ local function toggle_triptych(dir)
       wins.child.win,
     }
     vim.api.nvim_set_current_win(State.opening_win)
-    FileReader:destroy()
   end
 
   view.set_primary_and_parent_window_targets(State, opening_dir)

@@ -26,14 +26,16 @@ function AutoCommands.new(event_handlers, State, Diagnostics, Git)
       callback = event_handlers.handle_buf_leave,
     }),
 
+    -- User autocmd for asynchronously handling the result a directory read
     vim.api.nvim_create_autocmd('User', {
       group = au_group,
       pattern = 'TriptychPathRead',
       callback = function(data)
-        event_handlers.handle_path_read(State, data.data.path_details, data.data.win_type, Diagnostics, Git)
+        event_handlers.handle_dir_read(State, data.data.path_details, data.data.win_type, Diagnostics, Git)
       end,
     }),
 
+    -- User autocmd for asynchronously handling the result a file read
     vim.api.nvim_create_autocmd('User', {
       group = au_group,
       pattern = 'TriptychFileRead',
@@ -53,6 +55,7 @@ function AutoCommands:destroy_autocommands()
   end
 end
 
+---Publish the results of an async directory read
 ---@param path_details PathDetails
 ---@param win_type WinType
 ---@return nil
@@ -69,6 +72,7 @@ local function send_path_read(path_details, win_type)
   end)
 end
 
+---Publish the results of an async file read
 ---@param child_win_buf number
 ---@param path string
 ---@param lines string[]
