@@ -331,7 +331,7 @@ function M.set_parent_or_primary_window_lines(State, path_details, win_type, Dia
 
   float.buf_apply_highlights(buf, highlights)
 
-  set_sign_columns(buf, contents.children, 'triptych_sign_col')
+  set_sign_columns(buf, contents.children, 'triptych_sign_col_' .. win_type)
 
   if win_type == 'primary' then
     local line_number = u.cond(cursor_target, {
@@ -357,7 +357,6 @@ end
 function M.set_child_window_target(State, path_details)
   local vim = _G.triptych_mock_vim or vim
   local buf = vim.api.nvim_win_get_buf(State.windows.child.win)
-  vim.print('set_child_window_target', path_details.path)
 
   -- TODO: Can we make path_details mandatory to avoid the repeated checks
 
