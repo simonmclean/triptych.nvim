@@ -316,7 +316,6 @@ function M.set_parent_or_primary_window_lines(State, path_details, win_type, Dia
     return State.windows.child
   end)
 
-  -- TODO: Add a similar check for file preview
   -- Because of async we may have moved onto a differnt path
   if path_details.path ~= state.path then
     return nil
@@ -423,6 +422,11 @@ end
 ---@return nil
 function M.set_child_window_lines(State, path_details, Diagnostics, Git)
   local buf = vim.api.nvim_win_get_buf(State.windows.child.win)
+
+  -- Because of async we may have moved onto a differnt path
+  if path_details.path ~= State.windows.child.path then
+    return nil
+  end
 
   if path_details.is_dir then
     local contents = filter_and_encrich_dir_contents(path_details, State.show_hidden, Diagnostics, Git)
