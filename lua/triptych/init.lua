@@ -36,10 +36,14 @@ local function toggle_triptych(dir)
   local FileReader = file_reader.new(config.options.syntax_highlighting.debounce_ms)
 
   local opening_dir, selected_file = u.eval(function()
-      if vim.api.nvim_buf_get_option(vim.api.nvim_get_current_buf(), 'buftype') == 'terminal' then
+      if dir then
+        -- if dir is given, open it
+        return dir, dir
+      elseif vim.api.nvim_buf_get_option(vim.api.nvim_get_current_buf(), 'buftype') == 'terminal' then
         -- in case of a terminal buffer, open the current working directory
         return vim.fn.getcwd(), ''
       else
+        print("type: " .. vim.api.nvim_buf_get_option(vim.api.nvim_get_current_buf(), 'buftype'))
         -- otherwise open the directory containing the current file and select it
         local path = vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf())
         return vim.fs.dirname(path), path
