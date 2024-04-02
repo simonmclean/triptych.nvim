@@ -84,6 +84,7 @@ describe('toggle_triptych', function()
           nvim_buf_get_name = {},
           nvim_get_current_win = 0,
           nvim_set_current_win = {},
+          nvim_buf_get_option = {},
         },
         fs = {
           dirname = {},
@@ -110,16 +111,14 @@ describe('toggle_triptych', function()
         nvim_set_current_win = function(winid)
           table.insert(spies.vim.api.nvim_set_current_win, winid)
         end,
+        nvim_buf_get_option = function(bufid, option_name)
+          table.insert(spies.vim.api.nvim_buf_get_option, { bufid, option_name })
+        end,
       },
       fs = {
         dirname = function(path)
           table.insert(spies.vim.fs.dirname, path)
           return vim.fs.dirname(path)
-        end,
-      },
-      fn = {
-        getcwd = function()
-          spies.vim.fn.getcwd = spies.vim.fn.getcwd + 1
         end,
       },
     }
@@ -183,8 +182,8 @@ describe('toggle_triptych', function()
     assert.same(1, spies.git.new)
     assert.same(1, spies.diagnostics.new)
     assert.same({ 100 }, spies.file_reader.new)
+    assert.same({ { 0, 'buftype' } }, spies.vim.api.nvim_buf_get_option)
     assert.same({ 0 }, spies.vim.api.nvim_buf_get_name)
-    assert.same(1, spies.vim.fn.getcwd)
     assert.same({ '/hello/world' }, spies.vim.fs.dirname)
     assert.same(1, spies.float.create_three_floating_windows)
     assert.same({
@@ -235,6 +234,7 @@ describe('toggle_triptych', function()
         nvim_set_current_win = function(winid)
           table.insert(spies.nvim_set_current_win, winid)
         end,
+        nvim_buf_get_option = function(_, _) end,
       },
       fs = {
         dirname = function(path)
