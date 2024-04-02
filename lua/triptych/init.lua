@@ -43,7 +43,6 @@ local function toggle_triptych(dir)
         -- in case of a terminal buffer, open the current working directory
         return vim.fn.getcwd(), ''
       else
-        print("type: " .. vim.api.nvim_buf_get_option(vim.api.nvim_get_current_buf(), 'buftype'))
         -- otherwise open the directory containing the current file and select it
         local path = vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf())
         return vim.fs.dirname(path), path
