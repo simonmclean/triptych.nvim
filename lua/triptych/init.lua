@@ -38,7 +38,7 @@ local function toggle_triptych(dir)
   local opening_dir, selected_file = u.eval(function()
       if dir then
         -- if dir is given, open it
-        return dir, dir
+        return dir, nil
       elseif vim.api.nvim_buf_get_option(0, 'buftype') == 'terminal' then
         -- in case of a terminal buffer, open the current working directory
         return vim.fn.getcwd(), ''
