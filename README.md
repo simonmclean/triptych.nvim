@@ -171,7 +171,7 @@ If you want to make `<c-f>` search the file or directory under the cursor using 
 }
 ```
 
-### Opening a file in a split
+#### Opening a file in a split
 
 The simplest workflow would be to create the split before opening Triptych. But you could create bindings for this like so:
 
@@ -181,9 +181,9 @@ The simplest workflow would be to create the split before opening Triptych. But 
     ['-'] = {
       mode = 'n',
       fn = function(target)
-        vim.cmd.Triptych()
-        vim.schedule(function()
-          vim.cmd.split(target.path)
+        vim.cmd.Triptych() -- Close Triptych
+        vim.schedule(function() -- Wait for close to complete
+          vim.cmd.split(target.path) -- Open target file in a split
         end)
       end,
     },
@@ -196,6 +196,19 @@ The simplest workflow would be to create the split before opening Triptych. But 
         end)
       end,
     },
-  },
-}
+  }
+```
+
+#### Opening a file in a new tab
+
+```lua
+['<C-t>'] = {
+  mode = 'n',
+  fn = function(target)
+    vim.cmd.Triptych()
+    vim.schedule(function()
+      vim.cmd.tabedit(target.path)
+    end)
+  end,
+},
 ```
