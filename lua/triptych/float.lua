@@ -104,7 +104,7 @@ local function buf_set_lines_from_path(buf, path)
       syntax_highlighting.stop(buf)
       local file_size = fs.get_file_size_in_kb(path)
       if file_size < 300 then
-        local read_success, read_err = vim.cmd('noautocmd read ' .. path)
+        local read_success, read_err = vim.cmd('silent noautocmd read ' .. path)
         if read_success then
           vim.api.nvim_buf_set_lines(buf, 0, 1, false, {})
           if vim.g.triptych_config.options.syntax_highlighting.enabled then
