@@ -277,10 +277,19 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
   end
 
   ---@param path string
+  ---@param kind 'in-place' | 'vsplit' | 'hsplit' | 'tab'
   ---@return nil
-  M.edit_file = function(path)
+  local function edit_file(path, kind)
     vim.g.triptych_close()
-    vim.cmd.edit(path)
+    if kind == 'in-place' then
+      vim.cmd.edit(path)
+    elseif kind == 'hsplit' then
+      vim.cmd.split(path)
+    elseif kind == 'vsplit' then
+      vim.cmd.vsplit(path)
+    elseif kind == 'tab' then
+      vim.cmd.tabedit(path)
+    end
   end
 
   ---@return nil
@@ -316,10 +325,37 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
   M.nav_right = function()
     local target = view.get_target_under_cursor(State)
     if target then
-      if vim.fn.isdirectory(target.path) == 1 then
+      if target.is_dir then
         view.nav_to(State, target.path, Diagnostics, Git)
       else
-        M.edit_file(target.path)
+        edit_file(target.path, 'in-place')
+      end
+    end
+  end
+
+  M.open_hsplit = function()
+    local target = view.get_target_under_cursor(State)
+    if target then
+      if not target.is_dir then
+        edit_file(target.path, 'hsplit')
+      end
+    end
+  end
+
+  M.open_vsplit = function()
+    local target = view.get_target_under_cursor(State)
+    if target then
+      if not target.is_dir then
+        edit_file(target.path, 'vsplit')
+      end
+    end
+  end
+
+  M.open_tab = function()
+    local target = view.get_target_under_cursor(State)
+    if target then
+      if not target.is_dir then
+        edit_file(target.path, 'tab')
       end
     end
   end
