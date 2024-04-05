@@ -145,6 +145,7 @@ local function create_floating_window(config)
     style = 'minimal',
     noautocmd = true,
     focusable = config.is_focusable,
+    zindex = 101,
   })
   vim.api.nvim_win_set_var(win, 'triptych_role', config.role)
   vim.api.nvim_win_set_option(win, 'cursorline', config.enable_cursorline)
@@ -157,11 +158,36 @@ local function create_floating_window(config)
   return win
 end
 
+---@param winblend number
+---@return number
+local function create_backdrop(winblend)
+  local vim = _G.triptych_mock_vim or vim
+  local buf = create_new_buffer()
+  local win = vim.api.nvim_open_win(buf, false, {
+    width = vim.o.columns,
+    height = vim.o.lines,
+    relative = 'editor',
+    col = 0,
+    row = 0,
+    style = 'minimal',
+    noautocmd = true,
+    focusable = false,
+    zindex = 100,
+  })
+  vim.api.nvim_set_hl(0, 'TriptychBackdrop', { bg = '#000000', default = true })
+  vim.api.nvim_win_set_option(win, 'winhighlight', 'Normal:TriptychBackdrop')
+  vim.api.nvim_win_set_option(win, 'winblend', winblend)
+  vim.api.nvim_buf_set_option(buf, 'buftype', 'nofile')
+  vim.api.nvim_buf_set_option(buf, 'filetype', 'triptych_backdrop')
+  return win
+end
+
 ---@param show_numbers boolean
 ---@param relative_numbers boolean
 ---@param column_widths number[]
----@return { [1]: number, [2]: number, [3]: number }
-local function create_three_floating_windows(show_numbers, relative_numbers, column_widths)
+---@param backdrop number
+---@return number[] 4 window ids (parent, primary, child, backdrop)
+local function create_three_floating_windows(show_numbers, relative_numbers, column_widths, backdrop)
   local vim = _G.triptych_mock_vim or vim
   local max_total_width = 220 -- width of all 3 windows combined
   local max_height = 45
@@ -183,6 +209,7 @@ local function create_three_floating_windows(show_numbers, relative_numbers, col
     when_true = math.floor((screen_width - max_total_width) / 2),
     when_false = padding,
   })
+
   local y_pos = u.cond(screen_height > (max_height + (padding * 2)), {
     when_true = math.floor((screen_height - max_height) / 2),
     when_false = padding,
@@ -222,6 +249,11 @@ local function create_three_floating_windows(show_numbers, relative_numbers, col
 
   -- Focus the middle window
   vim.api.nvim_set_current_win(wins[2])
+
+  if backdrop < 100 and vim.o.termguicolors then
+    local backdrop_win = create_backdrop(backdrop)
+    table.insert(wins, backdrop_win)
+  end
 
   return wins
 end

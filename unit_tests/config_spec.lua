@@ -43,6 +43,7 @@ local function expected_default_config()
         enabled = true,
         debounce_ms = 100,
       },
+      backdrop = 60,
     },
     git_signs = {
       enabled = true,

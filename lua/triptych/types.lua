@@ -53,6 +53,7 @@
 ---@field column_widths number[]
 ---@field highlights TriptychConfigHighlights
 ---@field syntax_highlighting TriptychConfigSyntaxHighlighting
+---@field backdrop number
 
 ---@class TriptychConfigHighlights
 ---@field file_names string
