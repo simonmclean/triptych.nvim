@@ -7,10 +7,12 @@ describe('create_three_floating_windows', function()
     -- spies
     local nvim_open_win_spy = {}
     local nvim_win_set_option_spy = {}
+    local nvim_buf_set_option_spy = {}
     local nvim_win_set_var_spy = {}
     local nvim_create_buf_spy = {}
     local nvim_set_current_win_spy = {}
     local nvim_buf_set_lines_spy = {}
+    local nvim_set_hl_spy = {}
 
     -- incrementing indexes used for window and buffer ids
     local bufid = 0
@@ -21,6 +23,7 @@ describe('create_three_floating_windows', function()
       o = {
         lines = 40,
         columns = 60,
+        termguicolors = true,
       },
       api = {
         nvim_create_buf = function(listed, scratch)
@@ -39,18 +42,25 @@ describe('create_three_floating_windows', function()
         nvim_win_set_option = function(wid, opt, value)
           table.insert(nvim_win_set_option_spy, { wid, opt, value })
         end,
+        nvim_buf_set_option = function(bid, opt, value)
+          table.insert(nvim_buf_set_option_spy, { bid, opt, value })
+        end,
         nvim_win_set_var = function(wid, opt, value)
           table.insert(nvim_win_set_var_spy, { wid, opt, value })
         end,
         nvim_set_current_win = function(wid)
           table.insert(nvim_set_current_win_spy, wid)
         end,
+        nvim_set_hl = function(nsid, name, val)
+          table.insert(nvim_set_hl_spy, { nsid, name, val })
+        end,
       },
     }
 
-    float.create_three_floating_windows(true, false, { 0.25, 0.25, 0.5 })
+    float.create_three_floating_windows(true, false, { 0.25, 0.25, 0.5 }, 60)
 
     assert.same({
+      { false, true },
       { false, true },
       { false, true },
       { false, true },
@@ -70,6 +80,7 @@ describe('create_three_floating_windows', function()
           style = 'minimal',
           noautocmd = true,
           focusable = false,
+          zindex = 101,
         },
       },
       {
@@ -85,6 +96,7 @@ describe('create_three_floating_windows', function()
           style = 'minimal',
           noautocmd = true,
           focusable = true,
+          zindex = 101,
         },
       },
       {
@@ -100,6 +112,22 @@ describe('create_three_floating_windows', function()
           style = 'minimal',
           noautocmd = true,
           focusable = false,
+          zindex = 101,
+        },
+      },
+      {
+        4,
+        false,
+        {
+          width = 60,
+          height = 40,
+          relative = 'editor',
+          col = 0,
+          row = 0,
+          style = 'minimal',
+          noautocmd = true,
+          focusable = false,
+          zindex = 100,
         },
       },
     }, nvim_open_win_spy)
@@ -122,8 +150,12 @@ describe('create_three_floating_windows', function()
       { 3, 'cursorline', false },
       { 3, 'number', false },
       { 3, 'relativenumber', false },
+      -- fourth (backdrop) win
+      { 4, 'winhighlight', 'Normal:TriptychBackdrop' },
+      { 4, 'winblend', 60 },
     }, nvim_win_set_option_spy)
-
+    assert.same({ { 4, 'buftype', 'nofile' }, { 4, 'filetype', 'triptych_backdrop' } }, nvim_buf_set_option_spy)
+    assert.same({ { 0, 'TriptychBackdrop', { bg = '#000000', default = true } } }, nvim_set_hl_spy)
     assert.same({ 2 }, nvim_set_current_win_spy)
   end)
 end)

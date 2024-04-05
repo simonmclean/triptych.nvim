@@ -52,7 +52,8 @@ local function toggle_triptych(dir)
   local windows = float.create_three_floating_windows(
     config.options.line_numbers.enabled,
     config.options.line_numbers.relative,
-    config.options.column_widths
+    config.options.column_widths,
+    config.options.backdrop
   )
 
   State.windows = {
@@ -88,6 +89,7 @@ local function toggle_triptych(dir)
       wins.parent.win,
       wins.current.win,
       wins.child.win,
+      windows[4], -- backdrop
     }
     vim.api.nvim_set_current_win(State.opening_win)
     FileReader:destroy()

@@ -118,6 +118,7 @@ require 'triptych'.setup {
       enabled = true,
       debounce_ms = 100,
     },
+    backdrop = 60 -- Backdrop opacity. 0 is fully opaque, 100 is fully transparent (disables the feature)
   },
   git_signs = {
     enabled = true,
