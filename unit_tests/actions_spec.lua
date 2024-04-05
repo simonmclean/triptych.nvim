@@ -1126,36 +1126,6 @@ describe('paste', function()
   end)
 end)
 
-describe('edit_file', function()
-  it('closes triptych and opens the file', function()
-    local spies = {
-      close = 0,
-      cmd = {
-        edit = {},
-      },
-    }
-
-    _G.triptych_mock_vim = {
-      g = {
-        triptych_close = function()
-          spies.close = spies.close + 1
-        end,
-      },
-      cmd = {
-        edit = function(path)
-          table.insert(spies.cmd.edit, path)
-        end,
-      },
-    }
-
-    ---@diagnostic disable-next-line: missing-fields
-    actions.new({}, noop, {}, {}).edit_file '/hello/foo.js'
-
-    assert.same({ '/hello/foo.js' }, spies.cmd.edit)
-    assert.same(1, spies.close)
-  end)
-end)
-
 describe('toggle_hidden', function()
   it('closes triptych and opens the file', function()
     local spies = {
@@ -1293,11 +1263,6 @@ describe('nav_right', function()
         get_target_under_cursor = {},
         nav_to = {},
       },
-      vim = {
-        fn = {
-          isdirectory = {},
-        },
-      },
     }
     local mock_state = { 'state' }
     local mock_git = { 'git' }
@@ -1309,19 +1274,11 @@ describe('nav_right', function()
       table.insert(spies.view.get_target_under_cursor, s)
       return {
         path = '/hello/world/foo',
+        is_dir = true,
       }
     end
-    _G.triptych_mock_vim = {
-      fn = {
-        isdirectory = function(path)
-          table.insert(spies.vim.fn.isdirectory, path)
-          return 1
-        end,
-      },
-    }
     actions.new(mock_state, noop, mock_diagnostics, mock_git).nav_right()
     assert.same({ mock_state }, spies.view.get_target_under_cursor)
-    assert.same({ '/hello/world/foo' }, spies.vim.fn.isdirectory)
     assert.same(
       { {
         mock_state,
@@ -1342,8 +1299,11 @@ describe('nav_right', function()
         get_target_under_cursor = {},
       },
       vim = {
-        fn = {
-          isdirectory = {},
+        g = {
+          triptych_close = 0,
+        },
+        cmd = {
+          edit = {},
         },
       },
     }
@@ -1357,23 +1317,25 @@ describe('nav_right', function()
       table.insert(spies.view.get_target_under_cursor, s)
       return {
         path = '/hello/world/bar.js',
+        is_dir = false,
       }
     end
     _G.triptych_mock_vim = {
-      fn = {
-        isdirectory = function(path)
-          table.insert(spies.vim.fn.isdirectory, path)
-          return 0
+      g = {
+        triptych_close = function()
+          spies.vim.g.triptych_close = spies.vim.g.triptych_close + 1
+        end,
+      },
+      cmd = {
+        edit = function(path)
+          table.insert(spies.vim.cmd.edit, path)
         end,
       },
     }
     local actions_instance = actions.new(mock_state, noop, mock_diagnostics, mock_git)
-    actions_instance.edit_file = function(path)
-      table.insert(spies.actions.edit_file, path)
-    end
     actions_instance.nav_right()
     assert.same({ mock_state }, spies.view.get_target_under_cursor)
-    assert.same({ '/hello/world/bar.js' }, spies.vim.fn.isdirectory)
-    assert.same({ '/hello/world/bar.js' }, spies.actions.edit_file)
+    assert.same(1, spies.vim.g.triptych_close)
+    assert.same({ '/hello/world/bar.js' }, spies.vim.cmd.edit)
   end)
 end)

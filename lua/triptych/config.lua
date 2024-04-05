@@ -9,6 +9,9 @@ local function default_config()
       jump_to_cwd = '.', -- Pressing again will toggle back
       nav_left = 'h',
       nav_right = { 'l', '<CR>' },
+      open_hsplit = { '-' },
+      open_vsplit = { '|' },
+      open_tab = { '<C-t>' },
       delete = 'd',
       add = 'a',
       copy = 'c',

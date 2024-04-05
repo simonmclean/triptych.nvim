@@ -29,6 +29,9 @@
 ---@field jump_to_cwd KeyMapping
 ---@field nav_left KeyMapping
 ---@field nav_right KeyMapping
+---@field open_vsplit KeyMapping
+---@field open_hsplit KeyMapping
+---@field open_tab KeyMapping
 ---@field delete KeyMapping
 ---@field add KeyMapping
 ---@field copy KeyMapping
