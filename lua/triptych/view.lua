@@ -20,16 +20,8 @@ local function filter_and_encrich_dir_contents(path_details, show_hidden, Diagno
   local filtered_children = u.cond(show_hidden, {
     when_true = path_details.children,
     when_false = function()
-      local child_paths = u.map(path_details.children, u.get 'path')
-      local paths_not_ignored = u.cond(Git, {
-        when_true = function()
-          ---@diagnostic disable-next-line: need-check-nil
-          return Git:filter_ignored(child_paths)
-        end,
-        when_false = child_paths,
-      })
       return u.filter(path_details.children, function(child)
-        local is_git_ignored = not u.list_includes(paths_not_ignored, child.path)
+        local is_git_ignored = Git and Git:should_ignore(child.display_name, child.is_dir)
         local is_dot_file = string.sub(child.display_name, 1, 1) == '.'
         return not is_git_ignored and not is_dot_file
       end)

@@ -99,7 +99,7 @@
 ---@class Git
 ---@field new fun(): Git
 ---@field status_of fun(self: Git, path: string): GitFileStatus | nil
----@field filter_ignored fun(self: Git, path_details: PathDetails): PathDetails
+---@field should_ignore fun(self: Git, name: string, is_dir: boolean): boolean
 
 ---@class PathDetails
 ---@field path string
