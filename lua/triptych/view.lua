@@ -56,7 +56,7 @@ local function read_file_async(child_win_buf, path)
   plenary_async.run(function()
     fs.read_file_async(path, function(err, lines)
       if err then
-        vim.print(err)
+        vim.notify(err, vim.log.levels.ERROR)
       else
         autocmds.send_file_read(child_win_buf, path, lines)
       end
@@ -308,7 +308,7 @@ function M.set_parent_or_primary_window_lines(State, path_details, win_type, Dia
     return State.windows.child
   end)
 
-  -- Because of async we may have moved onto a differnt path
+  -- Because of async we may have moved onto a different path
   if path_details.path ~= state.path then
     return nil
   end
@@ -414,7 +414,7 @@ end
 function M.set_child_window_lines(State, path_details, Diagnostics, Git)
   local buf = vim.api.nvim_win_get_buf(State.windows.child.win)
 
-  -- Because of async we may have moved onto a differnt path
+  -- Because of async we may have moved onto a different path
   if path_details.path ~= State.windows.child.path then
     return nil
   end

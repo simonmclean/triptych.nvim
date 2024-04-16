@@ -44,7 +44,7 @@ function M.get_path_details(_path, show_hidden, callback)
   local tree = {
     path = path,
     display_name = vim.fs.basename(path),
-    dirname = nil, -- i.e. parent dir
+    dirname = vim.fs.dirname(path), -- i.e. parent dir
     is_dir = vim.fn.isdirectory(path) == 1,
     filetype = nil,
     children = {},
