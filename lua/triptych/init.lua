@@ -33,17 +33,17 @@ local function toggle_triptych(dir)
   local Git = config.git_signs.enabled and git.Git.new() or nil
   local Diagnostics = config.diagnostic_signs.enabled and diagnostics.new() or nil
 
-  local opening_dir, selected_file = u.eval(function()
+  local opening_dir  = u.eval(function()
     if dir then
       -- if dir is given, open it
-      return dir, nil
+      return dir
     elseif vim.api.nvim_buf_get_option(0, 'buftype') == 'terminal' then
       -- in case of a terminal buffer, open the current working directory
-      return vim.fn.getcwd(), nil
+      return vim.fn.getcwd()
     else
       -- otherwise open the directory containing the current file and select it
       local path = vim.api.nvim_buf_get_name(0)
-      return vim.fs.dirname(path), path
+      return vim.fs.dirname(path)
     end
   end)
 
