@@ -51,9 +51,10 @@ function M.get_path_details(_path, show_hidden, callback)
     children = {},
   }
 
-  local handle, err = vim.loop.fs_scandir(path)
+  local handle, _ = vim.loop.fs_scandir(path)
   if not handle then
-    print('Error opening directory: ' .. err)
+    -- On error fallback to cwd
+    M.get_path_details(vim.fn.getcwd(), show_hidden, callback)
     return
   end
 
