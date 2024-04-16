@@ -83,7 +83,10 @@ require 'triptych'.setup {
     show_help = 'g?',
     jump_to_cwd = '.',  -- Pressing again will toggle back
     nav_left = 'h',
-    nav_right = { 'l', '<CR>' },
+    nav_right = { 'l', '<CR>' }, -- If target is a file, opens the file in-place
+    open_hsplit = { '-' },
+    open_vsplit = { '|' },
+    open_tab = { '<C-t>' },
     delete = 'd',
     add = 'a',
     copy = 'c',
@@ -115,6 +118,7 @@ require 'triptych'.setup {
       enabled = true,
       debounce_ms = 100,
     },
+    backdrop = 60 -- Backdrop opacity. 0 is fully opaque, 100 is fully transparent (disables the feature)
   },
   git_signs = {
     enabled = true,
@@ -168,34 +172,5 @@ If you want to make `<c-f>` search the file or directory under the cursor using 
       end
     }
   }
-}
-```
-
-### Opening a file in a split
-
-The simplest workflow would be to create the split before opening Triptych. But you could create bindings for this like so:
-
-```lua
-{
-  extension_mappings = {
-    ['-'] = {
-      mode = 'n',
-      fn = function(target)
-        vim.cmd.Triptych()
-        vim.schedule(function()
-          vim.cmd.split(target.path)
-        end)
-      end,
-    },
-    ['|'] = {
-      mode = 'n',
-      fn = function(target)
-        vim.cmd.Triptych()
-        vim.schedule(function()
-          vim.cmd.vsplit(target.path)
-        end)
-      end,
-    },
-  },
 }
 ```

@@ -33,19 +33,25 @@ local function toggle_triptych(dir)
   local Git = config.git_signs.enabled and git.Git.new() or nil
   local Diagnostics = config.diagnostic_signs.enabled and diagnostics.new() or nil
 
-  local maybe_buf_name = u.cond(dir, {
-    when_true = nil,
-    when_false = vim.api.nvim_buf_get_name(0),
-  })
-  local opening_dir = dir
-    or u.cond(u.is_defined(maybe_buf_name), {
-      when_true = vim.fs.dirname(maybe_buf_name),
-      when_false = vim.fn.getcwd(),
-    })
+  local opening_dir, selected_file = u.eval(function()
+    if dir then
+      -- if dir is given, open it
+      return dir, nil
+    elseif vim.api.nvim_buf_get_option(0, 'buftype') == 'terminal' then
+      -- in case of a terminal buffer, open the current working directory
+      return vim.fn.getcwd(), nil
+    else
+      -- otherwise open the directory containing the current file and select it
+      local path = vim.api.nvim_buf_get_name(0)
+      return vim.fs.dirname(path), path
+    end
+  end)
+
   local windows = float.create_three_floating_windows(
     config.options.line_numbers.enabled,
     config.options.line_numbers.relative,
-    config.options.column_widths
+    config.options.column_widths,
+    config.options.backdrop
   )
 
   State.windows = {
@@ -81,6 +87,7 @@ local function toggle_triptych(dir)
       wins.parent.win,
       wins.current.win,
       wins.child.win,
+      windows[4], -- backdrop
     }
     vim.api.nvim_set_current_win(State.opening_win)
   end
