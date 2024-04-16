@@ -9,7 +9,6 @@ local view = require 'triptych.view'
 local git = require 'triptych.git'
 local diagnostics = require 'triptych.diagnostics'
 local event_handlers = require 'triptych.event_handlers'
-local file_reader = require 'triptych.file_reader'
 
 describe('setup', function()
   it('creates config and Triptych command', function()
@@ -72,12 +71,9 @@ describe('toggle_triptych', function()
       mappings = {
         new = {},
       },
-      file_reader = {
-        new = {},
-      },
       view = {
         refresh_view = {},
-        nav_to = {},
+        set_primary_and_parent_window_targets = {}
       },
       vim = {
         api = {
@@ -152,17 +148,12 @@ describe('toggle_triptych', function()
       return 'mock_actions'
     end
 
-    file_reader.new = function(debounce_ms)
-      table.insert(spies.file_reader.new, debounce_ms)
-      return 'mock_file_reader'
-    end
-
     view.refresh_view = function(s, d, g)
       table.insert(spies.view.refresh_view, { s, d, g })
     end
 
-    view.set_primary_and_parent_window_targets = function(s, buf_dir, d, g, buf)
-      table.insert(spies.view.nav_to, { s, buf_dir, d, g, buf })
+    view.set_primary_and_parent_window_targets = function (s, o)
+      table.insert(spies.view.set_primary_and_parent_window_targets, { s, o })
     end
 
     mappings.new = function(s, a)
@@ -181,7 +172,6 @@ describe('toggle_triptych', function()
     }, spies.state.new)
     assert.same(1, spies.git.new)
     assert.same(1, spies.diagnostics.new)
-    assert.same({ 100 }, spies.file_reader.new)
     assert.same({ { 0, 'buftype' } }, spies.vim.api.nvim_buf_get_option)
     assert.same({ 0 }, spies.vim.api.nvim_buf_get_name)
     assert.same({ '/hello/world' }, spies.vim.fs.dirname)
@@ -204,12 +194,12 @@ describe('toggle_triptych', function()
       },
     }, mock_state)
     assert.same(
-      { { event_handlers, 'mock_file_reader', mock_state, 'mock_diagnostic', 'mock_git' } },
+      { { event_handlers, mock_state, 'mock_diagnostic', 'mock_git' } },
       spies.autocmds.new
     )
+    assert.same({{ mock_state, '/hello' }}, spies.view.set_primary_and_parent_window_targets)
     assert.same(mock_state, spies.actions.new[1][1])
     assert.same({ { mock_state, 'mock_actions' } }, spies.mappings.new)
-    assert.same({ { mock_state, '/hello', 'mock_diagnostic', 'mock_git', '/hello/world' } }, spies.view.nav_to)
   end)
 
   it('create a close function', function()
@@ -217,7 +207,9 @@ describe('toggle_triptych', function()
       autocmd_destroy = 0,
       close_floats = {},
       nvim_set_current_win = {},
-      file_reader_destroy = 0,
+      view = {
+        set_primary_and_parent_window_targets = {}
+      }
     }
 
     _G.triptych_mock_vim = {
@@ -263,14 +255,6 @@ describe('toggle_triptych', function()
       return 'mock_diagnostic'
     end
 
-    file_reader.new = function(_)
-      return {
-        destroy = function()
-          spies.file_reader_destroy = spies.file_reader_destroy + 1
-        end,
-      }
-    end
-
     autocmds.new = function(_, _, _, _)
       return {
         destroy_autocommands = function(_)
@@ -285,7 +269,9 @@ describe('toggle_triptych', function()
 
     view.refresh_view = function(_, _, _) end
 
-    view.set_primary_and_parent_window_targets = function(_, _, _, _, _) end
+    view.set_primary_and_parent_window_targets = function (_state, opening_dir)
+      table.insert(spies.view.set_primary_and_parent_window_targets, { _state, opening_dir})
+    end
 
     mappings.new = function(_, _) end
 
@@ -301,8 +287,8 @@ describe('toggle_triptych', function()
 
     _G.triptych_mock_vim.g.triptych_close()
 
+    assert.same({ { mock_state, '/hello' } }, spies.view.set_primary_and_parent_window_targets)
     assert.same(1, spies.autocmd_destroy)
-    assert.same(1, spies.file_reader_destroy)
     assert.same({ { 4, 5, 6 } }, spies.close_floats)
     assert.same({ 9 }, spies.nvim_set_current_win)
   end)
