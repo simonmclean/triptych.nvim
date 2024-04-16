@@ -47,7 +47,7 @@ function M.handle_dir_read(State, path_details, win_type, Diagnostics, Git)
 
   -- Set cursor position
   local maybe_cached_line_num = State.path_to_line_map[path_details.path]
-  -- Handle new Triiptych session
+  -- Handle new Triptych session
   if win_type == 'primary' and u.is_empty(State.path_to_line_map) then
     local opening_buf = vim.api.nvim_win_get_buf(State.opening_win)
     local maybe_opening_buf_name = vim.api.nvim_buf_get_name(opening_buf)
