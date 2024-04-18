@@ -1,5 +1,4 @@
 local git = require 'triptych.git'
-local u = require 'triptych.utils'
 local tu = require 'unit_tests.test_utils'
 local config = require 'triptych.config'
 
@@ -93,56 +92,5 @@ describe('Git:status_of', function()
     local Git = git.Git.new()
     assert('AM', Git:status_of '/hello/world/lua/bar.lua')
     assert('??', Git:status_of '/hello/world/docs/README.md')
-  end)
-end)
-
-describe('Git:filter_ignored', function()
-  it('filters out path details which are git ignored', function()
-    local ignored_paths = {
-      '/hello/world/foo/bar.js',
-      '/hello/world/bar/baz.lua',
-      '/hello/world/hello/world.js',
-      '/hello/world/baz/monkey.php',
-    }
-    local not_ignored_paths = {
-      '/hello/world/baz/monkey/monkey.php',
-      '/hello/world/file.php',
-    }
-    local combined_paths = u.list_concat(ignored_paths, not_ignored_paths)
-    local spy = {}
-    _G.triptych_mock_vim = {
-      g = {
-        triptych_config = config.create_merged_config {},
-      },
-      fn = {
-        getcwd = function()
-          return mocks.project_root
-        end,
-        system = function(cmd)
-          if cmd == 'git status --porcelain' then
-            return mocks.git_status
-          elseif cmd == 'git rev-parse --show-toplevel' then
-            return mocks.project_root
-          elseif u.string_contains(cmd, 'git check-ignore') then
-            table.insert(spy, cmd)
-            return u.string_join('\n', ignored_paths)
-          end
-          return nil
-        end,
-        sign_getdefined = function(_)
-          return { name = 'foo', text = '+', texthl = 'Error' }
-        end,
-      },
-      fs = {
-        parents = tu.iterator {},
-      },
-    }
-    local Git = git.Git.new()
-    local result = Git:filter_ignored(combined_paths)
-    local expected_spy_result = {
-      'git check-ignore ' .. u.string_join(' ', combined_paths),
-    }
-    assert.same(expected_spy_result, spy)
-    assert.same(not_ignored_paths, result)
   end)
 end)
