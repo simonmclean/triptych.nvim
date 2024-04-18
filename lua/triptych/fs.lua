@@ -64,7 +64,12 @@ function M.get_path_details(_path, show_hidden, callback)
     end
     local entry_path = path .. '/' .. name
     table.insert(tree.children, {
-      display_name = name,
+      display_name = u.eval(function()
+        if type == 'directory' then
+          return name .. '/'
+        end
+        return name
+      end),
       path = entry_path,
       dirname = path,
       is_dir = type == 'directory',
