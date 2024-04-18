@@ -7,7 +7,6 @@ local view = require 'triptych.view'
 local git = require 'triptych.git'
 local diagnostics = require 'triptych.diagnostics'
 local event_handlers = require 'triptych.event_handlers'
-local file_reader = require 'triptych.file_reader'
 local u = require 'triptych.utils'
 
 ---@param msg string
@@ -33,19 +32,18 @@ local function toggle_triptych(dir)
   local State = state.new(config, vim.api.nvim_get_current_win())
   local Git = config.git_signs.enabled and git.Git.new() or nil
   local Diagnostics = config.diagnostic_signs.enabled and diagnostics.new() or nil
-  local FileReader = file_reader.new(config.options.syntax_highlighting.debounce_ms)
 
-  local opening_dir, selected_file = u.eval(function()
+  local opening_dir = u.eval(function()
     if dir then
       -- if dir is given, open it
-      return dir, nil
+      return dir
     elseif vim.api.nvim_buf_get_option(0, 'buftype') == 'terminal' then
       -- in case of a terminal buffer, open the current working directory
-      return vim.fn.getcwd(), nil
+      return vim.fn.getcwd()
     else
       -- otherwise open the directory containing the current file and select it
       local path = vim.api.nvim_buf_get_name(0)
-      return vim.fs.dirname(path), path
+      return vim.fs.dirname(path)
     end
   end)
 
@@ -73,11 +71,11 @@ local function toggle_triptych(dir)
   }
 
   -- Autocmds need to be created after the above state is set
-  local AutoCmds = autocmds.new(event_handlers, FileReader, State, Diagnostics, Git)
+  local AutoCmds = autocmds.new(event_handlers, State, Diagnostics, Git)
   local refresh_fn = function()
-    view.refresh_view(State, Diagnostics, Git)
+    view.refresh_view(State)
   end
-  local Actions = actions.new(State, refresh_fn, Diagnostics, Git)
+  local Actions = actions.new(State, refresh_fn)
   mappings.new(State, Actions)
 
   local close = function()
@@ -92,10 +90,9 @@ local function toggle_triptych(dir)
       windows[4], -- backdrop
     }
     vim.api.nvim_set_current_win(State.opening_win)
-    FileReader:destroy()
   end
 
-  view.nav_to(State, opening_dir, Diagnostics, Git, selected_file)
+  view.set_primary_and_parent_window_targets(State, opening_dir)
 
   vim.g.triptych_is_open = true
   vim.g.triptych_close = close

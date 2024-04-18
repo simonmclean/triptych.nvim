@@ -153,7 +153,6 @@ describe('triptych', function()
     }
     tu.user_input '+'
     assert.same({
-      basename = 'level_3_dir_1',
       children = {},
       dirname = './test_playground/level_1_dir_1/level_2_dir_1',
       display_name = 'level_3_dir_1/',

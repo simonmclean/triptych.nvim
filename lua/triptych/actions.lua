@@ -9,9 +9,7 @@ local Actions = {}
 --- TODO: Return type
 ---@param State TriptychState
 ---@param refresh_view fun(): nil
----@param Diagnostics? Diagnostics
----@param Git? Git
-function Actions.new(State, refresh_view, Diagnostics, Git)
+function Actions.new(State, refresh_view)
   local vim = _G.triptych_mock_vim or vim
 
   local M = {}
@@ -106,17 +104,21 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
   ---@return nil
   M.toggle_cut = function()
     local target = view.get_target_under_cursor(State)
-    State:list_remove('copy', target)
-    State:list_toggle('cut', target)
-    refresh_view()
+    if target then
+      State:list_remove('copy', target)
+      State:list_toggle('cut', target)
+      refresh_view()
+    end
   end
 
   ---@return nil
   M.toggle_copy = function()
     local target = view.get_target_under_cursor(State)
-    State:list_remove('cut', target)
-    State:list_toggle('copy', target)
-    refresh_view()
+    if target then
+      State:list_remove('cut', target)
+      State:list_toggle('copy', target)
+      refresh_view()
+    end
   end
 
   ---@return nil
@@ -249,7 +251,7 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
     local success, result = pcall(function()
       -- Handle cut items
       for _, item in ipairs(State.cut_list) do
-        local destination = u.path_join(destination_dir, item.basename)
+        local destination = u.path_join(destination_dir, item.display_name)
         if item.path ~= destination then
           M.duplicate_file_or_dir(item, destination, function(was_copied)
             -- Note that we don't want to error when was_copied is false
@@ -263,7 +265,7 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
       M.bulk_delete(delete_list, true)
       -- Handle copy items
       for _, item in ipairs(State.copy_list) do
-        local destination = get_copy_path(u.path_join(destination_dir, item.basename))
+        local destination = get_copy_path(u.path_join(destination_dir, item.display_name))
         M.duplicate_file_or_dir(item, destination)
       end
       view.jump_cursor_to(State, destination_dir)
@@ -306,19 +308,18 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
   M.jump_to_cwd = function()
     local cwd = vim.fn.getcwd()
     local win = State.windows.current
-    -- If we're already in the route directory, nav back to the previous directory (if we have that in memory)
+    -- If we're already in the root directory, nav back to the previous directory (if we have that in memory)
     if win.path == cwd and u.is_defined(win.previous_path) then
-      view.nav_to(State, win.previous_path, Diagnostics, Git)
+      view.set_primary_and_parent_window_targets(State, win.previous_path)
     elseif cwd then
-      view.nav_to(State, cwd, Diagnostics, Git)
+      view.set_primary_and_parent_window_targets(State, cwd)
     end
   end
 
   M.nav_left = function()
-    local focused_path = State.windows.current.path
     local parent_path = State.windows.parent.path
     if parent_path ~= '/' then
-      view.nav_to(State, parent_path, Diagnostics, Git, focused_path)
+      view.set_primary_and_parent_window_targets(State, parent_path)
     end
   end
 
@@ -326,7 +327,7 @@ function Actions.new(State, refresh_view, Diagnostics, Git)
     local target = view.get_target_under_cursor(State)
     if target then
       if target.is_dir then
-        view.nav_to(State, target.path, Diagnostics, Git)
+        view.set_primary_and_parent_window_targets(State, target.path)
       else
         edit_file(target.path, 'in-place')
       end

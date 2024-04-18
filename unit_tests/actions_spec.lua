@@ -40,7 +40,7 @@ describe('help', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(mock_state, noop, {}, {}).help()
+    actions.new(mock_state, noop).help()
 
     assert.same({ {
       3,
@@ -99,7 +99,7 @@ describe('delete', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(mock_state, mock_refresh, {}, {}).delete()
+    actions.new(mock_state, mock_refresh).delete()
 
     assert.same({ mock_state }, spies.view.get_target_under_cursor)
     assert.same({ { { 'Yes', 'No' }, { prompt = 'Are you sure you want to delete "foo"?' } } }, spies.ui.select)
@@ -142,7 +142,7 @@ describe('delete', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(mock_state, mock_refresh, {}, {}).delete()
+    actions.new(mock_state, mock_refresh).delete()
 
     assert.same(0, spies.refresh)
     assert.same({}, spies.fn.delete)
@@ -194,7 +194,7 @@ describe('bulk_delete', function()
     }
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(mock_state, mock_refresh, {}, {}).bulk_delete(mock_targets, false)
+    actions.new(mock_state, mock_refresh).bulk_delete(mock_targets, false)
     assert.same({ { { 'Yes', 'No' }, { prompt = 'Are you sure you want to delete these 2 items?' } } }, spies.ui.select)
     assert.same({
       { 'foo/bar/a.js', 'rf' },
@@ -242,7 +242,7 @@ describe('bulk_delete', function()
     }
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(mock_state, mock_refresh, {}, {}).bulk_delete(mock_targets, true)
+    actions.new(mock_state, mock_refresh).bulk_delete(mock_targets, true)
     assert.same(0, spies.ui.select)
     assert.same({
       { 'foo/bar/a.js', 'rf' },
@@ -290,7 +290,7 @@ describe('bulk_delete', function()
     }
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(mock_state, mock_refresh, {}, {}).bulk_delete(mock_targets, false)
+    actions.new(mock_state, mock_refresh).bulk_delete(mock_targets, false)
 
     assert.same({}, spies.fn.delete)
     assert.same(0, spies.refresh)
@@ -341,7 +341,7 @@ describe('add_file_or_dir', function()
     }
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(mock_state, mock_refresh, {}, {}).add_file_or_dir()
+    actions.new(mock_state, mock_refresh).add_file_or_dir()
 
     assert.same({ 'hello.lua' }, spies.fn.trim)
     assert.same({ 'Enter name for new file or directory (dirs end with a "/"): ' }, spies.fn.input)
@@ -386,7 +386,7 @@ describe('add_file_or_dir', function()
     }
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(mock_state, mock_refresh, {}, {}).add_file_or_dir()
+    actions.new(mock_state, mock_refresh).add_file_or_dir()
 
     assert.same({ { '/foo/bar/new_dir/', 'p' } }, spies.fn.mkdir)
   end)
@@ -430,7 +430,7 @@ describe('add_file_or_dir', function()
     }
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(mock_state, mock_refresh, {}, {}).add_file_or_dir()
+    actions.new(mock_state, mock_refresh).add_file_or_dir()
 
     assert.same({ { '/foo/bar/new_dir_1/new_dir_2/', 'p' } }, spies.fn.mkdir)
     assert.same({ { {}, '/foo/bar/new_dir_1/new_dir_2/new_file.ts' } }, spies.fn.writefile)
@@ -467,7 +467,7 @@ describe('toggle_cut', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(state_instance, mock_refresh, {}, {}).toggle_cut()
+    actions.new(state_instance, mock_refresh).toggle_cut()
 
     assert.same({ state_instance }, spies.get_target_under_cursor)
     assert.same({ { 'copy', 'hello' } }, spies.list_remove)
@@ -506,7 +506,7 @@ describe('toggle_copy', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(state_instance, mock_refresh, {}, {}).toggle_copy()
+    actions.new(state_instance, mock_refresh).toggle_copy()
 
     assert.same({ state_instance }, spies.get_target_under_cursor)
     assert.same({ { 'cut', 'hello' } }, spies.list_remove)
@@ -569,7 +569,7 @@ describe('bulk_toggle_cut', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(state_instance, mock_refresh, {}, {}).bulk_toggle_cut()
+    actions.new(state_instance, mock_refresh).bulk_toggle_cut()
 
     assert.same({ state_instance }, spies.view.get_targets_in_selection)
     assert.same({
@@ -618,7 +618,7 @@ describe('bulk_toggle_cut', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(state_instance, noop, {}, {}).bulk_toggle_cut()
+    actions.new(state_instance, noop).bulk_toggle_cut()
 
     assert.same({
       { 'cut', 'hello' },
@@ -682,7 +682,7 @@ describe('bulk_toggle_copy', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(state_instance, mock_refresh, {}, {}).bulk_toggle_copy()
+    actions.new(state_instance, mock_refresh).bulk_toggle_copy()
 
     assert.same({ state_instance }, spies.view.get_targets_in_selection)
     assert.same({
@@ -731,7 +731,7 @@ describe('bulk_toggle_copy', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(state_instance, noop, {}, {}).bulk_toggle_copy()
+    actions.new(state_instance, noop).bulk_toggle_copy()
 
     assert.same({
       { 'copy', 'hello' },
@@ -788,7 +788,7 @@ describe('rename', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    actions.new(mock_state, mock_refresh, {}, {}).rename()
+    actions.new(mock_state, mock_refresh).rename()
 
     assert.same({ mock_state }, spies.view.get_target_under_cursor)
     assert.same({ 'bar.js' }, spies.fn.trim)
@@ -877,7 +877,7 @@ describe('paste', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    local actions_instance = actions.new(state_instance, mock_refresh, {}, {})
+    local actions_instance = actions.new(state_instance, mock_refresh)
 
     actions_instance.bulk_delete = function(list, skip_confirm)
       table.insert(spies.actions.bulk_delete, { list, skip_confirm })
@@ -889,13 +889,13 @@ describe('paste', function()
     assert.same({ '/hello/world/foo.js', '/hello/world/bar.js' }, spies.plenary_path.new)
     assert.same({
       {
-        destination = '/hello/world/wow/foo.js',
+        destination = '/hello/world/wow',
         recursive = true,
         override = false,
         interactive = true,
       },
       {
-        destination = '/hello/world/wow/bar.js',
+        destination = '/hello/world/wow',
         recursive = true,
         override = false,
         interactive = true,
@@ -978,7 +978,7 @@ describe('paste', function()
     local mock_refresh = function() end
 
     ---@diagnostic disable-next-line: missing-fields
-    local actions_instance = actions.new(state_instance, mock_refresh, {}, {})
+    local actions_instance = actions.new(state_instance, mock_refresh)
 
     actions_instance.bulk_delete = function(_, _) end
 
@@ -997,23 +997,23 @@ describe('paste', function()
     actions_instance.paste()
 
     assert.same({
-      '/hello/world/foo.js',
-      '/hello/world/foo_copy1.js',
-      '/hello/world/foo.js',
-      '/hello/world/foo_copy1.js',
-      '/hello/world/foo.js',
-      '/hello/world/foo_copy2.js',
+      '/hello/world',
+      '/hello/world_copy1.',
+      '/hello/world',
+      '/hello/world_copy1.',
+      '/hello/world',
+      '/hello/world_copy2.',
     }, spies.fn.filereadable)
     assert.same({ '/hello/world/foo.js', '/hello/world/foo.js' }, spies.plenary_path.new)
     assert.same({
       {
-        destination = '/hello/world/foo_copy1.js',
+        destination = '/hello/world_copy1.',
         recursive = true,
         override = false,
         interactive = true,
       },
       {
-        destination = '/hello/world/foo_copy2.js',
+        destination = '/hello/world_copy2.',
         recursive = true,
         override = false,
         interactive = true,
@@ -1099,7 +1099,7 @@ describe('paste', function()
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    local actions_instance = actions.new(state_instance, mock_refresh, {}, {})
+    local actions_instance = actions.new(state_instance, mock_refresh)
 
     actions_instance.paste()
 
@@ -1107,13 +1107,13 @@ describe('paste', function()
     assert.same({ '/hello/world/foo.js', '/hello/world/bar.js' }, spies.plenary_path.new)
     assert.same({
       {
-        destination = '/hello/world/wow/foo.js',
+        destination = '/hello/world/wow',
         recursive = true,
         override = false,
         interactive = true,
       },
       {
-        destination = '/hello/world/wow/bar.js',
+        destination = '/hello/world/wow',
         recursive = true,
         override = false,
         interactive = true,
@@ -1141,7 +1141,7 @@ describe('toggle_hidden', function()
     }
 
     ---@diagnostic disable-next-line: missing-fields
-    local actions_instance = actions.new(mock_state, mock_refresh, {}, {})
+    local actions_instance = actions.new(mock_state, mock_refresh)
     actions_instance.toggle_hidden()
     assert.same(true, mock_state.show_hidden)
     actions_instance.toggle_hidden()
@@ -1157,7 +1157,7 @@ describe('jump_to_cwd', function()
         getcwd = 0,
       },
       view = {
-        nav_to = {},
+        set_primary_and_parent_window_targets = {},
       },
     }
     _G.triptych_mock_vim = {
@@ -1168,8 +1168,8 @@ describe('jump_to_cwd', function()
         end,
       },
     }
-    view.nav_to = function(s, dir, d, g)
-      table.insert(spies.view.nav_to, { s, dir, d, g })
+    view.set_primary_and_parent_window_targets = function(s, dir)
+      table.insert(spies.view.set_primary_and_parent_window_targets, { s, dir })
     end
     local mock_state = {
       windows = {
@@ -1179,14 +1179,12 @@ describe('jump_to_cwd', function()
         },
       },
     }
-    local mock_git = { 'git' }
-    local mock_diagnostics = { 'diagnostic' }
-    local actions_instance = actions.new(mock_state, noop, mock_diagnostics, mock_git)
+    local actions_instance = actions.new(mock_state, noop)
     actions_instance.jump_to_cwd()
     assert.same(1, spies.fn.getcwd)
     assert.same({
-      { mock_state, '/hello', mock_diagnostics, mock_git },
-    }, spies.view.nav_to)
+      { mock_state, '/hello' },
+    }, spies.view.set_primary_and_parent_window_targets)
   end)
 
   it('if currently in root, jumps to previous path', function()
@@ -1195,7 +1193,7 @@ describe('jump_to_cwd', function()
         getcwd = 0,
       },
       view = {
-        nav_to = {},
+        set_primary_and_parent_window_targets = {},
       },
     }
     _G.triptych_mock_vim = {
@@ -1206,8 +1204,8 @@ describe('jump_to_cwd', function()
         end,
       },
     }
-    view.nav_to = function(s, dir, d, g)
-      table.insert(spies.view.nav_to, { s, dir, d, g })
+    view.set_primary_and_parent_window_targets = function(s, dir)
+      table.insert(spies.view.set_primary_and_parent_window_targets, { s, dir })
     end
     local mock_state = {
       windows = {
@@ -1217,14 +1215,12 @@ describe('jump_to_cwd', function()
         },
       },
     }
-    local mock_git = { 'git' }
-    local mock_diagnostics = { 'diagnostic' }
-    local actions_instance = actions.new(mock_state, noop, mock_diagnostics, mock_git)
+    local actions_instance = actions.new(mock_state, noop)
     actions_instance.jump_to_cwd()
     assert.same(1, spies.fn.getcwd)
     assert.same({
-      { mock_state, '/hello/world/foo', mock_diagnostics, mock_git },
-    }, spies.view.nav_to)
+      { mock_state, '/hello/world/foo' },
+    }, spies.view.set_primary_and_parent_window_targets)
   end)
 end)
 
@@ -1241,17 +1237,13 @@ describe('nav_left', function()
         },
       },
     }
-    local mock_git = { 'git' }
-    local mock_diagnostics = { 'diagnostic' }
-    view.nav_to = function(s, dir, d, g)
-      table.insert(spy, { s, dir, d, g })
+    view.set_primary_and_parent_window_targets = function(s, dir)
+      table.insert(spy, { s, dir })
     end
-    actions.new(mock_state, noop, mock_diagnostics, mock_git).nav_left()
+    actions.new(mock_state, noop).nav_left()
     assert.same({ {
       mock_state,
       '/hello',
-      mock_diagnostics,
-      mock_git,
     } }, spy)
   end)
 end)
@@ -1261,14 +1253,12 @@ describe('nav_right', function()
     local spies = {
       view = {
         get_target_under_cursor = {},
-        nav_to = {},
+        set_primary_and_parent_window_targets = {},
       },
     }
     local mock_state = { 'state' }
-    local mock_git = { 'git' }
-    local mock_diagnostics = { 'diagnostic' }
-    view.nav_to = function(s, dir, d, g)
-      table.insert(spies.view.nav_to, { s, dir, d, g })
+    view.set_primary_and_parent_window_targets = function(s, dir)
+      table.insert(spies.view.set_primary_and_parent_window_targets, { s, dir })
     end
     view.get_target_under_cursor = function(s)
       table.insert(spies.view.get_target_under_cursor, s)
@@ -1277,16 +1267,14 @@ describe('nav_right', function()
         is_dir = true,
       }
     end
-    actions.new(mock_state, noop, mock_diagnostics, mock_git).nav_right()
+    actions.new(mock_state, noop).nav_right()
     assert.same({ mock_state }, spies.view.get_target_under_cursor)
     assert.same(
       { {
         mock_state,
         '/hello/world/foo',
-        mock_diagnostics,
-        mock_git,
       } },
-      spies.view.nav_to
+      spies.view.set_primary_and_parent_window_targets
     )
   end)
 
@@ -1308,10 +1296,8 @@ describe('nav_right', function()
       },
     }
     local mock_state = { 'state' }
-    local mock_git = { 'git' }
-    local mock_diagnostics = { 'diagnostic' }
-    view.nav_to = function(s, dir, d, g)
-      table.insert(spies.view.nav_to, { s, dir, d, g })
+    view.set_primary_and_parent_window_targets = function(s, dir)
+      table.insert(spies.view.set_primary_and_parent_window_targets, { s, dir })
     end
     view.get_target_under_cursor = function(s)
       table.insert(spies.view.get_target_under_cursor, s)
@@ -1332,7 +1318,7 @@ describe('nav_right', function()
         end,
       },
     }
-    local actions_instance = actions.new(mock_state, noop, mock_diagnostics, mock_git)
+    local actions_instance = actions.new(mock_state, noop)
     actions_instance.nav_right()
     assert.same({ mock_state }, spies.view.get_target_under_cursor)
     assert.same(1, spies.vim.g.triptych_close)

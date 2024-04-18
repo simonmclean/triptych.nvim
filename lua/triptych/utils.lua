@@ -223,7 +223,10 @@ local function multiline_str_to_table(str)
     return {}
   end
   local lines = {}
-  for s in str:gmatch '[^\r\n]+' do
+  -- Match any sequence of characters followed by an optional carriage return and a newline, or any characters till the end of the string
+  -- This pattern also captures blank lines
+  str = str .. '\n' -- Ensures the pattern captures the last line if it's blank by appending a newline at the end of the string
+  for s in str:gmatch '(.-)\r?\n' do
     table.insert(lines, s)
   end
   return lines

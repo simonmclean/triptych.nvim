@@ -43,7 +43,7 @@ describe('new', function()
       },
     }
 
-    view.nav_to = function(state, parent_path, diagnostics, git, focused_path)
+    view.set_primary_and_parent_window_targets = function(state, parent_path, diagnostics, git, focused_path)
       table.insert(spies.view.nav_to, { state, parent_path, diagnostics, git, focused_path })
     end
     view.jump_to_cwd = function(state, diagnostics, git)
