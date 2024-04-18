@@ -231,7 +231,9 @@ describe('toggle_triptych', function()
         end,
       },
       fn = {
-        getcwd = function() end,
+        getcwd = function()
+          return '/hello'
+        end,
       },
     }
 
