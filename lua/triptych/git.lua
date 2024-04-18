@@ -96,7 +96,7 @@ function M.Git.new()
   end
 
   instance.status = git_status_result
-  instance.git_ignore_patterns = read_gitignore('.')
+  instance.git_ignore_patterns = read_gitignore '.'
   instance.project_root = u.multiline_str_to_table(vim.fn.system 'git rev-parse --show-toplevel')[1]
 
   return instance

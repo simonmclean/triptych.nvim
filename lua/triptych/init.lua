@@ -33,7 +33,7 @@ local function toggle_triptych(dir)
   local Git = config.git_signs.enabled and git.Git.new() or nil
   local Diagnostics = config.diagnostic_signs.enabled and diagnostics.new() or nil
 
-  local opening_dir  = u.eval(function()
+  local opening_dir = u.eval(function()
     if dir then
       -- if dir is given, open it
       return dir

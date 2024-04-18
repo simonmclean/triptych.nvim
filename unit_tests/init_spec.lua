@@ -73,7 +73,7 @@ describe('toggle_triptych', function()
       },
       view = {
         refresh_view = {},
-        set_primary_and_parent_window_targets = {}
+        set_primary_and_parent_window_targets = {},
       },
       vim = {
         api = {
@@ -152,7 +152,7 @@ describe('toggle_triptych', function()
       table.insert(spies.view.refresh_view, { s, d, g })
     end
 
-    view.set_primary_and_parent_window_targets = function (s, o)
+    view.set_primary_and_parent_window_targets = function(s, o)
       table.insert(spies.view.set_primary_and_parent_window_targets, { s, o })
     end
 
@@ -193,11 +193,8 @@ describe('toggle_triptych', function()
         },
       },
     }, mock_state)
-    assert.same(
-      { { event_handlers, mock_state, 'mock_diagnostic', 'mock_git' } },
-      spies.autocmds.new
-    )
-    assert.same({{ mock_state, '/hello' }}, spies.view.set_primary_and_parent_window_targets)
+    assert.same({ { event_handlers, mock_state, 'mock_diagnostic', 'mock_git' } }, spies.autocmds.new)
+    assert.same({ { mock_state, '/hello' } }, spies.view.set_primary_and_parent_window_targets)
     assert.same(mock_state, spies.actions.new[1][1])
     assert.same({ { mock_state, 'mock_actions' } }, spies.mappings.new)
   end)
@@ -208,8 +205,8 @@ describe('toggle_triptych', function()
       close_floats = {},
       nvim_set_current_win = {},
       view = {
-        set_primary_and_parent_window_targets = {}
-      }
+        set_primary_and_parent_window_targets = {},
+      },
     }
 
     _G.triptych_mock_vim = {
@@ -269,8 +266,8 @@ describe('toggle_triptych', function()
 
     view.refresh_view = function(_, _, _) end
 
-    view.set_primary_and_parent_window_targets = function (_state, opening_dir)
-      table.insert(spies.view.set_primary_and_parent_window_targets, { _state, opening_dir})
+    view.set_primary_and_parent_window_targets = function(_state, opening_dir)
+      table.insert(spies.view.set_primary_and_parent_window_targets, { _state, opening_dir })
     end
 
     mappings.new = function(_, _) end

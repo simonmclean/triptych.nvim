@@ -91,7 +91,6 @@ local function send_file_read(child_win_buf, path, lines)
   end)
 end
 
-
 return {
   new = AutoCommands.new,
   send_path_read = send_path_read,

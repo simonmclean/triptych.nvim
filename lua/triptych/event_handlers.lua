@@ -61,7 +61,7 @@ function M.handle_dir_read(State, path_details, win_type, Diagnostics, Git)
     end
   elseif win_type == 'primary' and maybe_cached_line_num then
     local line_count = vim.api.nvim_buf_line_count(vim.api.nvim_win_get_buf(State.windows.current.win))
-    vim.api.nvim_win_set_cursor(State.windows.current.win, { math.min(line_count, maybe_cached_line_num) , 0 })
+    vim.api.nvim_win_set_cursor(State.windows.current.win, { math.min(line_count, maybe_cached_line_num), 0 })
   elseif win_type == 'primary' and State.windows.current.previous_path then
     local line_num = line_number_of_path(State.windows.current.previous_path, path_details.children)
     vim.api.nvim_win_set_cursor(State.windows.current.win, { line_num or 1, 0 })
