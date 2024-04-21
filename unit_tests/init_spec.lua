@@ -87,7 +87,7 @@ describe('toggle_triptych', function()
         },
         fn = {
           getcwd = 0,
-          filereadable = {}
+          filereadable = {},
         },
       },
     }
@@ -119,11 +119,11 @@ describe('toggle_triptych', function()
         end,
       },
       fn = {
-        filereadable = function (path)
+        filereadable = function(path)
           table.insert(spies.vim.fn.filereadable, path)
           return 1
-        end
-      }
+        end,
+      },
     }
 
     local mock_state = {
@@ -242,9 +242,9 @@ describe('toggle_triptych', function()
         getcwd = function()
           return '/hello'
         end,
-        filereadable = function ()
+        filereadable = function()
           return 1
-        end
+        end,
       },
     }
 
