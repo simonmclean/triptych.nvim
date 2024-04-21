@@ -12,6 +12,7 @@ local function expected_default_config()
       open_hsplit = { '-' },
       open_vsplit = { '|' },
       open_tab = { '<C-t>' },
+      cd = '<leader>cd',
       delete = 'd',
       add = 'a',
       copy = 'c',

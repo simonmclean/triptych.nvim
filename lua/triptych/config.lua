@@ -6,12 +6,13 @@ local function default_config()
     mappings = {
       -- Everything below is buffer-local, meaning it will only apply to Triptych windows
       show_help = 'g?',
-      jump_to_cwd = '.', -- Pressing again will toggle back
+      jump_to_cwd = '.',
       nav_left = 'h',
       nav_right = { 'l', '<CR>' },
       open_hsplit = { '-' },
       open_vsplit = { '|' },
       open_tab = { '<C-t>' },
+      cd = '<leader>cd',
       delete = 'd',
       add = 'a',
       copy = 'c',

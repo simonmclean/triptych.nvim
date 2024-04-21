@@ -35,6 +35,7 @@
 ---@field open_vsplit KeyMapping
 ---@field open_hsplit KeyMapping
 ---@field open_tab KeyMapping
+---@field cd KeyMapping
 ---@field delete KeyMapping
 ---@field add KeyMapping
 ---@field copy KeyMapping
