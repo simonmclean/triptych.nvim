@@ -1324,4 +1324,55 @@ describe('nav_right', function()
     assert.same(1, spies.vim.g.triptych_close)
     assert.same({ '/hello/world/bar.js' }, spies.vim.cmd.edit)
   end)
+
+  describe('cd', function()
+    it('changes the cwd', function()
+      local spies = {
+        actions = {
+          nav_right = 0,
+        },
+        view = {
+          get_target_under_cursor = {},
+        },
+        nvim_set_current_dir = {},
+        refresh = 0,
+      }
+
+      view.get_target_under_cursor = function(s)
+        table.insert(spies.view.get_target_under_cursor, s)
+        return {
+          is_dir = true,
+          path = '/hello/world',
+          dirname = '/hello',
+        }
+      end
+
+      _G.triptych_mock_vim = {
+        api = {
+          nvim_set_current_dir = function(path)
+            table.insert(spies.nvim_set_current_dir, path)
+          end,
+        },
+      }
+
+      local mock_state = { 'mock_state' }
+
+      local mock_refresh = function()
+        spies.refresh = spies.refresh + 1
+      end
+
+      local actions_instance = actions.new(mock_state, mock_refresh)
+
+      actions_instance.nav_right = function()
+        spies.actions.nav_right = spies.actions.nav_right + 1
+      end
+
+      actions_instance.cd()
+
+      assert.same({ mock_state }, spies.view.get_target_under_cursor)
+      assert.same({ '/hello/world' }, spies.nvim_set_current_dir)
+      assert.same(1, spies.actions.nav_right)
+      assert.same(1, spies.refresh)
+    end)
+  end)
 end)

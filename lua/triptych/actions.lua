@@ -361,6 +361,19 @@ function Actions.new(State, refresh_view)
     end
   end
 
+  M.cd = function ()
+    local target = view.get_target_under_cursor(State)
+    if target then
+      if target.is_dir then
+        vim.api.nvim_set_current_dir(target.path)
+        M.nav_right()
+      else
+        vim.api.nvim_set_current_dir(target.dirname)
+      end
+      refresh_view()
+    end
+  end
+
   return M
 end
 
