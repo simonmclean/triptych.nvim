@@ -42,8 +42,11 @@ local function toggle_triptych(dir)
       return vim.fn.getcwd()
     else
       -- otherwise open the directory containing the current file and select it
-      local path = vim.api.nvim_buf_get_name(0)
-      return vim.fs.dirname(path)
+      local bufname = vim.api.nvim_buf_get_name(0)
+      if vim.fn.filereadable(bufname) == 1 then
+        return vim.fs.dirname(bufname)
+      end
+      return vim.fn.getcwd()
     end
   end)
 
