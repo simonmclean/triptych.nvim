@@ -87,6 +87,7 @@ describe('toggle_triptych', function()
         },
         fn = {
           getcwd = 0,
+          filereadable = {},
         },
       },
     }
@@ -115,6 +116,12 @@ describe('toggle_triptych', function()
         dirname = function(path)
           table.insert(spies.vim.fs.dirname, path)
           return vim.fs.dirname(path)
+        end,
+      },
+      fn = {
+        filereadable = function(path)
+          table.insert(spies.vim.fn.filereadable, path)
+          return 1
         end,
       },
     }
@@ -174,6 +181,7 @@ describe('toggle_triptych', function()
     assert.same(1, spies.diagnostics.new)
     assert.same({ { 0, 'buftype' } }, spies.vim.api.nvim_buf_get_option)
     assert.same({ 0 }, spies.vim.api.nvim_buf_get_name)
+    assert.same({ '/hello/world' }, spies.vim.fn.filereadable)
     assert.same({ '/hello/world' }, spies.vim.fs.dirname)
     assert.same(1, spies.float.create_three_floating_windows)
     assert.same({
@@ -233,6 +241,9 @@ describe('toggle_triptych', function()
       fn = {
         getcwd = function()
           return '/hello'
+        end,
+        filereadable = function()
+          return 1
         end,
       },
     }
