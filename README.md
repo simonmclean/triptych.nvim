@@ -146,9 +146,8 @@ You simply provide a key mapping, a vim mode, and a function. When the mapped ke
 
 ```lua
 {
-  basename, -- e.g. bar.js
   dirname, -- e.g. /User/Name/foo
-  display_name -- same as basename (redundant field)
+  display_name -- same as basename
   filetype, -- e.g. 'javascript'
   is_dir, -- boolean indicating whether this is a directory
   path, -- e.g. /User/Name/foo/bar.js
