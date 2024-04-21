@@ -361,7 +361,7 @@ function Actions.new(State, refresh_view)
     end
   end
 
-  M.cd = function ()
+  M.cd = function()
     local target = view.get_target_under_cursor(State)
     if target then
       if target.is_dir then
