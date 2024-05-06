@@ -107,7 +107,7 @@ end
 ---@param user_config table
 local function handle_column_widths_deprecation(user_config)
   if user_config and user_config.options and user_config.options.column_widths then
-    config_warn 'options.column_widths' 'is deprecated. Please use "responsive_column_widths" instead.'
+    config_warn 'options.column_widths' 'is deprecated. Please use "options.responsive_column_widths" instead.'
   end
 end
 
