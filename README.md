@@ -110,7 +110,9 @@ require 'triptych'.setup {
       directory_icon = '',
       fallback_file_icon = ''
     },
-    column_widths = { .25, .25, .5 }, -- Must add up to 1 after rounding to 2 decimal places
+    -- Columns widths must add up to 1 after rounding to 2 decimal places
+    -- Parent or child windows can be hidden by setting a width of 0
+    column_widths = { .25, .25, .5 },
     highlights = { -- Highlight groups to use. See `:highlight` or `:h highlight`
       file_names = 'NONE',
       directory_names = 'NONE',
@@ -147,7 +149,7 @@ You simply provide a key mapping, a vim mode, and a function. When the mapped ke
 ```lua
 {
   dirname, -- e.g. /User/Name/foo
-  display_name -- same as basename
+  display_name -- e.g. 'bar.js'
   filetype, -- e.g. 'javascript'
   is_dir, -- boolean indicating whether this is a directory
   path, -- e.g. /User/Name/foo/bar.js

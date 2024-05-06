@@ -146,6 +146,7 @@
 ---@field show_numbers boolean
 ---@field relative_numbers boolean
 ---@field role WinType
+---@field hidden boolean
 
 ---@class HighlightDetails
 ---@field icon HighlightDetailsIcon
