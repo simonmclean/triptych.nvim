@@ -52,7 +52,6 @@ local function toggle_triptych(dir)
 
   -- Figure out which column widths to use from responsive_column_widths, based on the current vim.o.columns
   local column_widths = u.eval(function()
-    local rcw = config.options.responsive_column_widths
     local breakpoint_configs = {}
     for breakpoint, widths in pairs(config.options.responsive_column_widths) do
       table.insert(breakpoint_configs, { breakpoint = breakpoint, widths = widths })
