@@ -93,6 +93,9 @@ describe('toggle_triptych', function()
     }
 
     _G.triptych_mock_vim = {
+      o = {
+        columns = 160,
+      },
       g = {
         triptych_config = config.create_merged_config {},
       },
@@ -218,6 +221,9 @@ describe('toggle_triptych', function()
     }
 
     _G.triptych_mock_vim = {
+      o = {
+        columns = 160,
+      },
       g = {
         triptych_config = config.create_merged_config {},
       },

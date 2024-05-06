@@ -116,7 +116,7 @@ local function create_floating_window(config)
     style = 'minimal',
     noautocmd = true,
     focusable = config.is_focusable,
-    zindex = 101,
+    zindex = config.hidden and 100 or 101,
   })
   vim.api.nvim_win_set_var(win, 'triptych_role', config.role)
   vim.api.nvim_win_set_option(win, 'cursorline', config.enable_cursorline)
@@ -160,22 +160,33 @@ end
 ---@return number[] 4 window ids (parent, primary, child, backdrop)
 function M.create_three_floating_windows(show_numbers, relative_numbers, column_widths, backdrop)
   local vim = _G.triptych_mock_vim or vim
-  local max_total_width = 220 -- width of all 3 windows combined
-  local max_height = 45
-  local screen_height = vim.o.lines
-  local screen_width = vim.o.columns
-  local padding = 4
 
-  local float_widths = u.map(column_widths, function(percentage)
-    local max = math.floor(max_total_width * percentage)
-    local result = math.min(math.floor((screen_width * percentage)) - padding, max)
-    return result
-  end)
+  local max_total_width = 220 -- width of all 3 windows combined
+
+  local max_height = 45
+
+  local screen_height = vim.o.lines
+
+  local screen_width = vim.o.columns
+
+  local padding = 4
 
   local float_height = math.min(screen_height - (padding * 3), max_height)
 
-  local wins = {}
+  -- Widths must be calculated up-front, because when we're looping through later, we need to
+  -- reference the width of the previous window
+  local float_widths = u.map(column_widths, function(percentage)
+    local max = math.floor(max_total_width * percentage)
+    local result = math.min(math.floor((screen_width * percentage)) - padding, max)
+    if result < 1 then
+      -- The user can set a column width to 0 to hide that column. However the vim.api.nvim_open_win function requires positive integers.
+      -- Setting this to 1 allows for a valid window config, while effectively hiding the window
+      return 1
+    end
+    return result
+  end)
 
+  -- x_pos is mutable and will be updated in a loop below
   local x_pos = u.cond(screen_width > (max_total_width + (padding * 2)), {
     when_true = math.floor((screen_width - max_total_width) / 2),
     when_false = padding,
@@ -186,11 +197,20 @@ function M.create_three_floating_windows(show_numbers, relative_numbers, column_
     when_false = padding,
   })
 
-  for i = 1, 3, 1 do
+  local floating_windows_configs = {
+    parent = {},
+    primary = {},
+    child = {},
+  }
+
+  -- Build up the configs that will be passed to create_floating_window
+  for i, percentage in ipairs(column_widths) do
     local is_parent = i == 1
     local is_primary = i == 2
     local is_child = i == 3
-    if is_primary or is_child then
+    -- For the primary window, only shift the x_pos if the parent window is not "hidden"
+    -- Hidden is signified by a width of 1
+    if (is_primary and float_widths[i - 1] > 1) or is_child then
       x_pos = x_pos + float_widths[i - 1] + 2
     end
     local role = u.eval(function()
@@ -201,8 +221,9 @@ function M.create_three_floating_windows(show_numbers, relative_numbers, column_
       end
       return 'child'
     end)
-    local win = create_floating_window {
-      width = float_widths[i],
+    local width = float_widths[i]
+    floating_windows_configs[role] = {
+      width = width,
       height = float_height,
       y_pos = y_pos,
       x_pos = x_pos,
@@ -213,10 +234,26 @@ function M.create_three_floating_windows(show_numbers, relative_numbers, column_
       show_numbers = show_numbers and is_primary,
       relative_numbers = show_numbers and relative_numbers and is_primary,
       role = role,
+      hidden = width == 1,
     }
-
-    table.insert(wins, win)
   end
+
+  -- If the parent width is 1, we consider it "hidden"
+  -- This will be achieved by positioning it behind the primary window
+  if floating_windows_configs.parent.width == 1 then
+    floating_windows_configs.parent.x_pos = floating_windows_configs.primary.x_pos
+  end
+
+  -- Same for the child window
+  if floating_windows_configs.child.width == 1 then
+    floating_windows_configs.child.x_pos = floating_windows_configs.primary.x_pos
+  end
+
+  local wins = {
+    create_floating_window(floating_windows_configs.parent),
+    create_floating_window(floating_windows_configs.primary),
+    create_floating_window(floating_windows_configs.child),
+  }
 
   -- Focus the middle window
   vim.api.nvim_set_current_win(wins[2])

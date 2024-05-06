@@ -54,7 +54,7 @@
 ---@field show_hidden boolean
 ---@field line_numbers TriptychConfigLineNumbers
 ---@field file_icons TriptychConfigFileIcons
----@field column_widths number[]
+---@field responsive_column_widths { [string]: number[] }
 ---@field highlights TriptychConfigHighlights
 ---@field syntax_highlighting TriptychConfigSyntaxHighlighting
 ---@field backdrop number
@@ -146,6 +146,7 @@
 ---@field show_numbers boolean
 ---@field relative_numbers boolean
 ---@field role WinType
+---@field hidden boolean
 
 ---@class HighlightDetails
 ---@field icon HighlightDetailsIcon
