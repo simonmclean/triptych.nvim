@@ -54,7 +54,7 @@ local function toggle_triptych(dir)
   local column_widths = u.eval(function()
     local rcw = config.options.responsive_column_widths
     local breakpoint_configs = {}
-    for breakpoint, widths in pairs(rcw) do
+    for breakpoint, widths in pairs(config.options.responsive_column_widths) do
       table.insert(breakpoint_configs, { breakpoint = breakpoint, widths = widths })
     end
     table.sort(breakpoint_configs, function(a, b)
