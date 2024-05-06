@@ -110,9 +110,15 @@ require 'triptych'.setup {
       directory_icon = '',
       fallback_file_icon = ''
     },
-    -- Columns widths must add up to 1 after rounding to 2 decimal places
-    -- Parent or child windows can be hidden by setting a width of 0
-    column_widths = { .25, .25, .5 },
+    responsive_column_widths = {
+      -- Keys are breakpoints, values are column widths
+      -- A breakpoint means "when vim.o.columns >= x, use these column widths"
+      -- Columns widths must add up to 1 after rounding to 2 decimal places
+      -- Parent or child windows can be hidden by setting a width of 0
+      ['0'] = { 0, 0.5, 0.5 },
+      ['120'] = { 0.2, 0.3, 0.5 },
+      ['200'] = { 0.25, 0.25, 0.5 },
+    },
     highlights = { -- Highlight groups to use. See `:highlight` or `:h highlight`
       file_names = 'NONE',
       directory_names = 'NONE',
