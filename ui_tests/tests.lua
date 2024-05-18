@@ -3,14 +3,9 @@ local tu = require 'ui_tests.utils'
 local tryptic = require 'triptych.init'
 local u = require 'triptych.utils'
 
--- TODO:
---
--- Additional test cases:
--- Rename
--- Copy paste
--- Cut and paste
---
--- Figure out why tests fail on Linux (but not Mac) when files icons are enabled
+-- TODO: I've removed these tests from validate.sh
+-- They are no longer working since autocmds were made buffer local
+-- I need to find a more robust way of testing
 
 ---@return TriptychConfig
 local function test_config()
