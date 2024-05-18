@@ -3,7 +3,7 @@ local tu = require 'ui_tests.utils'
 local tryptic = require 'triptych.init'
 local u = require 'triptych.utils'
 
--- TODO: I've removed these tests from validate.sh
+-- TODO: I've removed these tests from validate.sh and ci.yml
 -- They are no longer working since autocmds were made buffer local
 -- I need to find a more robust way of testing
 
