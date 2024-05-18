@@ -13,9 +13,9 @@ function AutoCommands.new(event_handlers, State, Diagnostics, Git)
   setmetatable(instance, { __index = AutoCommands })
 
   instance.autocmds = {
-    -- TODO: Should I be using nvim_create_user_autocommand instead?...
     vim.api.nvim_create_autocmd('CursorMoved', {
       group = au_group,
+      buffer = vim.api.nvim_win_get_buf(State.windows.current.win),
       callback = function()
         event_handlers.handle_cursor_moved(State)
       end,
@@ -23,6 +23,7 @@ function AutoCommands.new(event_handlers, State, Diagnostics, Git)
 
     vim.api.nvim_create_autocmd('BufLeave', {
       group = au_group,
+      buffer = vim.api.nvim_win_get_buf(State.windows.current.win),
       callback = event_handlers.handle_buf_leave,
     }),
 

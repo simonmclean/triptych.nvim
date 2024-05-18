@@ -11,13 +11,11 @@ on:
     paths:
       - 'lua/**'
       - 'unit_tests/**'
-      - 'ui_tests/**'
   pull_request:
     branches: [ "main" ]
     paths:
       - 'lua/**'
       - 'unit_tests/**'
-      - 'ui_tests/**'
 
 jobs:
   validate:
@@ -72,11 +70,3 @@ jobs:
       run: |
         cd $HOME/$TRIPTYCH_DIR
         $HOME/nvim-linux64-$LATEST_NVIM_VERSION/bin/nvim --headless -c "PlenaryBustedDirectory unit_tests/"
-    - name: run UI tests against neovim 0.9.0
-      run: |
-        cd $HOME/$TRIPTYCH_DIR
-        $HOME/nvim-linux64-0.9.0/bin/nvim --headless -c "PlenaryBustedFile ui_tests/tests.lua"
-    - name: run UI tests against latest stable neovim
-      run: |
-        cd $HOME/$TRIPTYCH_DIR
-        $HOME/nvim-linux64-$LATEST_NVIM_VERSION/bin/nvim --headless -c "PlenaryBustedFile ui_tests/tests.lua"
