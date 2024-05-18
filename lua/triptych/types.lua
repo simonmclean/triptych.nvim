@@ -47,7 +47,7 @@
 
 ---@class ExtensionMapping
 ---@field mode string
----@field fn fun(contents?: PathDetails): nil
+---@field fn fun(contents?: PathDetails, refresh_fn: fun(): nil): nil
 
 ---@class TriptychConfigOptions
 ---@field dirs_first boolean

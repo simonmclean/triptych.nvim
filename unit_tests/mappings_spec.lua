@@ -7,6 +7,7 @@ describe('new', function()
   it('sets up the expected key bindings', function()
     local mock_state = {}
     local mock_actions = {}
+    local mock_refresh = function() end
 
     local spies = {
       keymap_set = {},
@@ -53,7 +54,7 @@ describe('new', function()
       table.insert(spies.view.get_target_under_cursor, state)
     end
 
-    mappings.new(mock_state, mock_actions)
+    mappings.new(mock_state, mock_actions, mock_refresh)
 
     local assert_mapping = function(name, mode)
       local results = u.filter(spies.keymap_set, function(entry)
@@ -95,13 +96,14 @@ describe('new', function()
     }
     local mock_state = { 'mock_state' } ---@as TriptychState
     local mock_target = { 'mock_target' } ---@as PathDetails
+    local mock_refresh = function() end
     view.get_target_under_cursor = function(s)
       table.insert(spies.get_target_under_cursor, s)
       return mock_target
     end
 
     ---@diagnostic disable-next-line: missing-fields
-    mappings.new(mock_state, {})
+    mappings.new(mock_state, {}, mock_refresh)
     local ext_mapping_index = u.list_index_of(spies.keymap_set, function(entry)
       return entry[2] == '<leader>xxx'
     end)

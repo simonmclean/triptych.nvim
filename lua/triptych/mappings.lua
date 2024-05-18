@@ -4,7 +4,7 @@ local Mappings = {}
 
 ---@param State TriptychState
 ---@param actions unknown
----@param refresh fun(): nil
+---@param refresh_fn fun(): nil
 function Mappings.new(State, actions, refresh_fn)
   local vim = _G.triptych_mock_vim or vim
   local mappings = vim.g.triptych_config.mappings
