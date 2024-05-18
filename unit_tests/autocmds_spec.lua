@@ -1,6 +1,12 @@
 local autocmds = require 'triptych.autocmds'
 
-local mock_state = { 'mock_state' }
+local mock_state = {
+  windows = {
+    current = {
+      win = 4,
+    },
+  },
+}
 local mock_diagnostic = { 'mock_diagnostic' }
 local mock_git = { 'mock_git' }
 
@@ -9,10 +15,14 @@ describe('AutoCommands.new', function()
     local autocmd_spy = {}
     local handle_cursor_moved_spy = {}
     local handle_buf_leave_spy = {}
+    local nvim_win_get_buf_spy = {}
     _G.triptych_mock_vim = {
       api = {
         nvim_create_autocmd = function(name, config)
           table.insert(autocmd_spy, { name, config })
+        end,
+        nvim_win_get_buf = function(winid)
+          table.insert(nvim_win_get_buf_spy, winid)
         end,
       },
     }
@@ -47,6 +57,8 @@ describe('AutoCommands.new', function()
     -- Test the BufLeave callback calls the event handler
     buf_leave_autocmd_config.callback()
     assert.same({ {} }, handle_buf_leave_spy)
+
+    assert.same({ mock_state.windows.current.win, mock_state.windows.current.win }, nvim_win_get_buf_spy)
   end)
 end)
 
@@ -63,6 +75,7 @@ describe('AutoCommands:destroy_autocommands', function()
         nvim_del_autocmd = function(id)
           table.insert(spy, id)
         end,
+        nvim_win_get_buf = function(_) end,
       },
     }
     local event_handlers = {
