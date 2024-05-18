@@ -23,6 +23,7 @@ describe('AutoCommands.new', function()
         end,
         nvim_win_get_buf = function(winid)
           table.insert(nvim_win_get_buf_spy, winid)
+          return 42
         end,
       },
     }
@@ -75,7 +76,9 @@ describe('AutoCommands:destroy_autocommands', function()
         nvim_del_autocmd = function(id)
           table.insert(spy, id)
         end,
-        nvim_win_get_buf = function(_) end,
+        nvim_win_get_buf = function(_)
+          return 4
+        end,
       },
     }
     local event_handlers = {
