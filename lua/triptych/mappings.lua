@@ -4,7 +4,8 @@ local Mappings = {}
 
 ---@param State TriptychState
 ---@param actions unknown
-function Mappings.new(State, actions)
+---@param refresh fun(): nil
+function Mappings.new(State, actions, refresh_fn)
   local vim = _G.triptych_mock_vim or vim
   local mappings = vim.g.triptych_config.mappings
   local extension_mappings = vim.g.triptych_config.extension_mappings
@@ -56,7 +57,7 @@ function Mappings.new(State, actions)
   -----------------------------------------
   for key, ext_mapping in pairs(extension_mappings) do
     map(ext_mapping.mode, key, function()
-      ext_mapping.fn(view.get_target_under_cursor(State))
+      ext_mapping.fn(view.get_target_under_cursor(State), refresh_fn)
     end)
   end
 end
