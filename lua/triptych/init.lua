@@ -104,7 +104,7 @@ local function toggle_triptych(dir)
     view.refresh_view(State)
   end
   local Actions = actions.new(State, refresh_fn)
-  mappings.new(State, Actions)
+  mappings.new(State, Actions, refresh_fn)
 
   local close = function()
     vim.g.triptych_is_open = false

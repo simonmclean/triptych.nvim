@@ -150,7 +150,8 @@ require 'triptych'.setup {
 ## Extending functionality
 
 The `extension_mappings` property allows you add any arbitrary functionality based on the current cursor target.
-You simply provide a key mapping, a vim mode, and a function. When the mapped keys are pressed the function is invoked, and will receive a table containing the following:
+You simply provide a key mapping, a vim mode, and a function. When the mapped keys are pressed, the function is invoked and is passed two arguments:
+A table describing the current cursor "target", and a function which refreshes the view. The target table looks as follows:
 
 ```lua
 {
@@ -173,7 +174,7 @@ If you want to make `<c-f>` search the file or directory under the cursor using 
   extension_mappings = {
     ['<c-f>'] = {
       mode = 'n',
-      fn = function(target)
+      fn = function(target, _)
         require 'telescope.builtin'.live_grep {
           search_dirs = { target.path }
         }
