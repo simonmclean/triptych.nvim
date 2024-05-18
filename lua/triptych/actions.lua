@@ -72,7 +72,6 @@ function Actions.new(State, refresh_view)
 
   ---@return nil
   M.add_file_or_dir = function()
-    vim = _G.triptych_mock_vim or vim
     local current_directory = State.windows.current.path
     local response = vim.fn.trim(vim.fn.input 'Enter name for new file or directory (dirs end with a "/"): ')
     if u.is_empty(response) then
