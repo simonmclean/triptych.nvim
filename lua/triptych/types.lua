@@ -18,6 +18,7 @@
 ---@field path_to_line_map { [string]: integer }
 ---@field opening_win integer
 ---@field show_hidden boolean
+---@field has_initial_cursor_pos_been_set boolean
 
 ---@alias AutoCommandMessage ('DirRead' | 'FileRead')
 

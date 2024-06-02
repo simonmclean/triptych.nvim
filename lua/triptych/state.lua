@@ -25,6 +25,7 @@ function TriptychState.new(config, opening_win)
   instance.cut_list = {}
   instance.opening_win = opening_win
   instance.path_to_line_map = {}
+  instance.has_initial_cursor_pos_been_set = false
 
   return instance
 end

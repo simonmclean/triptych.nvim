@@ -294,9 +294,8 @@ end
 ---@param win_type WinType
 ---@param Diagnostics? Diagnostics
 ---@param Git? Git
----@param cursor_target? string full path
 ---@return nil
-function M.set_parent_or_primary_window_lines(State, path_details, win_type, Diagnostics, Git, cursor_target)
+function M.set_parent_or_primary_window_lines(State, path_details, win_type, Diagnostics, Git)
   local vim = _G.triptych_mock_vim or vim
 
   local state = u.eval(function()
@@ -326,18 +325,26 @@ function M.set_parent_or_primary_window_lines(State, path_details, win_type, Dia
   set_sign_columns(buf, contents.children, 'triptych_sign_col_' .. win_type)
 
   if win_type == 'primary' then
-    local line_number = u.cond(cursor_target, {
-      when_true = function()
-        return line_number_of_path(cursor_target --[[@as string]], contents.children)
-      end,
-      when_false = State.path_to_line_map[path_details.path] or 1,
-    })
+    local line_number = u.eval(function()
+      if State.has_initial_cursor_pos_been_set then
+        return State.path_to_line_map[path_details.path] or 1
+      end
+      local opening_buf = vim.api.nvim_win_get_buf(State.opening_win)
+      local maybe_opening_buf_name = vim.api.nvim_buf_get_name(opening_buf)
+      if maybe_opening_buf_name then
+        return line_number_of_path(maybe_opening_buf_name, path_details.children)
+      end
+      return 1
+    end)
     local buf_line_count = vim.api.nvim_buf_line_count(buf)
     vim.api.nvim_win_set_cursor(0, { math.min(line_number, buf_line_count), 0 })
+    State.has_initial_cursor_pos_been_set = true
+    State.path_to_line_map[path_details.path] = line_number
     State.windows.current.contents = contents
   elseif win_type == 'parent' then
-    local line_number = line_number_of_path(path_details.path, contents.children)
+    local line_number = line_number_of_path(State.windows.current.path, contents.children)
     vim.api.nvim_win_set_cursor(state.win, { line_number, 0 })
+    State.path_to_line_map[State.windows.parent.path] = line_number
     State.windows.parent.contents = contents
   end
 end
