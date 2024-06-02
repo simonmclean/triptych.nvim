@@ -112,7 +112,7 @@ local function create_floating_window(config)
     relative = 'editor',
     col = config.x_pos,
     row = config.y_pos,
-    border = 'single',
+    border = config.border,
     style = 'minimal',
     noautocmd = true,
     focusable = config.is_focusable,
@@ -157,8 +157,9 @@ end
 ---@param relative_numbers boolean
 ---@param column_widths number[]
 ---@param backdrop number
+---@param border string | table
 ---@return number[] 4 window ids (parent, primary, child, backdrop)
-function M.create_three_floating_windows(show_numbers, relative_numbers, column_widths, backdrop)
+function M.create_three_floating_windows(show_numbers, relative_numbers, column_widths, backdrop, border)
   local vim = _G.triptych_mock_vim or vim
 
   local max_total_width = 220 -- width of all 3 windows combined
@@ -235,6 +236,7 @@ function M.create_three_floating_windows(show_numbers, relative_numbers, column_
       relative_numbers = show_numbers and relative_numbers and is_primary,
       role = role,
       hidden = width == 1,
+      border = border
     }
   end
 

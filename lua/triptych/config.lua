@@ -55,6 +55,7 @@ local function default_config()
         debounce_ms = 100,
       },
       backdrop = 60,
+      border = 'single',
     },
     git_signs = {
       enabled = true,

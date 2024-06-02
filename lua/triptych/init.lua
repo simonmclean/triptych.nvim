@@ -79,7 +79,8 @@ local function toggle_triptych(dir)
     config.options.line_numbers.enabled,
     config.options.line_numbers.relative,
     column_widths,
-    config.options.backdrop
+    config.options.backdrop,
+    config.options.border
   )
 
   State.windows = {
