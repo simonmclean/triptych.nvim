@@ -59,6 +59,7 @@
 ---@field highlights TriptychConfigHighlights
 ---@field syntax_highlighting TriptychConfigSyntaxHighlighting
 ---@field backdrop number
+---@field border string | table
 
 ---@class TriptychConfigHighlights
 ---@field file_names string
