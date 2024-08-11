@@ -60,6 +60,10 @@
 ---@field syntax_highlighting TriptychConfigSyntaxHighlighting
 ---@field backdrop number
 ---@field border string | table
+---@field max_height number
+---@field max_width number
+---@field margin_x number
+---@field margin_y number
 
 ---@class TriptychConfigHighlights
 ---@field file_names string
@@ -141,6 +145,7 @@
 ---@class FloatingWindowConfig
 ---@field width number
 ---@field height number
+---@field border number
 ---@field x_pos number
 ---@field y_pos number
 ---@field is_focusable boolean
