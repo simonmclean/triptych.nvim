@@ -106,7 +106,13 @@ local function toggle_triptych(dir)
   -- Autocmds need to be created after the above state is set
   local AutoCmds = autocmds.new(event_handlers, State, Diagnostics, Git)
   local refresh_fn = function()
-    view.refresh_view(State)
+    if vim.g.triptych_is_open then
+      view.refresh_view(State)
+    else
+      -- The reason why triptych might have closed when we go to refresh the view is
+      -- that some plugins steel focus (like telescope-ui-select)
+      toggle_triptych(State.windows.current.path)
+    end
   end
   local Actions = actions.new(State, refresh_fn)
   mappings.new(State, Actions, refresh_fn)

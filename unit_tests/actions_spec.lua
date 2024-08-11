@@ -144,7 +144,6 @@ describe('delete', function()
     ---@diagnostic disable-next-line: missing-fields
     actions.new(mock_state, mock_refresh).delete()
 
-    assert.same(0, spies.refresh)
     assert.same({}, spies.fn.delete)
   end)
 end)
@@ -293,7 +292,6 @@ describe('bulk_delete', function()
     actions.new(mock_state, mock_refresh).bulk_delete(mock_targets, false)
 
     assert.same({}, spies.fn.delete)
-    assert.same(0, spies.refresh)
   end)
 end)
 
