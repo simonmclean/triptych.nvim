@@ -252,7 +252,7 @@ function M.create_three_floating_windows(
     end)
     floating_windows_configs[role] = {
       -- The magic number 2 is to account for the natural spacing that exists around floating windows
-      width = float_widths[i] - 2,
+      width = math.max(float_widths[i] - 2, 1),
       height = float_height,
       y_pos = y_pos,
       x_pos = x_pos,
