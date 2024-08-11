@@ -29,8 +29,8 @@ function Actions.new(State, refresh_view)
       vim.ui.select({ 'Yes', 'No' }, { prompt = prompt }, function(response)
         if u.is_defined(response) and response == 'Yes' then
           vim.fn.delete(target.path, 'rf')
-          refresh_view()
         end
+        refresh_view()
       end)
     end
   end
@@ -64,8 +64,8 @@ function Actions.new(State, refresh_view)
               vim.print('Error deleting item', result)
             end
           end
-          refresh_view()
         end
+        refresh_view()
       end)
     end
   end
