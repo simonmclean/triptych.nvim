@@ -60,6 +60,10 @@
 ---@field syntax_highlighting TriptychConfigSyntaxHighlighting
 ---@field backdrop number
 ---@field border string | table
+---@field max_height number
+---@field max_width number
+---@field margin_x number
+---@field margin_y number
 
 ---@class TriptychConfigHighlights
 ---@field file_names string

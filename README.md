@@ -129,6 +129,10 @@ require 'triptych'.setup {
     },
     backdrop = 60 -- Backdrop opacity. 0 is fully opaque, 100 is fully transparent (disables the feature)
     border = 'single' -- See :h nvim_open_win for border options
+    max_height = 45,
+    max_width = 220,
+    margin_x = 4 -- Space left and right
+    margin_y = 4 -- Space above and below
   },
   git_signs = {
     enabled = true,

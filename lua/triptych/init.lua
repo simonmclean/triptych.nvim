@@ -80,7 +80,11 @@ local function toggle_triptych(dir)
     config.options.line_numbers.relative,
     column_widths,
     config.options.backdrop,
-    config.options.border
+    config.options.border,
+    config.options.max_height,
+    config.options.max_width,
+    config.options.margin_x,
+    config.options.margin_y
   )
 
   State.windows = {

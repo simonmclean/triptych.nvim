@@ -158,27 +158,37 @@ end
 ---@param column_widths number[]
 ---@param backdrop number
 ---@param border string | table
+---@param max_height number
+---@param max_width number
+---@param margin_x number
+---@param margin_y number
 ---@return number[] 4 window ids (parent, primary, child, backdrop)
-function M.create_three_floating_windows(show_numbers, relative_numbers, column_widths, backdrop, border)
+function M.create_three_floating_windows(
+  show_numbers,
+  relative_numbers,
+  column_widths,
+  backdrop,
+  border,
+  max_height,
+  max_width,
+  margin_x,
+  margin_y
+)
   local vim = _G.triptych_mock_vim or vim
-
-  local max_total_width = 220 -- width of all 3 windows combined
-
-  local max_height = 45
 
   local screen_height = vim.o.lines
 
   local screen_width = vim.o.columns
 
-  local padding = 4
+  local available_width = screen_width - (margin_x * 2)
 
-  local float_height = math.min(screen_height - (padding * 3), max_height)
+  local float_height = math.min(screen_height - (margin_y * 3), max_height)
 
   -- Widths must be calculated up-front, because when we're looping through later, we need to
   -- reference the width of the previous window
   local float_widths = u.map(column_widths, function(percentage)
-    local max = math.floor(max_total_width * percentage)
-    local result = math.min(math.floor((screen_width * percentage)) - padding, max)
+    local max = math.floor(max_width * percentage)
+    local result = math.min(math.floor(available_width * percentage), max)
     if result < 1 then
       -- The user can set a column width to 0 to hide that column. However the vim.api.nvim_open_win function requires positive integers.
       -- Setting this to 1 allows for a valid window config, while effectively hiding the window
@@ -187,15 +197,23 @@ function M.create_three_floating_windows(show_numbers, relative_numbers, column_
     return result
   end)
 
-  -- x_pos is mutable and will be updated in a loop below
-  local x_pos = u.cond(screen_width > (max_total_width + (padding * 2)), {
-    when_true = math.floor((screen_width - max_total_width) / 2),
-    when_false = padding,
-  })
+  local parent_width = float_widths[1]
+  local primary_width = float_widths[2]
+  local child_width = float_widths[3]
+  local is_parent_window_hidden = parent_width == 1
 
-  local y_pos = u.cond(screen_height > (max_height + (padding * 2)), {
+  -- Figure out how much we need to shift the x_pos in order to center align Triptych
+  local shift_right = u.eval(function()
+    local width_excluding_margin = parent_width + primary_width + child_width
+    if width_excluding_margin < screen_width then
+      return math.floor((screen_width - width_excluding_margin) / 2)
+    end
+    return 0
+  end)
+
+  local y_pos = u.cond(screen_height > (max_height + (margin_y * 2)), {
     when_true = math.floor((screen_height - max_height) / 2),
-    when_false = padding,
+    when_false = margin_y,
   })
 
   local floating_windows_configs = {
@@ -209,11 +227,21 @@ function M.create_three_floating_windows(show_numbers, relative_numbers, column_
     local is_parent = i == 1
     local is_primary = i == 2
     local is_child = i == 3
-    -- For the primary window, only shift the x_pos if the parent window is not "hidden"
-    -- Hidden is signified by a width of 1
-    if (is_primary and float_widths[i - 1] > 1) or is_child then
-      x_pos = x_pos + float_widths[i - 1] + 2
-    end
+    local x_pos = u.eval(function()
+      if is_parent then
+        return 0
+      elseif is_primary then
+        if is_parent_window_hidden then
+          return 0
+        end
+        return parent_width
+      else
+        if is_parent_window_hidden then
+          return primary_width
+        end
+        return primary_width + parent_width
+      end
+    end) + shift_right
     local role = u.eval(function()
       if is_parent then
         return 'parent'
@@ -222,9 +250,9 @@ function M.create_three_floating_windows(show_numbers, relative_numbers, column_
       end
       return 'child'
     end)
-    local width = float_widths[i]
     floating_windows_configs[role] = {
-      width = width,
+      -- The magic number 2 is to account for the natural spacing that exists around floating windows
+      width = float_widths[i] - 2,
       height = float_height,
       y_pos = y_pos,
       x_pos = x_pos,
@@ -236,7 +264,7 @@ function M.create_three_floating_windows(show_numbers, relative_numbers, column_
       relative_numbers = show_numbers and relative_numbers and is_primary,
       role = role,
       hidden = width == 1,
-      border = border
+      border = border,
     }
   end
 
