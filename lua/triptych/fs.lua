@@ -16,6 +16,11 @@ end
 ---@param path string
 ---@return string?
 function M.get_filetype_from_path(path)
+  -- plenary locks up when trying to read a fifo file, so we're sniffing this out first
+  if vim.fn.getftype(path) == 'fifo' then
+    return 'fifo'
+  end
+  -- We still want to use plenary though, because it has more advanced filetype detection
   local success, result = pcall(plenary_filetype.detect, path)
   if success then
     return result
