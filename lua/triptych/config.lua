@@ -59,7 +59,7 @@ local function default_config()
       max_height = 45,
       max_width = 220,
       margin_x = 4,
-      margin_y = 4
+      margin_y = 4,
     },
     git_signs = {
       enabled = true,

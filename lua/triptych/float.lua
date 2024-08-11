@@ -227,6 +227,7 @@ function M.create_three_floating_windows(
     local is_parent = i == 1
     local is_primary = i == 2
     local is_child = i == 3
+
     local x_pos = u.eval(function()
       if is_parent then
         return 0
@@ -242,6 +243,7 @@ function M.create_three_floating_windows(
         return primary_width + parent_width
       end
     end) + shift_right
+
     local role = u.eval(function()
       if is_parent then
         return 'parent'
@@ -250,9 +252,12 @@ function M.create_three_floating_windows(
       end
       return 'child'
     end)
+
+    local width = math.max(float_widths[i] - 2, 1),
+
     floating_windows_configs[role] = {
       -- The magic number 2 is to account for the natural spacing that exists around floating windows
-      width = math.max(float_widths[i] - 2, 1),
+      width = width,
       height = float_height,
       y_pos = y_pos,
       x_pos = x_pos,

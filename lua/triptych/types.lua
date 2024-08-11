@@ -145,6 +145,7 @@
 ---@class FloatingWindowConfig
 ---@field width number
 ---@field height number
+---@field border number
 ---@field x_pos number
 ---@field y_pos number
 ---@field is_focusable boolean
