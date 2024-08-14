@@ -20,7 +20,7 @@ M.status_to_sign = {
 
 ---Convert gitignore globs into lua patterns (which are like very simplified regex)
 local function glob_to_lua_pattern(glob)
-  return glob:gsub('%.', '%%.'):gsub('%*', '.*'):gsub('%?', '.') .. '$'
+  return glob:gsub('%.', '%%.'):gsub('%*', '.*'):gsub('%?', '.'):gsub('%-', '%%-') .. '$'
 end
 
 ---Reads the .gitignore file of a given directory (if it exists) and returns the ignore patterns
