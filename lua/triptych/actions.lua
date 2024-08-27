@@ -307,7 +307,6 @@ function Actions.new(State, refresh_view)
       -- Handle copy items
       for _, item in ipairs(State.copy_list) do
         local destination = get_copy_path(u.path_join(destination_dir, item.display_name))
-        -- TODO: Replace this with vim.fn.copy
         M.duplicate_file_or_dir(item, destination)
         autocmds.publish_file_created(destination)
       end
