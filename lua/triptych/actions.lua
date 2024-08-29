@@ -24,7 +24,7 @@ local function write_node_and_publish(path, is_dir)
 end
 
 ---wrap vim.fn.delete with public events
----@param path any
+---@param path string
 local function delete_node_and_publish(path)
   autocmds.publish_will_delete_node(path)
   local success = vim.fn.delete(path, 'rf') == 0
@@ -34,8 +34,8 @@ local function delete_node_and_publish(path)
 end
 
 ---wraps vim.fn.rename with public events
----@param from any
----@param to any
+---@param from string
+---@param to string
 local function rename_node_and_publish(from, to)
   autocmds.publish_will_move_node(from, to)
   local success = vim.fn.rename(from, to) == 0

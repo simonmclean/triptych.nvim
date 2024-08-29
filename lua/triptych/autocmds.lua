@@ -61,6 +61,9 @@ function AutoCommands:destroy_autocommands()
   end
 end
 
+---@param group string
+---@param pattern string
+---@param data any
 local function exec_autocmd(group, pattern, data)
   vim.schedule(function()
     vim.api.nvim_exec_autocmds('User', {
@@ -71,6 +74,8 @@ local function exec_autocmd(group, pattern, data)
   end)
 end
 
+---@param pattern string
+---@param data any
 local function exec_internal_autocmd(pattern, data)
   vim.schedule(function()
     vim.api.nvim_exec_autocmds('User', {
@@ -81,6 +86,8 @@ local function exec_internal_autocmd(pattern, data)
   end)
 end
 
+---@param pattern string
+---@param data table
 local function exec_public_autocmd(pattern, data)
   vim.api.nvim_exec_autocmds('User', {
     group = au_group_public,
