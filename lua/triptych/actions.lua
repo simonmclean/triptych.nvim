@@ -14,7 +14,7 @@ local function write_node_and_publish(path, is_dir)
   autocmds.publish_will_create_node(path)
   local success = u.eval(function()
     if is_dir then
-      return vim.fn.mkdir(absolute_dir_path, 'p') == 0
+      return vim.fn.mkdir(path, 'p') == 1
     end
     return vim.fn.writefile({}, path) == 0
   end)
