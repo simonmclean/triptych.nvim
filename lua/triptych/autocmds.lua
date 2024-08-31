@@ -126,7 +126,7 @@ end
 ---@param win_type WinType
 function M.publish_did_update_window(win_type)
   exec_public_autocmd('TriptychDidUpdateWindow', {
-    win_type = win_type
+    win_type = win_type,
   })
 end
 

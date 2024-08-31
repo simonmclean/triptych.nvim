@@ -80,7 +80,7 @@ end
 ---@param lines string[]
 function M.handle_file_read(child_win_buf, path, lines)
   float.set_child_window_file_preview(child_win_buf, path, lines)
-  autocmds.publish_did_update_window('child')
+  autocmds.publish_did_update_window 'child'
 end
 
 ---@return nil
