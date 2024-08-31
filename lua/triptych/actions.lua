@@ -3,8 +3,46 @@ local float = require 'triptych.float'
 local view = require 'triptych.view'
 local plenary_path = require 'plenary.path'
 local triptych_help = require 'triptych.help'
+local autocmds = require 'triptych.autocmds'
 
 local Actions = {}
+
+---wraps vim.fn.writefile and vim.fn.mkdir with public events
+---@param path string
+---@param is_dir boolean
+local function write_node_and_publish(path, is_dir)
+  autocmds.publish_will_create_node(path)
+  local success = u.eval(function()
+    if is_dir then
+      return vim.fn.mkdir(path, 'p') == 1
+    end
+    return vim.fn.writefile({}, path) == 0
+  end)
+  if success then
+    autocmds.publish_did_create_node(path)
+  end
+end
+
+---wrap vim.fn.delete with public events
+---@param path string
+local function delete_node_and_publish(path)
+  autocmds.publish_will_delete_node(path)
+  local success = vim.fn.delete(path, 'rf') == 0
+  if success then
+    autocmds.publish_did_delete_node(path)
+  end
+end
+
+---wraps vim.fn.rename with public events
+---@param from string
+---@param to string
+local function rename_node_and_publish(from, to)
+  autocmds.publish_will_move_node(from, to)
+  local success = vim.fn.rename(from, to) == 0
+  if success then
+    autocmds.publish_did_move_node(from, to)
+  end
+end
 
 --- TODO: Return type
 ---@param State TriptychState
@@ -28,7 +66,7 @@ function Actions.new(State, refresh_view)
       local prompt = 'Are you sure you want to delete "' .. target.display_name .. '"?'
       vim.ui.select({ 'Yes', 'No' }, { prompt = prompt }, function(response)
         if u.is_defined(response) and response == 'Yes' then
-          vim.fn.delete(target.path, 'rf')
+          delete_node_and_publish(target.path)
         end
         refresh_view()
       end)
@@ -37,8 +75,9 @@ function Actions.new(State, refresh_view)
 
   ---@param _targets PathDetails[]
   ---@param skip_confirm boolean
+  ---@param skip_event_publication boolean
   ---@return nil
-  M.bulk_delete = function(_targets, skip_confirm)
+  M.bulk_delete = function(_targets, skip_confirm, skip_event_publication)
     local targets = _targets or view.get_targets_in_selection(State)
 
     if u.is_empty(targets) then
@@ -47,7 +86,7 @@ function Actions.new(State, refresh_view)
 
     if skip_confirm then
       for _, target in ipairs(targets) do
-        vim.fn.delete(target.path, 'rf')
+        delete_node_and_publish(target.path)
       end
       refresh_view()
     else
@@ -58,7 +97,11 @@ function Actions.new(State, refresh_view)
         if u.is_defined(response) and response == 'Yes' then
           for _, target in ipairs(targets) do
             local success, result = pcall(function()
-              vim.fn.delete(target.path, 'rf')
+              if skip_event_publication then
+                vim.fn.delete(target.path, 'rf')
+              else
+                delete_node_and_publish(target.path)
+              end
             end)
             if not success then
               vim.print('Error deleting item', result)
@@ -89,12 +132,15 @@ function Actions.new(State, refresh_view)
         local absolute_dir_path = u.path_join(current_directory, dirs_to_create)
         vim.fn.mkdir(absolute_dir_path, 'p')
         -- TODO: writefile is destructive. Add checking
-        vim.fn.writefile({}, absolute_dir_path .. filename)
+        local final_path = absolute_dir_path .. filename
+        write_node_and_publish(final_path, false)
       else
-        vim.fn.writefile({}, u.path_join(current_directory, response))
+        local final_path = u.path_join(current_directory, response)
+        write_node_and_publish(final_path, false)
       end
     else
-      vim.fn.mkdir(u.path_join(current_directory, response), 'p')
+      local path = u.path_join(current_directory, response)
+      write_node_and_publish(path, true)
     end
 
     refresh_view()
@@ -196,7 +242,8 @@ function Actions.new(State, refresh_view)
       })
       local response = vim.fn.trim(vim.fn.input('Enter new name for "' .. display_name .. '": '))
       if u.is_defined(response) and response ~= target.display_name then
-        vim.fn.rename(target.path, u.path_join(target.dirname, response))
+        local destination = u.path_join(target.dirname, response)
+        rename_node_and_publish(target.path, destination)
         refresh_view()
       end
     end
@@ -234,6 +281,7 @@ function Actions.new(State, refresh_view)
 
   ---@return nil
   M.paste = function()
+    -- TODO: This function is a mess. Maybe break out into handlers for copy and cut?
     local cursor_target = view.get_target_under_cursor(State)
     local destination_dir = u.eval(function()
       if not cursor_target then
@@ -252,21 +300,17 @@ function Actions.new(State, refresh_view)
       for _, item in ipairs(State.cut_list) do
         local destination = u.path_join(destination_dir, item.display_name)
         if item.path ~= destination then
-          M.duplicate_file_or_dir(item, destination, function(was_copied)
-            -- Note that we don't want to error when was_copied is false
-            -- This is because it could mean that the user declined to override an existing file, which obviously isn't an error.
-            if was_copied then
-              table.insert(delete_list, item)
-            end
-          end)
+          rename_node_and_publish(item.path, destination)
         end
       end
-      M.bulk_delete(delete_list, true)
+
       -- Handle copy items
       for _, item in ipairs(State.copy_list) do
         local destination = get_copy_path(u.path_join(destination_dir, item.display_name))
         M.duplicate_file_or_dir(item, destination)
+        autocmds.publish_file_created(destination)
       end
+
       view.jump_cursor_to(State, destination_dir)
     end)
     if not success then
