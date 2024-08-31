@@ -50,7 +50,7 @@ function M.on_all_wins_updated(callback)
   }
   M.on_event('TriptychDidUpdateWindow', function(data)
     wins_updated[data.data.win_type] = true
-    if wins_updated.child and wins_updated.primary and wins_updated.primary then
+    if wins_updated.child and wins_updated.primary and wins_updated.parent then
       callback()
     end
   end)
