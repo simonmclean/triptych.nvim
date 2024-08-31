@@ -16,9 +16,9 @@ end
 describe('UI', function()
   it('when opened - populates windows with files and folders', function()
     local expected_lines = {
-      child = { 'level_5/', 'level_4_file_1.js' },
-      primary = { 'level_4/', 'level_3_file_1.js' },
-      parent = { 'level_3/', 'level_2_file_1.js' },
+      child = { 'level_5/', 'level_4_file_1.lua' },
+      primary = { 'level_4/', 'level_3_file_1.md' },
+      parent = { 'level_3/', 'level_2_file_1.lua' },
     }
 
     local expected_winbars = {
