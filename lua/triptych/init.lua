@@ -128,6 +128,7 @@ local function toggle_triptych(dir)
       windows[4], -- backdrop
     }
     vim.api.nvim_set_current_win(State.opening_win)
+    autocmds.publish_did_close()
   end
 
   view.set_primary_and_parent_window_targets(State, opening_dir)
