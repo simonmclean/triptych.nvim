@@ -63,37 +63,33 @@ end
 
 ---@param group string
 ---@param pattern string
----@param data any
-local function exec_autocmd(group, pattern, data)
-  vim.schedule(function()
+---@param schedule boolean
+---@param data? any
+local function exec_autocmd(group, pattern, schedule, data)
+  local exec = function()
     vim.api.nvim_exec_autocmds('User', {
       group = group,
       pattern = pattern,
       data = data,
     })
-  end)
+  end
+  if schedule then
+    vim.schedule(exec)
+  else
+    exec()
+  end
 end
 
 ---@param pattern string
 ---@param data any
 local function exec_internal_autocmd(pattern, data)
-  vim.schedule(function()
-    vim.api.nvim_exec_autocmds('User', {
-      group = au_group_internal,
-      pattern = pattern,
-      data = data,
-    })
-  end)
+  exec_autocmd(au_group_internal, pattern, true, data)
 end
 
 ---@param pattern string
----@param data table
+---@param data? table
 local function exec_public_autocmd(pattern, data)
-  vim.api.nvim_exec_autocmds('User', {
-    group = au_group_public,
-    pattern = pattern,
-    data = data,
-  })
+  exec_autocmd(au_group_public, pattern, false, data)
 end
 
 ---Publish the results of an async directory read
@@ -122,6 +118,17 @@ end
 
 -- NOTE: "publish" functions are intended as public hooks.
 -- Don't use these to add any internal logic (like with the "send" functions)
+
+function M.publish_did_close()
+  exec_public_autocmd 'TriptychDidClose'
+end
+
+---@param win_type WinType
+function M.publish_did_update_window(win_type)
+  exec_public_autocmd('TriptychDidUpdateWindow', {
+    win_type = win_type
+  })
+end
 
 ---@param path string
 function M.publish_will_delete_node(path)

@@ -1,5 +1,6 @@
 local u = require 'triptych.utils'
 local float = require 'triptych.float'
+local autocmds = require 'triptych.autocmds'
 
 local M = {}
 
@@ -69,6 +70,8 @@ function M.handle_dir_read(State, path_details, win_type, Diagnostics, Git)
     local line_num = line_number_of_path(State.windows.current.path, path_details.children)
     vim.api.nvim_win_set_cursor(State.windows.parent.win, { line_num or 1, 0 })
   end
+
+  autocmds.publish_did_update_window(win_type)
 end
 
 ---Handle the result of a file read
@@ -77,6 +80,7 @@ end
 ---@param lines string[]
 function M.handle_file_read(child_win_buf, path, lines)
   float.set_child_window_file_preview(child_win_buf, path, lines)
+  autocmds.publish_did_update_window('child')
 end
 
 ---@return nil
