@@ -8,7 +8,6 @@ local AutoCommands = {}
 ---@param Git? Git
 ---@return AutoCommands
 function AutoCommands.new(event_handlers, State, Diagnostics, Git)
-  local vim = _G.triptych_mock_vim or vim
   local instance = {}
   setmetatable(instance, { __index = AutoCommands })
 
@@ -50,7 +49,6 @@ function AutoCommands.new(event_handlers, State, Diagnostics, Git)
 end
 
 function AutoCommands:destroy_autocommands()
-  local vim = _G.triptych_mock_vim or vim
   for _, autocmd in pairs(self.autocmds) do
     vim.api.nvim_del_autocmd(autocmd)
   end

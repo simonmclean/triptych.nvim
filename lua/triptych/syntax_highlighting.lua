@@ -5,7 +5,6 @@ local M = {}
 ---@param buf number
 ---@return nil
 M.stop = function(buf)
-  local vim = _G.triptych_mock_vim or vim
   vim.treesitter.stop(buf)
   vim.api.nvim_buf_set_option(buf, 'syntax', 'off')
 end
@@ -14,7 +13,6 @@ end
 ---@param filetype? string
 ---@return nil
 M.start = function(buf, filetype)
-  local vim = _G.triptych_mock_vim or vim
 
   -- Because this function will be debounced we need to check that the buffer still exists
   if not vim.api.nvim_buf_is_valid(buf) then

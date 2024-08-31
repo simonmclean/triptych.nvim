@@ -7,7 +7,6 @@ local M = {}
 ---@param State TriptychState
 ---@return nil
 function M.handle_cursor_moved(State)
-  local vim = _G.triptych_mock_vim or vim
   local view = _G.triptych_mock_view or require 'triptych.view'
   local target = view.get_target_under_cursor(State)
   local current_dir = State.windows.current.path
@@ -41,7 +40,6 @@ end
 ---@param Git? Git
 ---@return nil
 function M.handle_dir_read(State, path_details, win_type, Diagnostics, Git)
-  local vim = _G.triptych_mock_vim or vim
   local view = _G.triptych_mock_view or require 'triptych.view'
   view.set_parent_or_primary_window_lines(State, path_details, win_type, Diagnostics, Git)
 

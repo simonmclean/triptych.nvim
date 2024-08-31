@@ -8,7 +8,6 @@ local M = {}
 ---@param path string
 ---@return number
 function M.get_file_size_in_kb(path)
-  local vim = _G.triptych_mock_vim or vim
   local bytes = vim.fn.getfsize(path)
   return bytes / 1000
 end
@@ -43,7 +42,6 @@ end, 2)
 ---@param show_hidden boolean
 ---@param callback fun(path_details: PathDetails): nil
 function M.get_path_details(_path, show_hidden, callback)
-  local vim = _G.triptych_mock_vim or vim
   local path = vim.fs.normalize(_path)
 
   local tree = {

@@ -44,7 +44,6 @@ end
 M.Git = {}
 
 function M.Git.new()
-  local vim = _G.triptych_mock_vim or vim
   local instance = {}
   setmetatable(instance, { __index = M.Git })
 

@@ -10,7 +10,6 @@ local Actions = {}
 ---@param State TriptychState
 ---@param refresh_view fun(): nil
 function Actions.new(State, refresh_view)
-  local vim = _G.triptych_mock_vim or vim
 
   local M = {}
 
