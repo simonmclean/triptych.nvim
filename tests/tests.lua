@@ -1,18 +1,22 @@
 local assert = require 'luassert'
 local u = require 'tests.utils'
 local test_runner = require 'tests.test_runner'
+local run_tests = test_runner.run_tests
 local test = test_runner.test
-local api = vim.api
 
 local function open_triptych(callback)
   local cwd = vim.fn.getcwd()
   local opening_dir = u.join_path(cwd, 'tests/test_playground/level_1/level_2/level_3')
-
   u.open_triptych(opening_dir)
   u.on_all_wins_updated(callback)
 end
 
-test_runner.run_tests {
+local function close_triptych(callback)
+  u.on_event('TriptychDidClose', callback)
+  u.press_key 'q'
+end
+
+run_tests {
   test('when opened - populates windows with files and folders', function(done)
     local expected_lines = {
       child = { 'level_5/', 'level_4_file_1.lua' },
@@ -30,13 +34,12 @@ test_runner.run_tests {
 
     open_triptych(function()
       result = u.get_state()
-      u.on_event('TriptychDidClose', function()
+      close_triptych(function()
         done(function()
           assert.same(expected_lines, result.lines)
           assert.same(expected_winbars, result.winbars)
         end)
       end)
-      u.press_key 'q'
     end)
   end),
 
@@ -58,13 +61,12 @@ test_runner.run_tests {
       u.press_key 'l'
       u.on_all_wins_updated(function()
         local result = u.get_state()
-        u.on_event('TriptychDidClose', function()
+        close_triptych(function()
           done(function()
             assert.same(expected_lines, result.lines)
             assert.same(expected_winbars, result.winbars)
           end)
         end)
-        u.press_key 'q'
       end)
     end)
   end),

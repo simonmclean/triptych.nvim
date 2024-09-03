@@ -8,20 +8,6 @@ function M.join_path(...)
   return table.concat({ ... }, '/')
 end
 
----@param n integer
----@param callback function
-function M.wait_ticks(n, callback)
-  local function tick()
-    if n == 0 then
-      callback()
-    else
-      n = n - 1
-      vim.schedule(tick)
-    end
-  end
-  tick()
-end
-
 function M.get_lines(buf)
   return vim.api.nvim_buf_get_lines(buf, 0, -1, false)
 end
@@ -124,14 +110,6 @@ function M.get_state()
     lines = lines,
     winbars = winbars,
   }
-end
-
-function M.await(fn)
-  local co = coroutine.running()
-  fn(function()
-    coroutine.resume(co)
-  end)
-  return coroutine.yield
 end
 
 function M.press_key(k)
