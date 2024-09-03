@@ -6,6 +6,7 @@ local TIMEOUT_SECONDS = 3
 
 ---@class Test
 ---@field name string
+---@field only boolean
 ---@field run fun(callback: fun(passed: boolean, fail_message?: string))
 
 ---@param description string
@@ -15,6 +16,7 @@ M.test = function(description, test_body)
   ---@type Test
   return {
     name = description,
+    only = false,
     run = function(callback)
       local success, err = pcall(test_body, function(assertions)
         local passed, failed = pcall(assertions)
@@ -33,6 +35,15 @@ M.test = function(description, test_body)
   }
 end
 
+---@param description string
+---@param test_body fun(done: function)
+---@return Test
+M.test_only = function(description, test_body)
+  local test = M.test(description, test_body)
+  test.only = true
+  return test
+end
+
 ---@param test_name string
 ---@param passed boolean
 ---@param fail_message? string
@@ -47,6 +58,22 @@ end
 
 ---@param tests Test[]
 M.run_tests = function(tests)
+  ---@type Test[]
+  local tests_marked_only = {}
+  for _, test in ipairs(tests) do
+    if test.only then
+      table.insert(tests_marked_only, test)
+    end
+  end
+
+  ---@type Test[]
+  local tests_to_run
+  if #tests_marked_only > 0 then
+    tests_to_run = tests_marked_only
+  else
+    tests_to_run = tests
+  end
+
   local timer = vim.loop.new_timer()
 
   ---@param remaining_tests Test[]
@@ -55,7 +82,7 @@ M.run_tests = function(tests)
     local current_test = table.remove(remaining_tests, #remaining_tests)
 
     if current_test then
-      timer:start(1000 * TIMEOUT_SECONDS, 0, function ()
+      timer:start(1000 * TIMEOUT_SECONDS, 0, function()
         output_result(current_test.name, false, 'Timeout after ' .. TIMEOUT_SECONDS .. ' seconds')
       end)
       current_test.run(function(passed, fail_message)
@@ -68,7 +95,7 @@ M.run_tests = function(tests)
     end
   end
 
-  run_tests(u.reverse_list(tests))
+  run_tests(u.reverse_list(tests_to_run))
 end
 
 return M

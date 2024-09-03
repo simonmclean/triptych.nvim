@@ -3,6 +3,7 @@ local u = require 'tests.utils'
 local test_runner = require 'tests.test_runner'
 local run_tests = test_runner.run_tests
 local test = test_runner.test
+local test_only = test_runner.test_only
 
 local function open_triptych(callback)
   local cwd = vim.fn.getcwd()
@@ -57,8 +58,34 @@ run_tests {
     }
 
     open_triptych(function()
-      -- Nav right
+      u.on_all_wins_updated(function()
+        local result = u.get_state()
+        close_triptych(function()
+          done(function()
+            assert.same(expected_lines, result.lines)
+            assert.same(expected_winbars, result.winbars)
+          end)
+        end)
+      end)
       u.press_key 'l'
+    end)
+  end),
+
+  test('navigates up the filesystem', function(done)
+    local expected_lines = {
+      child = { 'level_4/', 'level_3_file_1.md' },
+      primary = { 'level_3/', 'level_2_file_1.lua' },
+      parent = { 'level_2/', 'level_1_file_1.lua' },
+    }
+
+    local expected_winbars = {
+      child = '%#WinBar#%=%#WinBar#level_3/%=',
+      primary = '%#WinBar#%=%#WinBar#level_2%=',
+      parent = '%#WinBar#%=%#WinBar#level_1%=',
+    }
+
+    open_triptych(function()
+      u.press_key 'h'
       u.on_all_wins_updated(function()
         local result = u.get_state()
         close_triptych(function()
@@ -70,9 +97,26 @@ run_tests {
       end)
     end)
   end),
+
+  test('opens a file', function(done)
+    -- Used to return to this buffer, after the file is opened
+    local current_buf = vim.api.nvim_get_current_buf()
+
+    open_triptych(function()
+      u.on_event('TriptychDidClose', function()
+        done(function()
+          assert.same(vim.g.triptych_is_open, false)
+          vim.api.nvim_set_current_buf(current_buf)
+        end)
+      end)
+      u.press_key 'j'
+      u.on_child_window_updated(function()
+        u.press_key 'l'
+      end)
+    end)
+  end),
 }
 
--- it('navigates up the filesystem', function() end)
 --
 -- it('opens a file', function() end)
 --

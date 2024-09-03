@@ -34,6 +34,10 @@ function M.on_event(event, callback, once)
   })
 end
 
+function M.on_child_window_updated(callback)
+  M.on_event('TriptychDidUpdateWindow', callback)
+end
+
 function M.on_all_wins_updated(callback)
   local wins_updated = {
     child = false,
@@ -116,6 +120,19 @@ function M.press_key(k)
   local input_parsed = api.nvim_replace_termcodes(k, true, true, true)
   api.nvim_feedkeys(input_parsed, 'normal', false)
   api.nvim_exec2('norm! ' .. k, {})
+end
+
+function M.key_sequence(keys)
+  local function key_sequence(remaining_keys)
+    local k = table.remove(remaining_keys, #remaining_keys)
+    M.press_key(k)
+    if #remaining_keys > 0 then
+      vim.schedule(function()
+        M.key_sequence(remaining_keys)
+      end)
+    end
+  end
+  key_sequence(M.reverse_list(keys))
 end
 
 function M.reverse_list(list)
