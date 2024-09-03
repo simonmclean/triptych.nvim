@@ -1,4 +1,5 @@
 local u = require 'triptych.utils'
+local log = require 'triptych.logger'
 local float = require 'triptych.float'
 local autocmds = require 'triptych.autocmds'
 
@@ -8,6 +9,7 @@ local M = {}
 ---@param State TriptychState
 ---@return nil
 function M.handle_cursor_moved(State)
+  log.debug('handle_cursor_moved')
   local view = _G.triptych_mock_view or require 'triptych.view'
   local target = view.get_target_under_cursor(State)
   local current_dir = State.windows.current.path
@@ -41,6 +43,7 @@ end
 ---@param Git? Git
 ---@return nil
 function M.handle_dir_read(State, path_details, win_type, Diagnostics, Git)
+  log.debug('handle_cursor_moved', { win_type = win_type })
   local view = _G.triptych_mock_view or require 'triptych.view'
   view.set_parent_or_primary_window_lines(State, path_details, win_type, Diagnostics, Git)
 
@@ -77,6 +80,7 @@ end
 ---@param path string
 ---@param lines string[]
 function M.handle_file_read(child_win_buf, path, lines)
+  log.debug('handle_file_read', { path = path })
   float.set_child_window_file_preview(child_win_buf, path, lines)
   autocmds.publish_did_update_window 'child'
 end

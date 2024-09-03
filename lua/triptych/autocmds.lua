@@ -1,3 +1,5 @@
+local log = require 'triptych.logger'
+
 local au_group_internal = vim.api.nvim_create_augroup('TriptychEventsInternal', { clear = true })
 local au_group_public = vim.api.nvim_create_augroup('TriptychEvents', { clear = true })
 
@@ -123,6 +125,7 @@ end
 
 ---@param win_type WinType
 function M.publish_did_update_window(win_type)
+  log.debug('publish_did_update_window', { win_type = win_type })
   exec_public_autocmd('TriptychDidUpdateWindow', {
     win_type = win_type,
   })
