@@ -34,15 +34,76 @@ function M.on_event(event, callback, once)
   })
 end
 
+---@param events { name: string, wait_for_n: integer }[]
+---@param callback fun(result: table<string, any[]>)
+function M.on_events(events, callback)
+  ---@type table<string, any[]>
+  local result = {}
+
+  local autocmd_ids = {}
+
+  local function is_ready()
+    for _, event in ipairs(events) do
+      local entry = result[event.name] or {}
+      if #entry < event.wait_for_n then
+        return false
+      end
+    end
+    return true
+  end
+
+  for _, event in ipairs(events) do
+    result[event.name] = {}
+
+    local timer = vim.loop.new_timer()
+
+    local id = M.on_event(event.name, function(data)
+      timer:stop()
+
+      table.insert(result[event.name], data.data)
+
+      if is_ready() then
+        timer:start(
+          1000,
+          0,
+          vim.schedule_wrap(function()
+            for _, id in ipairs(autocmd_ids) do
+              api.nvim_del_autocmd(id)
+            end
+            callback(result)
+          end)
+        )
+      end
+    end, false)
+
+    table.insert(autocmd_ids, id)
+  end
+end
+
 function M.on_child_window_updated(callback)
-  M.on_event('TriptychDidUpdateWindow', callback)
+  M.on_wins_updated({ 'child' }, callback)
+end
+
+function M.on_primary_window_updated(callback)
+  M.on_wins_updated({ 'primary' }, callback)
 end
 
 function M.on_all_wins_updated(callback)
+  M.on_wins_updated({ 'child', 'primary', 'parent' }, callback)
+end
+
+---@param wins ('child' | 'primary'| 'parent')[]
+---@param callback function
+function M.on_wins_updated(wins, callback)
+  local wait_for_child = M.list_contains(wins, 'child')
+  local wait_for_primary = M.list_contains(wins, 'primary')
+  local wait_for_parent = M.list_contains(wins, 'parent')
+
+  -- We're essentially saying, if the wins list does't contain X, then we consider it already updated
   local wins_updated = {
-    child = false,
-    primary = false,
-    parent = false,
+    child = not wait_for_child,
+    primary = not wait_for_primary,
+    parent = not wait_for_parent,
   }
   -- Timer is used to wait 1 second before executing the callback
   -- Just to make sure there are no more events coming through
@@ -67,9 +128,13 @@ function M.open_triptych(opening_dir)
   local triptych = require 'triptych.init'
   triptych.setup {
     debug = false,
+    -- Set options for easier testing
     options = {
       file_icons = {
-        enabled = false, -- Makes for easier testing
+        enabled = false,
+      },
+      syntax_highlighting = {
+        enabled = false,
       },
     },
   }
@@ -116,10 +181,10 @@ function M.get_state()
   }
 end
 
-function M.press_key(k)
-  local input_parsed = api.nvim_replace_termcodes(k, true, true, true)
+---@param key string
+function M.press_key(key)
+  local input_parsed = api.nvim_replace_termcodes(key, true, true, true)
   api.nvim_feedkeys(input_parsed, 'normal', false)
-  api.nvim_exec2('norm! ' .. k, {})
 end
 
 function M.key_sequence(keys)
@@ -141,6 +206,30 @@ function M.reverse_list(list)
     table.insert(reversed, list[i])
   end
   return reversed
+end
+
+---@param list string[]
+---@param str string
+---@return boolean
+function M.list_contains(list, str)
+  for _, value in ipairs(list) do
+    if value == str then
+      return true
+    end
+  end
+  return false
+end
+
+---@param list table
+---@param fn fun(element: any): boolean
+---@return boolean
+function M.list_find(list, fn)
+  for _, value in ipairs(list) do
+    if fn(value) then
+      return value
+    end
+  end
+  return false
 end
 
 return M
