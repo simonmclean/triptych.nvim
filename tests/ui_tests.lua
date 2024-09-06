@@ -16,18 +16,23 @@ end
 ---@param callback function
 local function close_triptych(callback)
   u.on_event('TriptychDidClose', callback)
-  u.press_key 'q'
+  u.press_keys 'q'
 end
 
 run_tests {
-  test('opens on Triptych command', function(done)
+  test('opens on Triptych command, with cursor on current file', function(done)
+    u.setup_triptych()
     vim.cmd 'Triptych'
     u.on_all_wins_updated(function()
       local is_open = vim.g.triptych_is_open
+      local current_line = vim.api.nvim_get_current_line()
       close_triptych(function()
-        done(function()
-          assert.same(is_open, true)
-        end)
+        done {
+          assertions = function()
+            assert.same(is_open, true)
+            assert.same(current_line, 'ui_tests.lua')
+          end,
+        }
       end)
     end)
   end),
@@ -35,9 +40,11 @@ run_tests {
   test('closes on Triptych command', function(done)
     open_triptych(function()
       u.on_event('TriptychDidClose', function()
-        done(function()
-          assert.same(vim.g.triptych_is_open, false)
-        end)
+        done {
+          assertions = function()
+            assert.same(vim.g.triptych_is_open, false)
+          end,
+        }
       end)
       vim.cmd 'Triptych'
     end)
@@ -61,10 +68,12 @@ run_tests {
     open_triptych(function()
       result = u.get_state()
       close_triptych(function()
-        done(function()
-          assert.same(expected_lines, result.lines)
-          assert.same(expected_winbars, result.winbars)
-        end)
+        done {
+          assertions = function()
+            assert.same(expected_lines, result.lines)
+            assert.same(expected_winbars, result.winbars)
+          end,
+        }
       end)
     end)
   end),
@@ -83,16 +92,18 @@ run_tests {
     }
 
     open_triptych(function()
+      u.press_keys 'l'
       u.on_all_wins_updated(function()
         local result = u.get_state()
         close_triptych(function()
-          done(function()
-            assert.same(expected_lines, result.lines)
-            assert.same(expected_winbars, result.winbars)
-          end)
+          done {
+            assertions = function()
+              assert.same(expected_lines, result.lines)
+              assert.same(expected_winbars, result.winbars)
+            end,
+          }
         end)
       end)
-      u.press_key 'l'
     end)
   end),
 
@@ -110,14 +121,16 @@ run_tests {
     }
 
     open_triptych(function()
-      u.press_key 'h'
+      u.press_keys 'h'
       u.on_all_wins_updated(function()
         local result = u.get_state()
         close_triptych(function()
-          done(function()
-            assert.same(expected_lines, result.lines)
-            assert.same(expected_winbars, result.winbars)
-          end)
+          done {
+            assertions = function()
+              assert.same(expected_lines, result.lines)
+              assert.same(expected_winbars, result.winbars)
+            end,
+          }
         end)
       end)
     end)
@@ -129,14 +142,18 @@ run_tests {
 
     open_triptych(function()
       u.on_event('TriptychDidClose', function()
-        done(function()
-          assert.same(vim.g.triptych_is_open, false)
-          vim.api.nvim_set_current_buf(current_buf)
-        end)
+        done {
+          assertions = function()
+            assert.same(vim.g.triptych_is_open, false)
+          end,
+          cleanup = function()
+            vim.api.nvim_set_current_buf(current_buf)
+          end,
+        }
       end)
-      u.press_key 'j'
+      u.press_keys 'j'
       u.on_child_window_updated(function()
-        u.press_key 'l'
+        u.press_keys 'l'
       end)
     end)
   end),
@@ -153,16 +170,17 @@ run_tests {
       u.on_child_window_updated(function()
         local state = u.get_state()
         close_triptych(function()
-          done(function()
-            assert.same(expected_file_preview, state.lines.child)
-          end)
+          done {
+            assertions = function()
+              assert.same(expected_file_preview, state.lines.child)
+            end,
+          }
         end)
       end)
-      u.press_key 'j'
+      u.press_keys 'j'
     end)
   end),
 
-  -- TODO: Include public events
   test('creates files and folders', function(done)
     local expected_lines = {
       primary = {
@@ -177,27 +195,28 @@ run_tests {
     }
 
     open_triptych(function()
-      u.press_key 'a'
-      -- TODO: Can I just use press_key?
-      u.key_sequence { 'a_new_file.lua<cr>' }
-      u.press_key 'a'
-      u.key_sequence { 'a_new_dir/another_new_file.md<cr>' }
+      u.press_keys 'a'
+      u.press_keys 'a_new_file.lua<cr>'
+      u.press_keys 'a'
+      u.press_keys 'a_new_dir/another_new_file.md<cr>'
       u.on_wins_updated({ 'primary', 'child' }, function()
         local state = u.get_state()
         close_triptych(function()
-          -- cleanup
-          vim.fn.delete(u.join_path(opening_dir, 'a_new_dir'), 'rf')
-          vim.fn.delete(u.join_path(opening_dir, 'a_new_file.lua'))
-          done(function()
-            assert.same(expected_lines.primary, state.lines.primary)
-            assert.same(expected_lines.child, state.lines.child)
-          end)
+          done {
+            assertions = function()
+              assert.same(expected_lines.primary, state.lines.primary)
+              assert.same(expected_lines.child, state.lines.child)
+            end,
+            cleanup = function()
+              vim.fn.delete(u.join_path(opening_dir, 'a_new_dir'), 'rf')
+              vim.fn.delete(u.join_path(opening_dir, 'a_new_file.lua'))
+            end,
+          }
         end)
       end)
     end)
   end),
 
-  -- TODO: This is running twice
   test('publishes public events on file/folder creation', function(done)
     local expected_events = {
       ['TriptychWillCreateNode'] = {
@@ -211,22 +230,24 @@ run_tests {
     }
 
     open_triptych(function()
-      u.press_key 'a'
-      -- TODO: Can I just use press_key?
-      u.key_sequence { 'a_new_file.lua<cr>' }
-      u.press_key 'a'
-      u.key_sequence { 'a_new_dir/another_new_file.md<cr>' }
+      u.press_keys 'a'
+      u.press_keys 'a_new_file.lua<cr>'
+      u.press_keys 'a'
+      u.press_keys 'a_new_dir/another_new_file.md<cr>'
       u.on_events({
         { name = 'TriptychWillCreateNode', wait_for_n = 2 },
         { name = 'TriptychDidCreateNode', wait_for_n = 2 },
       }, function(events)
         close_triptych(function()
-          -- cleanup
-          vim.fn.delete(u.join_path(opening_dir, 'a_new_dir'), 'rf')
-          vim.fn.delete(u.join_path(opening_dir, 'a_new_file.lua'))
-          done(function()
-            assert.same(expected_events, events)
-          end)
+          done {
+            assertions = function()
+              assert.same(expected_events, events)
+            end,
+            cleanup = function()
+              vim.fn.delete(u.join_path(opening_dir, 'a_new_dir'), 'rf')
+              vim.fn.delete(u.join_path(opening_dir, 'a_new_file.lua'))
+            end,
+          }
         end)
       end)
     end)
@@ -234,7 +255,6 @@ run_tests {
 
   -- Having trouble with this
   -- How to programatically input a selection in vim.ui.select
-  -- TODO: Include public events
   test('deletes files and folders', function(done)
     local expected_lines = {
       primary = {
@@ -248,20 +268,22 @@ run_tests {
 
     open_triptych(function()
       -- Add things
-      u.press_key 'a'
-      u.key_sequence { 'a_new_file.lua<cr>' }
-      u.press_key 'a'
-      u.key_sequence { 'a_new_dir/another_new_file.md<cr>' }
+      u.press_keys 'a'
+      u.press_keys 'a_new_file.lua<cr>'
+      u.press_keys 'a'
+      u.press_keys 'a_new_dir/another_new_file.md<cr>'
       -- Then remove them
       u.on_wins_updated({ 'primary', 'child' }, function()
         local state = u.get_state()
-        u.key_sequence { 'd', '1' }
+        u.press_keys 'd1<cr>'
         u.on_wins_updated({ 'primary', 'child' }, function()
           close_triptych(function()
-            done(function()
-              assert.same(expected_lines.primary, state.lines.primary)
-              assert.same(expected_lines.child, state.lines.child)
-            end)
+            done {
+              assertions = function()
+                assert.same(expected_lines.primary, state.lines.primary)
+                assert.same(expected_lines.child, state.lines.child)
+              end,
+            }
           end)
         end)
       end)
@@ -269,7 +291,6 @@ run_tests {
   end):skip(),
 
   -- TODO: Skipped this because there seems to be a bug with dir pasting!
-  -- TODO: Include public events
   test('copies file and folders', function(done)
     local expected_lines = {
       primary = {
@@ -284,27 +305,30 @@ run_tests {
       },
     }
     open_triptych(function()
-      u.press_key 'c'
+      u.press_keys 'c'
       u.on_primary_window_updated(function()
-        u.press_key 'p'
+        u.press_keys 'p'
         u.on_primary_window_updated(function()
-          u.press_key 'j'
-          u.press_key 'c'
+          u.press_keys 'j'
+          u.press_keys 'c'
           u.on_primary_window_updated(function()
-            u.press_key 'p'
+            u.press_keys 'p'
             u.on_primary_window_updated(function()
               -- Go back to the top, so we can the new dir we've pasted in the the child directory
-              u.press_key 'gg'
+              u.press_keys 'gg'
               u.on_child_window_updated(function()
                 local state = u.get_state()
                 close_triptych(function()
-                  -- Cleanup
-                  vim.fn.delete(u.join_path(opening_dir, 'level_3_file_1_copy1.md'))
-                  vim.fn.delete(u.join_path(opening_dir, 'level_4/level_4', 'rf'))
-                  done(function()
-                    assert.same(expected_lines.child, state.lines.child)
-                    assert.same(expected_lines.primary, state.lines.primary)
-                  end)
+                  done {
+                    assertions = function()
+                      assert.same(expected_lines.child, state.lines.child)
+                      assert.same(expected_lines.primary, state.lines.primary)
+                    end,
+                    cleanup = function()
+                      vim.fn.delete(u.join_path(opening_dir, 'level_3_file_1_copy1.md'))
+                      vim.fn.delete(u.join_path(opening_dir, 'level_4/level_4', 'rf'))
+                    end,
+                  }
                 end)
               end)
             end)
@@ -315,14 +339,11 @@ run_tests {
   end):skip(),
 
   -- TODO: This once the dir pasting bug has been fixed
-  -- TODO: Include public events
-  -- test('moves files and folders', function (done) end)
+  -- test('moves files and folders', function (done) end):skip()
 
   -- TODO: This once the dir pasting bug has been fixed
-  -- TODO: Include public events
-  -- test('copies files and folders', function(done) end)
+  -- test('copies files and folders', function(done) end):skip()
 
-  -- TODO: Include public events
   test('renames files and folders', function(done)
     local expected_lines = {
       primary = {
@@ -332,28 +353,74 @@ run_tests {
     }
 
     open_triptych(function()
-      u.press_key 'r'
-      u.key_sequence { 'renamed_dir<cr>' }
+      u.press_keys 'r'
+      u.press_keys 'renamed_dir<cr>'
       u.on_primary_window_updated(function()
-        u.press_key 'j'
-        u.press_key 'r'
-        u.key_sequence { 'renamed_file.lua<cr>' }
+        u.press_keys 'j'
+        u.press_keys 'r'
+        u.press_keys 'renamed_file.lua<cr>'
         u.on_primary_window_updated(function()
           local state = u.get_state()
           close_triptych(function()
-            -- cleanup
-            vim.fn.rename(u.join_path(opening_dir, 'renamed_dir'), u.join_path(opening_dir, 'level_4'))
-            vim.fn.rename(u.join_path(opening_dir, 'renamed_file.lua'), u.join_path(opening_dir, 'level_3_file_1.md'))
-            done(function()
-              assert.same(expected_lines.primary, state.lines.primary)
-            end)
+            done {
+              assertions = function()
+                assert.same(expected_lines.primary, state.lines.primary)
+              end,
+              cleanup = function()
+                vim.fn.rename(u.join_path(opening_dir, 'renamed_dir'), u.join_path(opening_dir, 'level_4'))
+                vim.fn.rename(
+                  u.join_path(opening_dir, 'renamed_file.lua'),
+                  u.join_path(opening_dir, 'level_3_file_1.md')
+                )
+              end,
+            }
           end)
         end)
       end)
     end)
   end),
 
-  -- TODO: Why doesn't "done" have type signature?
+  test('publishes public events on renaming files/folders', function(done)
+    local expected_data = {
+      { from_path = u.join_path(opening_dir, 'level_4'), to_path = u.join_path(opening_dir, 'renamed_dir') },
+      {
+        from_path = u.join_path(opening_dir, 'level_3_file_1.md'),
+        to_path = u.join_path(opening_dir, 'renamed_file.lua'),
+      },
+    }
+
+    local expected_events = {
+      ['TriptychWillMoveNode'] = expected_data,
+      ['TriptychDidMoveNode'] = expected_data,
+    }
+
+    open_triptych(function()
+      u.press_keys 'r'
+      u.press_keys 'renamed_dir<cr>'
+      u.on_primary_window_updated(function()
+        u.press_keys 'j'
+        u.press_keys 'r'
+        u.press_keys 'renamed_file.lua<cr>'
+      end)
+      u.on_events({
+        { name = 'TriptychWillMoveNode', wait_for_n = 2 },
+        { name = 'TriptychDidMoveNode', wait_for_n = 2 },
+      }, function(events)
+        close_triptych(function()
+          done {
+            assertions = function()
+              assert.same(expected_events, events)
+            end,
+            cleanup = function()
+              vim.fn.rename(u.join_path(opening_dir, 'renamed_dir'), u.join_path(opening_dir, 'level_4'))
+              vim.fn.rename(u.join_path(opening_dir, 'renamed_file.lua'), u.join_path(opening_dir, 'level_3_file_1.md'))
+            end,
+          }
+        end)
+      end)
+    end)
+  end),
+
   test('toggles hidden files (dot and gitignored)', function(done)
     local expected_lines_without_hidden = {
       primary = {
@@ -372,18 +439,20 @@ run_tests {
 
     open_triptych(function()
       local first_state = u.get_state()
-      u.press_key '<leader>.'
+      u.press_keys '<leader>.'
       u.on_primary_window_updated(function()
         local second_state = u.get_state()
-        u.press_key '<leader>.'
+        u.press_keys '<leader>.'
         u.on_primary_window_updated(function()
           local third_state = u.get_state()
           close_triptych(function()
-            done(function()
-              assert.same(expected_lines_without_hidden.primary, first_state.lines.primary)
-              assert.same(expected_lines_with_hidden.primary, second_state.lines.primary)
-              assert.same(expected_lines_without_hidden.primary, third_state.lines.primary)
-            end)
+            done {
+              assertions = function()
+                assert.same(expected_lines_without_hidden.primary, first_state.lines.primary)
+                assert.same(expected_lines_with_hidden.primary, second_state.lines.primary)
+                assert.same(expected_lines_without_hidden.primary, third_state.lines.primary)
+              end,
+            }
           end)
         end)
       end)
@@ -399,19 +468,21 @@ run_tests {
     local winbar_after_second_jump
 
     open_triptych(function()
-      u.press_key '.'
+      u.press_keys '.'
       u.on_all_wins_updated(function()
         local state = u.get_state()
         winbar_after_first_jump = state.winbars.primary
-        u.press_key '.'
+        u.press_keys '.'
         u.on_all_wins_updated(function()
           local state_2 = u.get_state()
           winbar_after_second_jump = state_2.winbars.primary
           close_triptych(function()
-            done(function()
-              assert.same(expected_winbar_after_first_jump, winbar_after_first_jump)
-              assert.same(expected_winbar_after_second_jump, winbar_after_second_jump)
-            end)
+            done {
+              assertions = function()
+                assert.same(expected_winbar_after_first_jump, winbar_after_first_jump)
+                assert.same(expected_winbar_after_second_jump, winbar_after_second_jump)
+              end,
+            }
           end)
         end)
       end)

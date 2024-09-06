@@ -124,9 +124,8 @@ function M.on_wins_updated(wins, callback)
   end, false)
 end
 
-function M.open_triptych(opening_dir)
-  local triptych = require 'triptych.init'
-  triptych.setup {
+function M.setup_triptych()
+  require('triptych.init').setup {
     debug = false,
     -- Set options for easier testing
     options = {
@@ -138,7 +137,11 @@ function M.open_triptych(opening_dir)
       },
     },
   }
-  triptych.toggle_triptych(opening_dir)
+end
+
+function M.open_triptych(opening_dir)
+  M.setup_triptych()
+  require('triptych.init').toggle_triptych(opening_dir)
 end
 
 function M.get_state()
@@ -182,22 +185,9 @@ function M.get_state()
 end
 
 ---@param key string
-function M.press_key(key)
+function M.press_keys(key)
   local input_parsed = api.nvim_replace_termcodes(key, true, true, true)
   api.nvim_feedkeys(input_parsed, 'normal', false)
-end
-
-function M.key_sequence(keys)
-  local function key_sequence(remaining_keys)
-    local k = table.remove(remaining_keys, #remaining_keys)
-    M.press_key(k)
-    if #remaining_keys > 0 then
-      vim.schedule(function()
-        M.key_sequence(remaining_keys)
-      end)
-    end
-  end
-  key_sequence(M.reverse_list(keys))
 end
 
 function M.reverse_list(list)

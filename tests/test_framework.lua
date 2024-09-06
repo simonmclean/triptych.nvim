@@ -2,11 +2,13 @@ local u = require 'tests.utils'
 
 local M = {}
 
-local TIMEOUT_SECONDS = 10
+local TIMEOUT_SECONDS = 7
 
 -- TODO: values (like has_run, result, is_timed_out) persist between test runs. Write a function to reset the tests
 -- This should run on pcall error, and also on successful completion
 -- Perhaps I can just call the constructor again?
+
+---@alias TestBodyCallback fun(done: { assertions: function, cleanup?: function })
 
 ---@class Test
 ---@field name string
@@ -16,11 +18,11 @@ local TIMEOUT_SECONDS = 10
 ---@field has_run boolean
 ---@field result? ('passed' | 'failed' | 'skipped')
 ---@field fail_message? string
----@field test_body fun(callback: function)
+---@field test_body fun(done: TestBodyCallback)
 local Test = {}
 
 ---@param name string
----@param test_body fun(done: function)
+---@param test_body fun(done: TestBodyCallback)
 ---@return Test
 function Test.new(name, test_body)
   local instance = {}
@@ -40,17 +42,24 @@ M.test = Test.new
 
 ---@param callback fun(passed: boolean, fail_message?: string)
 function Test:run(callback)
-  local success, err = pcall(self.test_body, function(run_assertions)
+  local success, err = pcall(self.test_body, function(test_callback)
     if self.has_run then
-      error("Attempted to invoke test completion more than once. Check that any async callbacks in the test are not firing multiple times.")
+      error 'Attempted to invoke test completion more than once. Check that any async callbacks in the test are not firing multiple times.'
     end
 
     self.has_run = true
 
+    if test_callback.cleanup then
+      local cleanup_successful, cleanup_err = pcall(test_callback.cleanup)
+      if not cleanup_successful then
+        error(cleanup_err)
+      end
+    end
+
     if self.is_timed_out then
       callback(false, 'Timed out')
     else
-      local passed, fail_message = pcall(run_assertions)
+      local passed, fail_message = pcall(test_callback.assertions)
       if passed then
         callback(true, nil)
       else
