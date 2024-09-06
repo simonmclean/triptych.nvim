@@ -4,11 +4,7 @@ local M = {}
 
 local TIMEOUT_SECONDS = 7
 
--- TODO: values (like has_run, result, is_timed_out) persist between test runs. Write a function to reset the tests
--- This should run on pcall error, and also on successful completion
--- Perhaps I can just call the constructor again?
-
----@alias TestBodyCallback fun(done: { assertions: function, cleanup?: function })
+---@alias AsyncTestCallback fun(done: { assertions: function, cleanup?: function })
 
 ---@class Test
 ---@field name string
@@ -18,13 +14,14 @@ local TIMEOUT_SECONDS = 7
 ---@field has_run boolean
 ---@field result? ('passed' | 'failed' | 'skipped')
 ---@field fail_message? string
----@field test_body fun(done: TestBodyCallback)
+---@field is_async boolean
+---@field test_body? function
+---@field test_body_async? AsyncTestCallback
 local Test = {}
 
 ---@param name string
----@param test_body fun(done: TestBodyCallback)
 ---@return Test
-function Test.new(name, test_body)
+function Test.new(name)
   local instance = {}
   setmetatable(instance, { __index = Test })
 
@@ -33,16 +30,44 @@ function Test.new(name, test_body)
   instance.is_onlyed = false
   instance.is_timed_out = false
   instance.has_run = false
-  instance.test_body = test_body
 
   return instance
 end
 
-M.test = Test.new
+---Define a synchronous test
+---@param name string
+---@param test_body function
+---@return Test
+M.test = function(name, test_body)
+  local t = Test.new(name)
+  t.test_body = test_body
+  t.is_async = false
+  return t
+end
+
+---Define an asyncronous test
+---@param name string
+---@param test_body AsyncTestCallback
+---@return Test
+M.test_async = function(name, test_body)
+  local t = Test.new(name)
+  t.test_body_async = test_body
+  t.is_async = true
+  return t
+end
 
 ---@param callback fun(passed: boolean, fail_message?: string)
 function Test:run(callback)
-  local success, err = pcall(self.test_body, function(test_callback)
+  if self.is_async then
+    self:run_async(callback)
+  else
+    self:run_sync(callback)
+  end
+end
+
+---@param callback fun(passed: boolean, fail_message?: string)
+function Test:run_async(callback)
+  local success, err = pcall(self.test_body_async, function(test_callback)
     if self.has_run then
       error 'Attempted to invoke test completion more than once. Check that any async callbacks in the test are not firing multiple times.'
     end
@@ -74,6 +99,16 @@ function Test:run(callback)
   end
 end
 
+---@param callback fun(passed: boolean, fail_message?: string)
+function Test:run_sync(callback)
+  local success, err = pcall(self.test_body)
+  if success then
+    callback(true, nil)
+  else
+    callback(false, err)
+  end
+end
+
 function Test:skip()
   self.is_skipped = true
   return self
@@ -100,7 +135,9 @@ local function output_final_results(passed, skipped)
 end
 
 ---@param tests Test[]
-M.run_tests = function(tests)
+M.describe = function(description, tests)
+  vim.print('-- ' .. description .. ' --')
+
   local contains_onlyed = u.list_find(tests, function(test)
     return test.is_onlyed
   end)

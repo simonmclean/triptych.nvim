@@ -1,8 +1,8 @@
 local assert = require 'luassert'
 local u = require 'tests.utils'
 local framework = require 'tests.test_framework'
-local run_tests = framework.run_tests
-local test = framework.test
+local describe = framework.describe
+local test = framework.test_async
 
 local cwd = vim.fn.getcwd()
 local opening_dir = u.join_path(cwd, 'tests/test_playground/level_1/level_2/level_3')
@@ -19,7 +19,7 @@ local function close_triptych(callback)
   u.press_keys 'q'
 end
 
-run_tests {
+describe('Triptych UI', {
   test('opens on Triptych command, with cursor on current file', function(done)
     u.setup_triptych()
     vim.cmd 'Triptych'
@@ -488,4 +488,4 @@ run_tests {
       end)
     end)
   end),
-}
+})

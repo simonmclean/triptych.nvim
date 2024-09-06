@@ -222,4 +222,9 @@ function M.list_find(list, fn)
   return false
 end
 
+---@param fn function
+function M.eval(fn)
+  return fn()
+end
+
 return M
