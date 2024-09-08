@@ -11,7 +11,7 @@ describe('help_lines', {
     assert.same({
       'Triptych key bindings',
       '',
-      '[-]             : pen_hsplit',
+      '[-]             : open_hsplit',
       '[.]             : jump_to_cwd',
       '[<C-t>]         : open_tab',
       '[<leader>.]     : toggle_hidden',
