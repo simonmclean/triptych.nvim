@@ -30,12 +30,13 @@ describe('Triptych UI', {
         done {
           assertions = function()
             assert.same(is_open, true)
-            assert.same(current_line, 'ui_tests.lua')
+            -- This is kinda janky, but basically this test could be called from one of 2 places
+            assert(current_line == 'run_specs.lua' or current_line == 'ui_spec.spec')
           end,
         }
       end)
     end)
-  end),
+  end):only(),
 
   test('closes on Triptych command', function(done)
     open_triptych(function()

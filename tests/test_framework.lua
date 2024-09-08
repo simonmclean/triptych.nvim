@@ -4,10 +4,14 @@ local M = {}
 
 local TIMEOUT_SECONDS = 7
 
+---@type table<string, boolean>
+vim.g.tests_running = {}
+
 ---@alias AsyncTestCallback fun(done: { assertions: function, cleanup?: function })
 
 ---@class Test
 ---@field name string
+---@field id boolean
 ---@field is_skipped boolean
 ---@field is_onlyed boolean
 ---@field is_timed_out boolean
@@ -26,6 +30,7 @@ function Test.new(name)
   setmetatable(instance, { __index = Test })
 
   instance.name = name
+  instance.id = u.UUID()
   instance.is_ignored = false
   instance.is_onlyed = false
   instance.is_timed_out = false
@@ -121,9 +126,27 @@ end
 
 ---@param test Test
 local function output_result(test)
-  vim.print('[' .. string.upper(test.result) .. '] ' .. test.name)
+  local print_level
+  if test.result == 'passed' then
+    print_level = 'success'
+  elseif test.result == 'skipped' then
+    print_level = 'warn'
+  elseif test.result == 'failed' then
+    print_level = 'error'
+  end
+  local indent = ' - '
+  u.print(indent .. '[' .. string.upper(test.result) .. '] ' .. test.name, print_level)
   if test.fail_message then
-    vim.print(test.fail_message)
+    u.print(test.fail_message)
+  end
+end
+
+---@param test Test
+local function handle_test_complete(test)
+  vim.g.tests_running[test.id] = false
+  output_result(test)
+  if test.result == 'failed' and vim.g.is_headless then
+    u.exit_status_code 'failed'
   end
 end
 
@@ -131,12 +154,21 @@ end
 ---@param skipped integer
 local function output_final_results(passed, skipped)
   local total = passed + skipped
-  vim.print('Finished running ' .. total .. ' tests. ' .. skipped .. ' skipped, ' .. passed .. ' passed')
+  u.print('Finished running ' .. total .. ' tests. ' .. skipped .. ' skipped, ' .. passed .. ' passed')
+end
+
+local function are_tests_running()
+  for _, is_running in ipairs(vim.g.tests_running) do
+    if is_running then
+      return true
+    end
+  end
+  return false
 end
 
 ---@param tests Test[]
 M.describe = function(description, tests)
-  vim.print('-- ' .. description .. ' --')
+  u.print('[TEST SUITE] ' .. description)
 
   local contains_onlyed = u.list_find(tests, function(test)
     return test.is_onlyed
@@ -182,16 +214,18 @@ M.describe = function(description, tests)
     end
 
     if current_test then
+      vim.g.tests_running[current_test.id] = true
+
       if current_test.is_skipped then
         current_test.result = 'skipped'
-        output_result(current_test)
+        handle_test_complete(current_test)
         next()
       else
         timer:start(1000 * TIMEOUT_SECONDS, 0, function()
           current_test.is_timed_out = true
           current_test.result = 'failed'
           current_test.fail_message = 'Timeout after ' .. TIMEOUT_SECONDS .. ' seconds'
-          output_result(current_test)
+          handle_test_complete(current_test)
         end)
 
         current_test:run(function(passed, fail_message)
@@ -203,17 +237,25 @@ M.describe = function(description, tests)
               current_test.result = 'failed'
               current_test.fail_message = fail_message
             end
-            output_result(current_test)
+            handle_test_complete(current_test)
             next()
           end
         end)
       end
     else
       output_final_results(result_count.passed, result_count.skipped)
+      if not are_tests_running() and vim.g.is_headless then
+        u.exit_status_code 'success'
+      end
     end
   end
 
   run_tests(u.reverse_list(tests))
 end
+
+vim.g.is_headless = true
+vim.schedule(function()
+  vim.g.is_headless = #vim.api.nvim_list_uis() == 0
+end)
 
 return M

@@ -227,4 +227,44 @@ function M.eval(fn)
   return fn()
 end
 
+---Used when running tests headlessly
+---@param status ('success' | 'failed')
+function M.exit_status_code(status)
+  if status == 'success' then
+    vim.cmd '0cq'
+  else
+    vim.cmd '1cq'
+  end
+end
+
+---Decides how to output messages, based on whether we're running headlessly
+---@param str string
+---@param level? ('error' | 'warn' | 'info' | 'success')
+function M.print(str, level)
+  if vim.g.is_headless then
+    io.stdout:write(str)
+    io.stdout:write '\n'
+  else
+    local highlight = 'Normal'
+    if level == 'error' then
+      highlight = 'Error'
+    elseif level == 'warn' then
+      highlight = 'WarningMsg'
+    elseif level == 'success' then
+      highlight = 'String'
+    end
+    vim.api.nvim_echo({ { str, highlight } }, true, {})
+  end
+end
+
+function M.UUID()
+  local handle = io.popen 'uuidgen'
+  if handle then
+    local uuid = handle:read '*a'
+    handle:close()
+    return uuid
+  end
+  error 'uuidgen failed'
+end
+
 return M
