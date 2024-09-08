@@ -7,6 +7,11 @@ It works somewhat like [Cypress](https://www.cypress.io) in that tests performs 
 
 The Cypress inspired UI tests are in `tests/specs/ui_tests.lua`. All other specs are typical unit tests.
 
+### Test playground
+
+Since the UI tests perform real user actions, this means real filesystem changes. As such the `test_playground` directory
+exists as a safe place to run such actions and to simulate a real project environment.
+
 ## Running tests
 
 Individual spec files can be run by sourcing them. e.g. `:source %` or `:so%`.
@@ -19,3 +24,4 @@ Tests can also be run headlessly from outside Neovim, by doing
 cd <project-root>
 nvim --headless +"so%" tests/run_specs.lua
 ```
+
