@@ -1,11 +1,9 @@
 # Testing
 
-This project has a bespoke test framework, created to more easily handle the async requirements of testing this plugin.
+This project has a bespoke test framework, created to more easily handle the async requirements of testing Triptych.
 
 It works somewhat like [Cypress](https://www.cypress.io) in that tests performs user actions, and then assert what's displayed on screen
-(or anything really, like what's in the filesystem)
-
-The Cypress inspired UI tests are in `tests/specs/ui_tests.lua`. All other specs are typical unit tests.
+(or anything really, like filesystem changes)
 
 ### Test playground
 
@@ -25,3 +23,5 @@ cd <project-root>
 nvim --headless +"so%" tests/run_specs.lua
 ```
 
+# TODO
+- UI spec is not running fully in headless mode

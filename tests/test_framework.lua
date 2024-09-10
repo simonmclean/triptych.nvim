@@ -4,8 +4,17 @@ local M = {}
 
 local TIMEOUT_SECONDS = 7
 
----@type table<string, boolean>
-vim.g.tests_running = {}
+if not TestsRunning then
+  ---@type table<string, Test>
+  TestsRunning = {}
+end
+
+-- Sniff out whether we're running in headless mode
+-- When true, the framework will close vim on error or when all tests finish
+vim.g.is_headless = true
+vim.schedule(function()
+  vim.g.is_headless = #vim.api.nvim_list_uis() == 0
+end)
 
 ---@alias AsyncTestCallback fun(done: { assertions: function, cleanup?: function })
 
@@ -31,7 +40,6 @@ function Test.new(name)
 
   instance.name = name
   instance.id = u.UUID()
-  instance.is_ignored = false
   instance.is_onlyed = false
   instance.is_timed_out = false
   instance.has_run = false
@@ -61,6 +69,7 @@ M.test_async = function(name, test_body)
   return t
 end
 
+---Run a test, calling the relevant method depending on whether it's sync or async
 ---@param callback fun(passed: boolean, fail_message?: string)
 function Test:run(callback)
   if self.is_async then
@@ -70,6 +79,7 @@ function Test:run(callback)
   end
 end
 
+---Run an asyncronous test
 ---@param callback fun(passed: boolean, fail_message?: string)
 function Test:run_async(callback)
   local success, err = pcall(self.test_body_async, function(test_callback)
@@ -98,12 +108,13 @@ function Test:run_async(callback)
     end
   end)
 
-  -- This handles syncronous errors thrown
+  -- This catches errors thrown before we reach cleanup or assertions
   if not success then
     callback(false, err)
   end
 end
 
+---Run a synchronous test
 ---@param callback fun(passed: boolean, fail_message?: string)
 function Test:run_sync(callback)
   local success, err = pcall(self.test_body)
@@ -143,32 +154,54 @@ end
 
 ---@param test Test
 local function handle_test_complete(test)
-  vim.g.tests_running[test.id] = false
   output_result(test)
   if test.result == 'failed' and vim.g.is_headless then
     u.exit_status_code 'failed'
   end
 end
 
+---Print the final result summary
 ---@param passed integer
 ---@param skipped integer
 local function output_final_results(passed, skipped)
   local total = passed + skipped
-  u.print('Finished running ' .. total .. ' tests. ' .. skipped .. ' skipped, ' .. passed .. ' passed')
+  u.print('Finished running ' .. total .. ' tests. ' .. skipped .. ' skipped, ' .. passed .. ' passed, 0 failed')
 end
 
+---Check in the global space if any tests are still running
 local function are_tests_running()
-  for _, is_running in ipairs(vim.g.tests_running) do
-    if is_running then
+  for _, test in pairs(TestsRunning) do
+    if not test.result then
       return true
     end
   end
   return false
 end
 
+---Check if other tests are still running. If so, do nothing, otherwise do things
+local function on_test_suite_finish()
+  -- Check if there are other test suites running
+  if not are_tests_running() then
+    local passed_count = 0
+    local skipped_count = 0
+    for _, test in pairs(TestsRunning) do
+      if test.result == 'passed' then
+        passed_count = passed_count + 1
+      elseif test.result == 'skipped' then
+        skipped_count = skipped_count + 1
+      end
+    end
+    output_final_results(passed_count, skipped_count)
+    TestsRunning = {}
+    if vim.g.is_headless then
+      u.exit_status_code 'success'
+    end
+  end
+end
+
 ---@param tests Test[]
 M.describe = function(description, tests)
-  u.print('[TEST SUITE] ' .. description)
+  u.print('[DESCRIBE] ' .. description)
 
   local contains_onlyed = u.list_find(tests, function(test)
     return test.is_onlyed
@@ -189,6 +222,11 @@ M.describe = function(description, tests)
     passed = 0,
     skipped = 0,
   }
+
+  -- Register test as running in global space
+  for _, test in ipairs(tests) do
+    TestsRunning[tostring(test.id)] = test
+  end
 
   ---@param remaining_tests Test[]
   local function run_tests(remaining_tests)
@@ -214,8 +252,6 @@ M.describe = function(description, tests)
     end
 
     if current_test then
-      vim.g.tests_running[current_test.id] = true
-
       if current_test.is_skipped then
         current_test.result = 'skipped'
         handle_test_complete(current_test)
@@ -243,19 +279,11 @@ M.describe = function(description, tests)
         end)
       end
     else
-      output_final_results(result_count.passed, result_count.skipped)
-      if not are_tests_running() and vim.g.is_headless then
-        u.exit_status_code 'success'
-      end
+      on_test_suite_finish()
     end
   end
 
   run_tests(u.reverse_list(tests))
 end
-
-vim.g.is_headless = true
-vim.schedule(function()
-  vim.g.is_headless = #vim.api.nvim_list_uis() == 0
-end)
 
 return M

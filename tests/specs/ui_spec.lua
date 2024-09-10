@@ -36,7 +36,7 @@ describe('Triptych UI', {
         }
       end)
     end)
-  end):only(),
+  end),
 
   test('closes on Triptych command', function(done)
     open_triptych(function()

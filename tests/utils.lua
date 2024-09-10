@@ -231,8 +231,10 @@ end
 ---@param status ('success' | 'failed')
 function M.exit_status_code(status)
   if status == 'success' then
+    M.print('Exiting with status code 0')
     vim.cmd '0cq'
   else
+    M.print('Exiting with status code 1')
     vim.cmd '1cq'
   end
 end
