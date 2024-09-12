@@ -9,6 +9,7 @@ end
 ---@return TriptychConfig
 local function default_config()
   return {
+    debug = false,
     mappings = {
       -- Everything below is buffer-local, meaning it will only apply to Triptych windows
       show_help = 'g?',

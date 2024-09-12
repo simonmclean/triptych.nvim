@@ -70,7 +70,6 @@ end
 ---@return string[] # Lines including icons
 ---@return HighlightDetails[]
 local function path_details_to_lines(State, path_details)
-  local vim = _G.triptych_mock_vim or vim
   local config_options = vim.g.triptych_config.options
   local icons_enabled = config_options.file_icons.enabled
   local lines = {}
@@ -163,7 +162,6 @@ end
 ---@param State TriptychState
 ---@return PathDetails?
 function M.get_target_under_cursor(State)
-  local vim = _G.triptych_mock_vim or vim
   local line_number = vim.api.nvim_win_get_cursor(0)[1]
   local contents = State.windows.current.contents
   if contents then
@@ -175,7 +173,6 @@ end
 ---@param State TriptychState
 ---@return PathDetails[]
 function M.get_targets_in_selection(State)
-  local vim = _G.triptych_mock_vim or vim
   local from = vim.fn.getpos('v')[2]
   local to = vim.api.nvim_win_get_cursor(0)[1]
   local results = {}
@@ -208,7 +205,6 @@ end
 ---@param path string
 ---@return string?
 local function get_title_postfix(path)
-  local vim = _G.triptych_mock_vim or vim
   if path == vim.fn.getcwd() then
     return '(cwd)'
   end
@@ -230,7 +226,6 @@ end
 ---@param group string # see :h sign-group
 ---@return nil
 local function set_sign_columns(buf, children, group)
-  local vim = _G.triptych_mock_vim or vim
   vim.fn.sign_unplace(group)
   for index, entry in ipairs(children) do
     if entry.git_status then
@@ -250,8 +245,6 @@ end
 ---@param target_dir string
 ---@return nil
 function M.set_primary_and_parent_window_targets(State, target_dir)
-  local vim = _G.triptych_mock_vim or vim
-
   local focused_win = State.windows.current.win
   local parent_win = State.windows.parent.win
   local child_win = State.windows.child.win
@@ -296,8 +289,6 @@ end
 ---@param Git? Git
 ---@return nil
 function M.set_parent_or_primary_window_lines(State, path_details, win_type, Diagnostics, Git)
-  local vim = _G.triptych_mock_vim or vim
-
   local state = u.eval(function()
     if win_type == 'parent' then
       return State.windows.parent
@@ -354,7 +345,6 @@ end
 ---@param path_details PathDetails
 ---@return nil
 function M.set_child_window_target(State, path_details)
-  local vim = _G.triptych_mock_vim or vim
   local buf = vim.api.nvim_win_get_buf(State.windows.child.win)
 
   -- TODO: Can we make path_details mandatory to avoid the repeated checks
@@ -448,7 +438,6 @@ end
 ---@param path string
 ---@return nil
 function M.jump_cursor_to(State, path)
-  local vim = _G.triptych_mock_vim or vim
   local line_num
   for index, item in ipairs(State.windows.current.contents.children) do
     if item.path == path then

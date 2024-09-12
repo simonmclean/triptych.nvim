@@ -13,7 +13,6 @@ Diagnostics.get_sign = function(severity)
 end
 
 Diagnostics.new = function()
-  local vim = _G.triptych_mock_vim or vim
   local instance = {}
   setmetatable(instance, { __index = Diagnostics })
 

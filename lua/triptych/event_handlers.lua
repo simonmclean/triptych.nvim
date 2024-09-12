@@ -1,6 +1,8 @@
 local u = require 'triptych.utils'
+local log = require 'triptych.logger'
 local float = require 'triptych.float'
 local autocmds = require 'triptych.autocmds'
+local view = require 'triptych.view'
 
 local M = {}
 
@@ -8,8 +10,7 @@ local M = {}
 ---@param State TriptychState
 ---@return nil
 function M.handle_cursor_moved(State)
-  local vim = _G.triptych_mock_vim or vim
-  local view = _G.triptych_mock_view or require 'triptych.view'
+  log.debug 'handle_cursor_moved'
   local target = view.get_target_under_cursor(State)
   local current_dir = State.windows.current.path
   local line_number = vim.api.nvim_win_get_cursor(0)[1]
@@ -42,8 +43,7 @@ end
 ---@param Git? Git
 ---@return nil
 function M.handle_dir_read(State, path_details, win_type, Diagnostics, Git)
-  local vim = _G.triptych_mock_vim or vim
-  local view = _G.triptych_mock_view or require 'triptych.view'
+  log.debug('handle_cursor_moved', { win_type = win_type })
   view.set_parent_or_primary_window_lines(State, path_details, win_type, Diagnostics, Git)
 
   -- Set cursor position
@@ -79,8 +79,11 @@ end
 ---@param path string
 ---@param lines string[]
 function M.handle_file_read(child_win_buf, path, lines)
-  float.set_child_window_file_preview(child_win_buf, path, lines)
-  autocmds.publish_did_update_window 'child'
+  log.debug('handle_file_read', { path = path })
+  if vim.g.triptych_is_open then
+    float.set_child_window_file_preview(child_win_buf, path, lines)
+    autocmds.publish_did_update_window 'child'
+  end
 end
 
 ---@return nil

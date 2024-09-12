@@ -1,3 +1,5 @@
+local log = require 'triptych.logger'
+
 local au_group_internal = vim.api.nvim_create_augroup('TriptychEventsInternal', { clear = true })
 local au_group_public = vim.api.nvim_create_augroup('TriptychEvents', { clear = true })
 
@@ -11,7 +13,6 @@ local AutoCommands = {}
 ---@param Git? Git
 ---@return AutoCommands
 function AutoCommands.new(event_handlers, State, Diagnostics, Git)
-  local vim = _G.triptych_mock_vim or vim
   local instance = {}
   setmetatable(instance, { __index = AutoCommands })
 
@@ -55,7 +56,6 @@ end
 M.new = AutoCommands.new
 
 function AutoCommands:destroy_autocommands()
-  local vim = _G.triptych_mock_vim or vim
   for _, autocmd in pairs(self.autocmds) do
     vim.api.nvim_del_autocmd(autocmd)
   end
@@ -125,6 +125,7 @@ end
 
 ---@param win_type WinType
 function M.publish_did_update_window(win_type)
+  log.debug('publish_did_update_window', { win_type = win_type })
   exec_public_autocmd('TriptychDidUpdateWindow', {
     win_type = win_type,
   })

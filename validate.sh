@@ -2,16 +2,6 @@
 
 # Use this script to test changes locally
 
-echo "Running unit tests..."
-nvim --headless -c 'PlenaryBustedDirectory unit_tests/'
-unit_tests_exit_code=$?
-
-if [ $unit_tests_exit_code -ne 0 ]; then
-  echo "❌ 1 or more unit tests failed";
-else
-  echo "✅ Unit tests passed";
-fi
-
 echo "Checking formatting..."
 npx @johnnymorganz/stylua-bin --check .
 formatting_exit_code=$?
@@ -25,3 +15,13 @@ fi
 
 echo "Check diagnostics..."
 ~/.local/share/nvim/mason/bin/lua-language-server --check .
+
+echo "Running tests..."
+HEADLESS=true nvim --headless +"so%" tests/run_specs.lua
+tests_exit_code=$?
+
+if [ $tests_exit_code -ne 0 ]; then
+  echo "❌ 1 or more unit tests failed";
+else
+  echo "✅ Unit tests passed";
+fi

@@ -2,7 +2,6 @@
 
 ---@return string[]
 local function help_lines()
-  local vim = _G.triptych_mock_vim or vim
   local mappings = vim.g.triptych_config.mappings
   local lines = {}
   local left_col_length = 0 -- Used for padding and alignment

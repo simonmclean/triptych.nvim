@@ -1,9 +1,13 @@
+local assert = require 'luassert'
+local u = require 'tests.utils'
 local config = require 'triptych.config'
-local u = require 'triptych.utils'
+local framework = require 'test_framework.test'
+local it = framework.test
+local describe = framework.describe
 
----@return TriptychConfig
 local function expected_default_config()
   return {
+    debug = false,
     mappings = {
       show_help = 'g?',
       jump_to_cwd = '.',
@@ -70,14 +74,12 @@ local function expected_default_config()
   }
 end
 
-describe('create_merged_config', function()
+describe('create_merged_config', {
   it('returns the default config when user config is empty', function()
-    _G.triptych_mock_vim = {}
     assert.same(expected_default_config(), config.create_merged_config {})
-  end)
+  end),
 
   it('merges partial user config with the default', function()
-    _G.triptych_mock_vim = {}
     local default_config = expected_default_config()
     local user_config = {
       mappings = {
@@ -94,5 +96,5 @@ describe('create_merged_config', function()
       return result
     end)
     assert.same(expected, config.create_merged_config(user_config))
-  end)
-end)
+  end),
+})

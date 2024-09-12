@@ -9,7 +9,6 @@ local M = {}
 ---@param fn fun(): nil
 ---@return nil
 local function modify_locked_buffer(buf, fn)
-  local vim = _G.triptych_mock_vim or vim
   vim.api.nvim_buf_set_option(buf, 'readonly', false)
   vim.api.nvim_buf_set_option(buf, 'modifiable', true)
   fn()
@@ -21,7 +20,6 @@ end
 ---@param lines string[]
 ---@return nil
 function M.buf_set_lines(buf, lines)
-  local vim = _G.triptych_mock_vim or vim
   modify_locked_buffer(buf, function()
     vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
   end)
@@ -32,7 +30,6 @@ end
 ---@param highlights HighlightDetails[]
 ---@return nil
 function M.buf_apply_highlights(buf, highlights)
-  local vim = _G.triptych_mock_vim or vim
   -- Apply icon highlight
   for i, highlight in ipairs(highlights) do
     vim.api.nvim_buf_add_highlight(buf, 0, highlight.icon.highlight_name, i - 1, 0, highlight.icon.length)
@@ -46,7 +43,6 @@ end
 ---@param lines string[]
 ---@param attempt_scroll_top? boolean
 function M.win_set_lines(win, lines, attempt_scroll_top)
-  local vim = _G.triptych_mock_vim or vim
   local buf = vim.api.nvim_win_get_buf(win)
   M.buf_set_lines(buf, lines)
   if attempt_scroll_top then
@@ -63,7 +59,6 @@ end
 ---@param postfix? string
 ---@return nil
 function M.win_set_title(win, title, icon, highlight, postfix)
-  local vim = _G.triptych_mock_vim or vim
   vim.api.nvim_win_call(win, function()
     local maybe_icon = ''
     if vim.g.triptych_config.options.file_icons.enabled and icon then
@@ -96,7 +91,6 @@ end
 
 ---@return number
 local function create_new_buffer()
-  local vim = _G.triptych_mock_vim or vim
   local buf = vim.api.nvim_create_buf(false, true)
   return buf
 end
@@ -104,7 +98,6 @@ end
 ---@param config FloatingWindowConfig
 ---@return number
 local function create_floating_window(config)
-  local vim = _G.triptych_mock_vim or vim
   local buf = create_new_buffer()
   local win = vim.api.nvim_open_win(buf, true, {
     width = config.width,
@@ -132,7 +125,6 @@ end
 ---@param winblend number
 ---@return number
 local function create_backdrop(winblend)
-  local vim = _G.triptych_mock_vim or vim
   local buf = create_new_buffer()
   local win = vim.api.nvim_open_win(buf, false, {
     width = vim.o.columns,
@@ -174,8 +166,6 @@ function M.create_three_floating_windows(
   margin_x,
   margin_y
 )
-  local vim = _G.triptych_mock_vim or vim
-
   local screen_height = vim.o.lines
 
   local screen_width = vim.o.columns
@@ -304,7 +294,6 @@ end
 ---@param wins number[]
 ---@return nil
 function M.close_floats(wins)
-  local vim = _G.triptych_mock_vim or vim
   for _, win in ipairs(wins) do
     local buf = vim.api.nvim_win_get_buf(win)
     vim.api.nvim_buf_delete(buf, { force = true })

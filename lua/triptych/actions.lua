@@ -48,8 +48,6 @@ end
 ---@param State TriptychState
 ---@param refresh_view fun(): nil
 function Actions.new(State, refresh_view)
-  local vim = _G.triptych_mock_vim or vim
-
   local M = {}
 
   ---@return nil
@@ -308,7 +306,7 @@ function Actions.new(State, refresh_view)
       for _, item in ipairs(State.copy_list) do
         local destination = get_copy_path(u.path_join(destination_dir, item.display_name))
         M.duplicate_file_or_dir(item, destination)
-        autocmds.publish_file_created(destination)
+        autocmds.publish_did_delete_node(destination)
       end
 
       view.jump_cursor_to(State, destination_dir)
