@@ -16,12 +16,9 @@ Individual spec files can be run by sourcing them. e.g. `:source %` or `:so%`.
 
 There's also `run_specs.lua` which does this for all files in the `specs` directory. Just do `so%` from `run_specs.lua`.
 
-Tests can also be run headlessly from outside Neovim, by doing
+Tests can also be run headlessly from outside Neovim, by doing.
 
 ```
 cd <project-root>
-nvim --headless +"so%" tests/run_specs.lua
+HEADLESS=true nvim --headless +"so%" tests/run_specs.lua
 ```
-
-# TODO
-- UI spec is not running fully in headless mode

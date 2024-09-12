@@ -34,9 +34,7 @@ local function run_specs()
   end)
 end
 
-local is_headless = #vim.api.nvim_list_uis() == 0
-
-if is_headless then
+if u.is_headless() then
   vim.api.nvim_create_autocmd({ 'VimEnter' }, {
     callback = function()
       -- The "VeryLazy" event doesn't seem to run in headless mode, so we need to call setup() manually.

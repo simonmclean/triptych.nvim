@@ -231,10 +231,10 @@ end
 ---@param status ('success' | 'failed')
 function M.exit_status_code(status)
   if status == 'success' then
-    M.print('Exiting with status code 0')
+    M.print 'Exiting with status code 0'
     vim.cmd '0cq'
   else
-    M.print('Exiting with status code 1')
+    M.print 'Exiting with status code 1'
     vim.cmd '1cq'
   end
 end
@@ -243,7 +243,7 @@ end
 ---@param str string
 ---@param level? ('error' | 'warn' | 'info' | 'success')
 function M.print(str, level)
-  if vim.g.is_headless then
+  if M.is_headless() then
     io.stdout:write(str)
     io.stdout:write '\n'
   else
@@ -267,6 +267,10 @@ function M.UUID()
     return uuid
   end
   error 'uuidgen failed'
+end
+
+function M.is_headless()
+  return vim.fn.getenv 'HEADLESS' == 'true'
 end
 
 return M

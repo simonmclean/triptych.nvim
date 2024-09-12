@@ -31,7 +31,7 @@ describe('Triptych UI', {
           assertions = function()
             assert.same(is_open, true)
             -- This is kinda janky, but basically this test could be called from one of 2 places
-            assert(current_line == 'run_specs.lua' or current_line == 'ui_spec.spec')
+            assert(current_line == 'run_specs.lua' or current_line == 'ui_spec.lua', 'got ' .. tostring(current_line))
           end,
         }
       end)
