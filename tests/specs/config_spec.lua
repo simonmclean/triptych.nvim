@@ -1,7 +1,7 @@
 local assert = require 'luassert'
 local u = require 'tests.utils'
 local config = require 'triptych.config'
-local framework = require 'tests.test_framework'
+local framework = require 'test_framework.test'
 local it = framework.test
 local describe = framework.describe
 

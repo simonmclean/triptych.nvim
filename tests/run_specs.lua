@@ -1,4 +1,4 @@
-local u = require 'tests.utils'
+local u = require 'test_framework.utils'
 local uv = vim.loop
 
 local function get_files_in_dir(dir)
