@@ -28,5 +28,5 @@ describe('help_lines', {
       '[x]             : cut',
       '[|]             : open_vsplit',
     }, result)
-  end)
+  end),
 })

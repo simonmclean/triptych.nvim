@@ -245,7 +245,6 @@ end
 ---@param target_dir string
 ---@return nil
 function M.set_primary_and_parent_window_targets(State, target_dir)
-
   local focused_win = State.windows.current.win
   local parent_win = State.windows.parent.win
   local child_win = State.windows.child.win
@@ -290,7 +289,6 @@ end
 ---@param Git? Git
 ---@return nil
 function M.set_parent_or_primary_window_lines(State, path_details, win_type, Diagnostics, Git)
-
   local state = u.eval(function()
     if win_type == 'parent' then
       return State.windows.parent

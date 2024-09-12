@@ -48,7 +48,6 @@ end
 ---@param State TriptychState
 ---@param refresh_view fun(): nil
 function Actions.new(State, refresh_view)
-
   local M = {}
 
   ---@return nil

@@ -156,7 +156,7 @@ end
 
 return {
   ---@param test Test
-  add = function (test)
+  add = function(test)
     GlobalTestQueue:add(test)
-  end
+  end,
 }

@@ -13,7 +13,6 @@ end
 ---@param filetype? string
 ---@return nil
 M.start = function(buf, filetype)
-
   -- Because this function will be debounced we need to check that the buffer still exists
   if not vim.api.nvim_buf_is_valid(buf) then
     return

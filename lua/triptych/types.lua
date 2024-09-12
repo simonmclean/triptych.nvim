@@ -1,4 +1,5 @@
 ---@class TriptychConfig
+---@field debug boolean
 ---@field config boolean
 ---@field mappings TriptychConfigMappings
 ---@field extension_mappings { [string]: ExtensionMapping }

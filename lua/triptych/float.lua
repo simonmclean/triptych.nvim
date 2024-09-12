@@ -166,7 +166,6 @@ function M.create_three_floating_windows(
   margin_x,
   margin_y
 )
-
   local screen_height = vim.o.lines
 
   local screen_width = vim.o.columns

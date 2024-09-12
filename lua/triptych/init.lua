@@ -18,7 +18,6 @@ end
 ---@param dir? string Path of directory to open. If omitted will be the directory containing the current buffer
 ---@return fun()|nil
 local function toggle_triptych(dir)
-
   if dir and not vim.fn.isdirectory(dir) then
     return warn(tostring(dir) .. ' is not a directory')
   end
@@ -141,7 +140,6 @@ end
 
 ---@param user_config? table
 local function setup(user_config)
-
   if vim.fn.has 'nvim-0.9.0' ~= 1 then
     return warn 'triptych.nvim requires Neovim >= 0.9.0'
   end
