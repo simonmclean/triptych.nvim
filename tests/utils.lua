@@ -54,7 +54,7 @@ function M.on_events(events, callback)
 
   local function cleanup_autocmds()
     vim.print {
-      autocmd_ids = autocmd_ids
+      autocmd_ids = autocmd_ids,
     }
     for _, id in ipairs(autocmd_ids) do
       api.nvim_del_autocmd(id)
