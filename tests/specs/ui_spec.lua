@@ -545,6 +545,11 @@ describe('Triptych UI', {
       },
     }
 
+    -- Create this file in the test because, being git-ignored, it can't be added to the repo
+    -- which means it won't work in CI
+    local git_ignored_file = u.join_path(opening_dir, 'git_ignored_file')
+    vim.fn.writefile({}, git_ignored_file)
+
     open_triptych(function()
       local first_state = u.get_state()
       u.press_keys '<leader>.'
@@ -559,6 +564,9 @@ describe('Triptych UI', {
                 assert.same(expected_lines_without_hidden.primary, first_state.lines.primary)
                 assert.same(expected_lines_with_hidden.primary, second_state.lines.primary)
                 assert.same(expected_lines_without_hidden.primary, third_state.lines.primary)
+              end,
+              cleanup = function()
+                vim.fn.delete(git_ignored_file)
               end,
             }
           end)
