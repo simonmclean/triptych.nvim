@@ -254,8 +254,7 @@ describe('Triptych UI', {
     end)
   end),
 
-  -- Having trouble with this
-  -- How to programatically input a selection in vim.ui.select
+  -- TODO: Having trouble with this. How to programatically input a selection in vim.ui.select?
   test('deletes files and folders', function(done)
     local expected_lines = {
       primary = {
@@ -291,8 +290,120 @@ describe('Triptych UI', {
     end)
   end):skip(),
 
-  -- TODO: Skipped this because there seems to be a bug with dir pasting!
-  test('copies file and folders', function(done)
+  test('copies folders along with their contents', function(done)
+    local expected_lines = {
+      primary = {
+        'level_3/',
+        'level_4/', -- this is the copied dir, cursor should be over it
+        'level_2_file_1.lua',
+      },
+      child = {
+        'level_5/',
+        'level_4_file_1.lua',
+      },
+    }
+    open_triptych(function()
+      -- Copy directory under cursor
+      u.press_keys 'c'
+      u.on_primary_window_updated(function()
+        -- Move left into the parent directory
+        u.press_keys 'h'
+        u.on_all_wins_updated(function()
+          -- Move down, so that the cursor is not over a directory, then paste the previously copied directory
+          u.press_keys 'jp'
+          u.on_all_wins_updated(function()
+            local state = u.get_state()
+            close_triptych(function()
+              done {
+                assertions = function()
+                  assert.same(expected_lines.child, state.lines.child)
+                  assert.same(expected_lines.primary, state.lines.primary)
+                end,
+                cleanup = function()
+                  vim.fn.delete(u.join_path(cwd, 'tests/test_playground/level_1/level_2/level_4'), 'rf')
+                end,
+              }
+            end)
+          end)
+        end)
+      end)
+    end)
+  end),
+
+  test('when copying-pasting a folder, publishes public events for the files (but not the folders)', function(done)
+    local base_dir = u.join_path(cwd, 'tests/test_playground/level_1/level_2')
+
+    local expected_events = {
+      ['TriptychDidCreateNode'] = {
+        { path = u.join_path(base_dir, 'level_4/level_4_file_1.lua') },
+        { path = u.join_path(base_dir, 'level_4/level_5/level_5_file_1.lua') },
+      },
+    }
+
+    open_triptych(function()
+      -- Copy directory under cursor
+      u.press_keys 'c'
+      u.on_primary_window_updated(function()
+        -- Move left into the parent directory
+        u.press_keys 'h'
+        u.on_all_wins_updated(function()
+          -- Move down, so that the cursor is not over a directory, then paste the previously copied directory
+          u.press_keys 'jp'
+          u.on_events({
+            { name = 'TriptychDidCreateNode', wait_for_n = 2 },
+          }, function(events)
+            close_triptych(function()
+              done {
+                assertions = function()
+                  assert.same(expected_events, events)
+                end,
+                cleanup = function()
+                  vim.fn.delete(u.join_path(cwd, 'tests/test_playground/level_1/level_2/level_4'), 'rf')
+                end,
+              }
+            end)
+          end)
+        end)
+      end)
+    end)
+  end),
+
+  test('when copying-pasting a file, publishes public events', function(done)
+    local expected_events = {
+      ['TriptychWillCreateNode'] = {
+        { path = u.join_path(opening_dir, 'level_3_file_1_copy1.md') },
+      },
+      ['TriptychDidCreateNode'] = {
+        { path = u.join_path(opening_dir, 'level_3_file_1_copy1.md') },
+      },
+    }
+
+    open_triptych(function()
+      -- Move down to the file and copy
+      u.press_keys 'jc'
+      u.on_primary_window_updated(function()
+        -- Paste
+        u.press_keys 'p'
+        u.on_events({
+          { name = 'TriptychWillCreateNode', wait_for_n = 1 },
+          { name = 'TriptychDidCreateNode', wait_for_n = 1 },
+        }, function(events)
+          close_triptych(function()
+            done {
+              assertions = function()
+                assert.same(expected_events, events)
+              end,
+              cleanup = function()
+                vim.fn.delete(u.join_path(opening_dir, 'level_3_file_1_copy1.md'))
+              end,
+            }
+          end)
+        end)
+      end)
+    end)
+  end),
+
+  test('copies files', function(done)
     local expected_lines = {
       primary = {
         'level_4/',
@@ -300,50 +411,46 @@ describe('Triptych UI', {
         'level_3_file_1_copy1.md',
       },
       child = {
-        'level_4/',
         'level_5/',
+        'level_3_file_1.md',
         'level_4_file_1.lua',
       },
     }
+
     open_triptych(function()
-      u.press_keys 'c'
+      -- Move down to the file and copy
+      u.press_keys 'jc'
       u.on_primary_window_updated(function()
+        -- Paste
         u.press_keys 'p'
         u.on_primary_window_updated(function()
-          u.press_keys 'j'
-          u.press_keys 'c'
+          -- Copy file again, move up over directory
+          u.press_keys 'ck'
           u.on_primary_window_updated(function()
+            -- Paste
             u.press_keys 'p'
-            u.on_primary_window_updated(function()
-              -- Go back to the top, so we can the new dir we've pasted in the the child directory
-              u.press_keys 'gg'
-              u.on_child_window_updated(function()
-                local state = u.get_state()
-                close_triptych(function()
-                  done {
-                    assertions = function()
-                      assert.same(expected_lines.child, state.lines.child)
-                      assert.same(expected_lines.primary, state.lines.primary)
-                    end,
-                    cleanup = function()
-                      vim.fn.delete(u.join_path(opening_dir, 'level_3_file_1_copy1.md'))
-                      vim.fn.delete(u.join_path(opening_dir, 'level_4/level_4', 'rf'))
-                    end,
-                  }
-                end)
+            u.on_child_window_updated(function()
+              local state = u.get_state()
+              close_triptych(function()
+                done {
+                  assertions = function()
+                    assert.same(expected_lines.primary, state.lines.primary)
+                    assert.same(expected_lines.child, state.lines.child)
+                  end,
+                  cleanup = function()
+                    vim.fn.delete(u.join_path(opening_dir, 'level_3_file_1_copy1.md'))
+                    vim.fn.delete(u.join_path(opening_dir, 'level_4/level_3_file_1.md'))
+                  end,
+                }
               end)
             end)
           end)
         end)
       end)
     end)
-  end):skip(),
+  end),
 
-  -- TODO: This once the dir pasting bug has been fixed
   -- test('moves files and folders', function (done) end):skip()
-
-  -- TODO: This once the dir pasting bug has been fixed
-  -- test('copies files and folders', function(done) end):skip()
 
   test('renames files and folders', function(done)
     local expected_lines = {
@@ -438,6 +545,11 @@ describe('Triptych UI', {
       },
     }
 
+    -- Create this file in the test because, being git-ignored, it can't be added to the repo
+    -- which means it won't work in CI
+    local git_ignored_file = u.join_path(opening_dir, 'git_ignored_file')
+    vim.fn.writefile({}, git_ignored_file)
+
     open_triptych(function()
       local first_state = u.get_state()
       u.press_keys '<leader>.'
@@ -452,6 +564,9 @@ describe('Triptych UI', {
                 assert.same(expected_lines_without_hidden.primary, first_state.lines.primary)
                 assert.same(expected_lines_with_hidden.primary, second_state.lines.primary)
                 assert.same(expected_lines_without_hidden.primary, third_state.lines.primary)
+              end,
+              cleanup = function()
+                vim.fn.delete(git_ignored_file)
               end,
             }
           end)

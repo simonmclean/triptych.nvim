@@ -70,28 +70,31 @@ end
 ---Run an asyncronous test
 ---@param callback fun(passed: boolean, fail_message?: string)
 function Test:run_async(callback)
-  local success, err = pcall(self.test_body_async, function(test_callback)
+  local success, err = pcall(self.test_body_async, function(test_finish)
     if self.has_run then
       error 'Attempted to invoke test completion more than once. Check that any async callbacks in the test are not firing multiple times.'
     end
 
+    -- Scheduling this allows cleanup to complete before running the next test
+    local scheduled_callback = vim.schedule_wrap(callback)
+
     self.has_run = true
 
-    if test_callback.cleanup then
-      local cleanup_successful, cleanup_err = pcall(test_callback.cleanup)
+    if test_finish.cleanup then
+      local cleanup_successful, cleanup_err = pcall(test_finish.cleanup)
       if not cleanup_successful then
         error(cleanup_err)
       end
     end
 
     if self.is_timed_out then
-      callback(false, 'Timed out')
+      scheduled_callback(false, 'Timed out')
     else
-      local passed, fail_message = pcall(test_callback.assertions)
+      local passed, fail_message = pcall(test_finish.assertions)
       if passed then
-        callback(true, nil)
+        scheduled_callback(true, nil)
       else
-        callback(false, fail_message)
+        scheduled_callback(false, fail_message)
       end
     end
   end)
@@ -123,7 +126,7 @@ function Test:only()
   return self
 end
 
-function Test:cleanup()
+function Test:reset()
   self.has_run = false
   self.result = nil
 end
