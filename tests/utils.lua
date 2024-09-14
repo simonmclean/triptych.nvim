@@ -53,9 +53,6 @@ function M.on_events(events, callback)
   end
 
   local function cleanup_autocmds()
-    vim.print {
-      autocmd_ids = autocmd_ids,
-    }
     for _, id in ipairs(autocmd_ids) do
       api.nvim_del_autocmd(id)
     end
@@ -70,11 +67,6 @@ function M.on_events(events, callback)
     local timer = vim.loop.new_timer()
 
     local id = M.on_event(event_name, function(data)
-      vim.print {
-        event_name = event_name,
-        count = #result[event_name] + 1,
-        data = data,
-      }
       timer:stop()
 
       table.insert(result[event_name], data.data)

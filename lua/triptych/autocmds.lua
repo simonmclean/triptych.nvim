@@ -147,9 +147,6 @@ end
 
 ---@param path string
 function M.publish_will_create_node(path)
-  -- vim.print {
-  --   will_create = path
-  -- }
   exec_public_autocmd('TriptychWillCreateNode', {
     path = path,
   })
@@ -157,9 +154,6 @@ end
 
 ---@param path string
 function M.publish_did_create_node(path)
-  -- vim.print {
-  --   created = path
-  -- }
   exec_public_autocmd('TriptychDidCreateNode', {
     path = path,
   })
