@@ -330,7 +330,7 @@ describe('Triptych UI', {
     end)
   end),
 
-  test('when copying-pasting, publishes public events for files (not folders)', function(done)
+  test('when copying-pasting a folder, publishes public events for the files (but not the folders)', function(done)
     local base_dir = u.join_path(cwd, 'tests/test_playground/level_1/level_2')
 
     local expected_events = {
@@ -352,7 +352,6 @@ describe('Triptych UI', {
           u.on_events({
             { name = 'TriptychDidCreateNode', wait_for_n = 2 },
           }, function(events)
-            local state = u.get_state()
             close_triptych(function()
               done {
                 assertions = function()
@@ -363,6 +362,41 @@ describe('Triptych UI', {
                 end,
               }
             end)
+          end)
+        end)
+      end)
+    end)
+  end),
+
+  test('when copying-pasting a file, publishes public events', function(done)
+    local expected_events = {
+      ['TriptychWillCreateNode'] = {
+        { path = u.join_path(opening_dir, 'level_3_file_1_copy1.md') },
+      },
+      ['TriptychDidCreateNode'] = {
+        { path = u.join_path(opening_dir, 'level_3_file_1_copy1.md') },
+      },
+    }
+
+    open_triptych(function()
+      -- Move down to the file and copy
+      u.press_keys 'jc'
+      u.on_primary_window_updated(function()
+        -- Paste
+        u.press_keys 'p'
+        u.on_events({
+          { name = 'TriptychWillCreateNode', wait_for_n = 1 },
+          { name = 'TriptychDidCreateNode', wait_for_n = 1 },
+        }, function(events)
+          close_triptych(function()
+            done {
+              assertions = function()
+                assert.same(expected_events, events)
+              end,
+              cleanup = function()
+                vim.fn.delete(u.join_path(opening_dir, 'level_3_file_1_copy1.md'))
+              end,
+            }
           end)
         end)
       end)
