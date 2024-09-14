@@ -39,11 +39,11 @@ end
 function TestQueue:cleanup()
   self.is_running = false
   for _, test in ipairs(self.queue) do
-    test:cleanup()
+    test:reset()
     test.result = nil
   end
   for _, test in ipairs(self.completed) do
-    test:cleanup()
+    test:reset()
     test.result = nil
   end
   self.queue = {}
@@ -104,13 +104,15 @@ end
 ---@param fail_message? string
 function TestQueue:handle_test_fail(test, fail_message)
   test.result = 'failed'
-  u.print('[FAILED] ' .. test.name)
-  error(fail_message)
-  self:cleanup()
-  if u.is_headless() then
-    u.exit_status_code 'failed'
-  else
-  end
+  vim.schedule(function()
+    u.print('[FAILED] ' .. test.name)
+    error(fail_message)
+    test:reset()
+    self:cleanup()
+    if u.is_headless() then
+      u.exit_status_code 'failed'
+    end
+  end)
 end
 
 function TestQueue:run_next()

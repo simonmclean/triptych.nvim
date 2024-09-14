@@ -23,7 +23,7 @@ function M.on_event(event, callback, once)
   if once == nil then
     once = true
   end
-  vim.api.nvim_create_autocmd('User', {
+  return vim.api.nvim_create_autocmd('User', {
     group = 'TriptychEvents',
     pattern = event,
     once = once,
@@ -52,24 +52,44 @@ function M.on_events(events, callback)
     return true
   end
 
+  local function cleanup_autocmds()
+    vim.print {
+      autocmd_ids = autocmd_ids
+    }
+    for _, id in ipairs(autocmd_ids) do
+      api.nvim_del_autocmd(id)
+    end
+  end
+
   for _, event in ipairs(events) do
-    result[event.name] = {}
+    local event_name = event.name
+    local expected_count = event.wait_for_n
+
+    result[event_name] = {}
 
     local timer = vim.loop.new_timer()
 
-    local id = M.on_event(event.name, function(data)
+    local id = M.on_event(event_name, function(data)
+      vim.print {
+        event_name = event_name,
+        count = #result[event_name] + 1,
+        data = data,
+      }
       timer:stop()
 
-      table.insert(result[event.name], data.data)
+      table.insert(result[event_name], data.data)
+
+      if #result[event_name] > expected_count then
+        cleanup_autocmds()
+        error('Expected ' .. expected_count .. ' events of type "' .. event_name .. '", but that number was exceeded')
+      end
 
       if is_ready() then
         timer:start(
           1000,
           0,
           vim.schedule_wrap(function()
-            for _, id in ipairs(autocmd_ids) do
-              api.nvim_del_autocmd(id)
-            end
+            cleanup_autocmds()
             callback(result)
           end)
         )

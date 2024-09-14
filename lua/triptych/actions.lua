@@ -4,6 +4,7 @@ local view = require 'triptych.view'
 local plenary_path = require 'plenary.path'
 local triptych_help = require 'triptych.help'
 local autocmds = require 'triptych.autocmds'
+local log = require 'triptych.logger'
 
 local Actions = {}
 
@@ -41,6 +42,49 @@ local function rename_node_and_publish(from, to)
   local success = vim.fn.rename(from, to) == 0
   if success then
     autocmds.publish_did_move_node(from, to)
+  end
+end
+
+---Wraps plenary Path:copy with public events
+---Note: It only publishes events for files, not folders. This is probably fine for LSP purposes
+---@param target PathDetails
+---@param destination string
+---@return nil
+local function duplicate_node_and_publish(target, destination)
+  log.debug('duplicate_file_or_dir', { target = target, destination = destination })
+  if not target.is_dir then
+    autocmds.publish_will_create_node(destination)
+  end
+
+  local p = plenary_path:new(target.path)
+  -- Note: Plenary has a bug whereby a copying a directory into itself creates hundreds of nested copies
+  -- https://github.com/nvim-lua/plenary.nvim/pull/358
+  local results = p:copy {
+    destination = destination,
+    recursive = true,
+    override = false,
+    interactive = true,
+  }
+
+  local files_created = {}
+
+  local function handle_results(results)
+    for key, value in pairs(results) do
+      if type(value) == 'table' then
+        handle_results(value)
+      elseif value then
+        table.insert(files_created, key.filename)
+      end
+    end
+  end
+
+  handle_results(results)
+
+  -- Sorting to avoid flakey test
+  table.sort(files_created)
+
+  for _, path in ipairs(files_created) do
+    autocmds.publish_did_create_node(path)
   end
 end
 
@@ -188,25 +232,6 @@ function Actions.new(State, refresh_view)
     refresh_view()
   end
 
-  ---@param target PathDetails
-  ---@param destination string
-  ---@param callback? fun(boolean) - Callback indicting whether an item an copied
-  ---@return nil
-  M.duplicate_file_or_dir = function(target, destination, callback)
-    local p = plenary_path:new(target.path)
-    local results = p:copy {
-      destination = destination,
-      recursive = true,
-      override = false,
-      interactive = true,
-    }
-    if callback then
-      for _, v in pairs(results) do
-        callback(v)
-      end
-    end
-  end
-
   M.bulk_toggle_copy = function()
     local targets = view.get_targets_in_selection(State)
     local contains_copy_items = false
@@ -277,9 +302,9 @@ function Actions.new(State, refresh_view)
     return get_copy_path(target_path, i + 1)
   end
 
+  -- TODO: This function is a mess. Maybe break out into handlers for copy and cut?
   ---@return nil
   M.paste = function()
-    -- TODO: This function is a mess. Maybe break out into handlers for copy and cut?
     local cursor_target = view.get_target_under_cursor(State)
     local destination_dir = u.eval(function()
       if not cursor_target then
@@ -305,8 +330,11 @@ function Actions.new(State, refresh_view)
       -- Handle copy items
       for _, item in ipairs(State.copy_list) do
         local destination = get_copy_path(u.path_join(destination_dir, item.display_name))
-        M.duplicate_file_or_dir(item, destination)
-        autocmds.publish_did_delete_node(destination)
+        if item.is_dir then
+          -- Strip trailing slash
+          destination = string.sub(destination, 1, #destination - 1)
+        end
+        duplicate_node_and_publish(item, destination)
       end
 
       view.jump_cursor_to(State, destination_dir)
