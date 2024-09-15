@@ -395,12 +395,6 @@ function Actions.new(State, refresh_view)
     end
   end
 
-  ---@param path string
-  ---@return nil
-  M.jump_to_dir = function(path)
-    view.set_primary_and_parent_window_targets(State, path)
-  end
-
   M.nav_left = function()
     local parent_path = State.windows.parent.path
     if parent_path ~= '/' then
@@ -414,10 +408,11 @@ function Actions.new(State, refresh_view)
       if target.is_dir then
         local target_path
         if State.collapse_dirs and target.collapse_path then
-          view.set_primary_and_parent_window_targets(State, target.collapse_path)
+          target_path = target_path.collapse_path
         else
-          view.set_primary_and_parent_window_targets(State, target.path)
+          target_path = target.path
         end
+        view.set_primary_and_parent_window_targets(State, target_path)
       else
         edit_file(target.path, 'in-place')
       end

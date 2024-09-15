@@ -17,12 +17,13 @@ function M.handle_cursor_moved(State)
   local line_number = vim.api.nvim_win_get_cursor(0)[1]
   State.path_to_line_map[current_dir] = line_number
   if target then
+    local final_target
     if State.collapse_dirs and target.is_dir and target.collapse_path then
-      local path_details = fs.read_path(target.collapse_path, State.show_hidden)
-      view.set_child_window_target(State, path_details)
+      final_target = fs.read_path(target.collapse_path, State.show_hidden)
     else
-      view.set_child_window_target(State, target)
+      final_target = target
     end
+    view.set_child_window_target(State, final_target)
   end
 end
 

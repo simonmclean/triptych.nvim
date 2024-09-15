@@ -112,9 +112,9 @@ local function default_config()
       rename = 'r',
       cut = 'x',
       paste = 'p',
-      toggle_collapse_dirs = 'z',
       quit = 'q',
       toggle_hidden = '<leader>.',
+      toggle_collapse_dirs = 'z',
     },
     extension_mappings = {},
     options = {

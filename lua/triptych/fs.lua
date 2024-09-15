@@ -38,7 +38,7 @@ M.read_file_async = plenary_async.wrap(function(file_path, callback)
   end)
 end, 2)
 
-local function drill(path, display_name)
+local function read_collapsed_dirs(path, display_name)
   local handle, _ = vim.loop.fs_scandir(path)
   if not handle then
     return path, display_name
@@ -54,7 +54,7 @@ local function drill(path, display_name)
   end
 
   if #dirs == 1 then
-    return drill(path .. '/' .. dirs[1], display_name .. dirs[1] .. '/')
+    return read_collapsed_dirs(path .. '/' .. dirs[1], display_name .. dirs[1] .. '/')
   end
 
   return path, display_name
@@ -102,7 +102,7 @@ function M.read_path(_path, show_hidden)
       children = {},
     }
     if is_dir then
-      local collapsed_path, collapsed_display_name = drill(entry_path, display_name)
+      local collapsed_path, collapsed_display_name = read_collapsed_dirs(entry_path, display_name)
       entry.collapse_path = collapsed_path
       entry.collapse_display_name =  collapsed_display_name
     end

@@ -43,15 +43,15 @@ end
 ---@param path string
 ---@param show_hidden boolean
 ---@param win_type WinType
-local function read_path_async(path, show_hidden, win_type)
+local function read_path_and_publish(path, show_hidden, win_type)
   local path_details = fs.read_path(path, show_hidden)
   autocmds.send_path_read(path_details, win_type)
 end
 
----Asyncronously read a file, then publish the results to a User event
+---Read a file, then publish the results to a User event
 ---@param child_win_buf number
 ---@param path string
-local function read_file_async(child_win_buf, path)
+local function read_file_and_publish(child_win_buf, path)
   plenary_async.run(function()
     fs.read_file_async(path, function(err, lines)
       if err then
@@ -283,8 +283,8 @@ function M.set_primary_and_parent_window_targets(State, target_dir)
     },
   }
 
-  read_path_async(parent_path, State.show_hidden, 'parent')
-  read_path_async(target_dir, State.show_hidden, 'primary')
+  read_path_and_publish(parent_path, State.show_hidden, 'parent')
+  read_path_and_publish(target_dir, State.show_hidden, 'primary')
 end
 
 --- Set lines for the parent or primary window
@@ -392,7 +392,7 @@ function M.set_child_window_target(State, path_details)
       'Directory',
       get_title_postfix(path_details.path)
     )
-    read_path_async(path_details.path, State.show_hidden, 'child')
+    read_path_and_publish(path_details.path, State.show_hidden, 'child')
   else
     local filetype = fs.get_filetype_from_path(path_details.path) -- TODO: De-dupe this
     local icon, highlight = icons.get_icon_by_filetype(filetype)
@@ -400,7 +400,7 @@ function M.set_child_window_target(State, path_details)
     float.buf_set_lines(buf, {})
     local file_size = fs.get_file_size_in_kb(path_details.path)
     if file_size < 300 then
-      read_file_async(buf, path_details.path)
+      read_file_and_publish(buf, path_details.path)
     else
       local msg = '[File size too large to preview]'
       float.buf_set_lines(buf, { msg })
