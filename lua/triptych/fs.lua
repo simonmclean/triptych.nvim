@@ -38,6 +38,11 @@ M.read_file_async = plenary_async.wrap(function(file_path, callback)
   end)
 end, 2)
 
+---Keep recursively reading into sub-directories, so long as each sub-directory contains only a single directory and no files
+---@param path string
+---@param display_name string
+---@return string
+---@return string
 local function read_collapsed_dirs(path, display_name)
   local handle, _ = vim.loop.fs_scandir(path)
   if not handle then
@@ -47,8 +52,11 @@ local function read_collapsed_dirs(path, display_name)
   local dirs = {}
   while true do
     local name, type = vim.loop.fs_scandir_next(handle)
-    if not name or type ~= 'directory' then
+    if not name then
       break
+    end
+    if type ~= 'directory' then
+      return path, display_name
     end
     table.insert(dirs, name)
   end
@@ -104,7 +112,7 @@ function M.read_path(_path, show_hidden)
     if is_dir then
       local collapsed_path, collapsed_display_name = read_collapsed_dirs(entry_path, display_name)
       entry.collapse_path = collapsed_path
-      entry.collapse_display_name =  collapsed_display_name
+      entry.collapse_display_name = collapsed_display_name
     end
     table.insert(tree.children, entry)
   end
