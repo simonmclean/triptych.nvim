@@ -402,8 +402,6 @@ function Actions.new(State, refresh_view)
     end
   end
 
-  -- TODO: Nav up to code dir with collapse on. You'll see the problem...
-
   M.nav_right = function()
     local target = view.get_target_under_cursor(State)
     if target then
