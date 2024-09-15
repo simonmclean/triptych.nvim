@@ -408,7 +408,7 @@ function Actions.new(State, refresh_view)
       if target.is_dir then
         local target_path
         if State.collapse_dirs and target.collapse_path then
-          target_path = target_path.collapse_path
+          target_path = target.collapse_path
         else
           target_path = target.path
         end
