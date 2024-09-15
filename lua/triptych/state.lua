@@ -1,5 +1,20 @@
 local u = require 'triptych.utils'
 
+---@class TriptychState
+---@field new fun(config: TriptychConfig, opening_win: integer): TriptychState
+---@field list_add fun(self: TriptychState, list_type: 'cut' | 'copy', item: PathDetails): nil
+---@field list_remove fun(self: TriptychState, list_type: 'cut' | 'copy', item: PathDetails): nil
+---@field list_remove_all fun(self: TriptychState, list_type: 'cut' | 'copy'): nil
+---@field list_toggle fun(self: TriptychState, list_type: 'cut' | 'copy', item: PathDetails): nil
+---@field list_contains fun(self: TriptychState, list_type: 'cut' | 'copy', item: PathDetails): nil
+---@field windows ViewState
+---@field cut_list PathDetails[]
+---@field copy_list PathDetails[]
+---@field path_to_line_map { [string]: integer }
+---@field opening_win integer
+---@field show_hidden boolean
+---@field collapse_dirs boolean
+---@field has_initial_cursor_pos_been_set boolean
 local TriptychState = {}
 
 ---@return TriptychState
@@ -8,6 +23,7 @@ function TriptychState.new(config, opening_win)
   setmetatable(instance, { __index = TriptychState })
 
   instance.show_hidden = config.options.show_hidden
+  instance.collapse_dirs = config.options.collapse_dirs
   instance.windows = {
     parent = {
       path = '',

@@ -38,10 +38,31 @@ M.read_file_async = plenary_async.wrap(function(file_path, callback)
   end)
 end, 2)
 
+local function drill(path, display_name)
+  local handle, _ = vim.loop.fs_scandir(path)
+  if not handle then
+    return path, display_name
+  end
+
+  local dirs = {}
+  while true do
+    local name, type = vim.loop.fs_scandir_next(handle)
+    if not name or type ~= 'directory' then
+      break
+    end
+    table.insert(dirs, name)
+  end
+
+  if #dirs == 1 then
+    return drill(path .. '/' .. dirs[1], display_name .. dirs[1] .. '/')
+  end
+
+  return path, display_name
+end
+
 ---@param _path string
 ---@param show_hidden boolean
----@param callback fun(path_details: PathDetails): nil
-function M.get_path_details(_path, show_hidden, callback)
+function M.read_path(_path, show_hidden)
   local path = vim.fs.normalize(_path)
 
   local tree = {
@@ -56,8 +77,7 @@ function M.get_path_details(_path, show_hidden, callback)
   local handle, _ = vim.loop.fs_scandir(path)
   if not handle then
     -- On error fallback to cwd
-    M.get_path_details(vim.fn.getcwd(), show_hidden, callback)
-    return
+    return M.get_path_details(vim.fn.getcwd(), show_hidden)
   end
 
   while true do
@@ -66,16 +86,13 @@ function M.get_path_details(_path, show_hidden, callback)
       break
     end
     local entry_path = path .. '/' .. name
-    table.insert(tree.children, {
-      display_name = u.eval(function()
-        if type == 'directory' then
-          return name .. '/'
-        end
-        return name
-      end),
+    local is_dir = type == 'directory'
+    local display_name = is_dir and (name .. '/') or name
+    local entry = {
+      display_name = display_name,
       path = entry_path,
       dirname = path,
-      is_dir = type == 'directory',
+      is_dir = is_dir,
       filetype = u.eval(function()
         if type == 'directory' then
           return
@@ -83,7 +100,13 @@ function M.get_path_details(_path, show_hidden, callback)
         return M.get_filetype_from_path(entry_path)
       end),
       children = {},
-    })
+    }
+    if is_dir then
+      local collapsed_path, collapsed_display_name = drill(entry_path, display_name)
+      entry.collapse_path = collapsed_path
+      entry.collapse_display_name =  collapsed_display_name
+    end
+    table.insert(tree.children, entry)
   end
 
   if vim.g.triptych_config.options.dirs_first then
@@ -98,7 +121,7 @@ function M.get_path_details(_path, show_hidden, callback)
     end)
   end
 
-  callback(tree)
+  return tree
 end
 
 return M

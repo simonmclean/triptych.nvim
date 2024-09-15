@@ -374,6 +374,16 @@ function Actions.new(State, refresh_view)
   end
 
   ---@return nil
+  M.toggle_collapse_dirs = function()
+    if State.collapse_dirs then
+      State.collapse_dirs = false
+    else
+      State.collapse_dirs = true
+    end
+    refresh_view()
+  end
+
+  ---@return nil
   M.jump_to_cwd = function()
     local cwd = vim.fn.getcwd()
     local win = State.windows.current
@@ -383,6 +393,12 @@ function Actions.new(State, refresh_view)
     elseif cwd then
       view.set_primary_and_parent_window_targets(State, cwd)
     end
+  end
+
+  ---@param path string
+  ---@return nil
+  M.jump_to_dir = function(path)
+    view.set_primary_and_parent_window_targets(State, path)
   end
 
   M.nav_left = function()
@@ -396,7 +412,12 @@ function Actions.new(State, refresh_view)
     local target = view.get_target_under_cursor(State)
     if target then
       if target.is_dir then
-        view.set_primary_and_parent_window_targets(State, target.path)
+        local target_path
+        if State.collapse_dirs and target.collapse_path then
+          view.set_primary_and_parent_window_targets(State, target.collapse_path)
+        else
+          view.set_primary_and_parent_window_targets(State, target.path)
+        end
       else
         edit_file(target.path, 'in-place')
       end

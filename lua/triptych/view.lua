@@ -39,14 +39,13 @@ local function filter_and_encrich_dir_contents(path_details, show_hidden, Diagno
   return path_details
 end
 
---- Asyncronously read a directory, then publish the results to a User event
+--- Read a directory, then publish the results to a User event
 ---@param path string
 ---@param show_hidden boolean
 ---@param win_type WinType
 local function read_path_async(path, show_hidden, win_type)
-  fs.get_path_details(path, show_hidden, function(path_details)
-    autocmds.send_path_read(path_details, win_type)
-  end)
+  local path_details = fs.read_path(path, show_hidden)
+  autocmds.send_path_read(path_details, win_type)
 end
 
 ---Asyncronously read a file, then publish the results to a User event
@@ -67,9 +66,10 @@ end
 ---Take a PathDetails and return lines and highlights for an nvim buffer
 ---@param State TriptychState
 ---@param path_details PathDetails
+---@param win_type WinType
 ---@return string[] # Lines including icons
 ---@return HighlightDetails[]
-local function path_details_to_lines(State, path_details)
+local function path_details_to_lines(State, path_details, win_type)
   local config_options = vim.g.triptych_config.options
   local icons_enabled = config_options.file_icons.enabled
   local lines = {}
@@ -95,9 +95,15 @@ local function path_details_to_lines(State, path_details)
             }),
           },
         }
+        local display_name = u.eval(function()
+          if State.collapse_dirs and win_type ~= 'parent' then
+            return child.collapse_display_name
+          end
+          return child.display_name
+        end)
         local line = u.cond(icons_enabled, {
-          when_true = config_options.file_icons.directory_icon .. ' ' .. child.display_name,
-          when_false = child.display_name,
+          when_true = config_options.file_icons.directory_icon .. ' ' .. display_name,
+          when_false = display_name,
         })
         return line, highlight
       end,
@@ -307,7 +313,7 @@ function M.set_parent_or_primary_window_lines(State, path_details, win_type, Dia
 
   local contents = filter_and_encrich_dir_contents(path_details, State.show_hidden, Diagnostics, Git)
 
-  local lines, highlights = path_details_to_lines(State, contents)
+  local lines, highlights = path_details_to_lines(State, contents, win_type)
 
   float.win_set_lines(state.win, lines, win_type == 'primary')
 
@@ -418,7 +424,7 @@ function M.set_child_window_lines(State, path_details, Diagnostics, Git)
 
   if path_details.is_dir then
     local contents = filter_and_encrich_dir_contents(path_details, State.show_hidden, Diagnostics, Git)
-    local lines, highlights = path_details_to_lines(State, contents)
+    local lines, highlights = path_details_to_lines(State, contents, 'child')
     vim.treesitter.stop(buf)
     vim.api.nvim_buf_set_option(buf, 'syntax', 'off')
     float.buf_set_lines(buf, lines)
