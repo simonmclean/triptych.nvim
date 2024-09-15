@@ -55,7 +55,7 @@ local function read_collapsed_dirs(path, display_name)
     if not name then
       break
     end
-    if type ~= 'directory' then
+    if type ~= 'directory' or #dirs > 1 then
       return path, display_name
     end
     table.insert(dirs, name)
