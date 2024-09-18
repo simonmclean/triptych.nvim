@@ -19,7 +19,7 @@ function M.handle_cursor_moved(State)
   if target then
     local final_target
     if State.collapse_dirs and target.is_dir and target.collapse_path then
-      final_target = fs.read_path(target.collapse_path, State.show_hidden)
+      final_target = fs.read_path(target.collapse_path, true)
     else
       final_target = target
     end

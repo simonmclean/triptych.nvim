@@ -41,36 +41,34 @@ end, 2)
 ---Keep recursively reading into sub-directories, so long as each sub-directory contains only a single directory and no files
 ---@param path string
 ---@param display_name string
----@return string
----@return string
+---@return string - full path
+---@return string - display name
 local function read_collapsed_dirs(path, display_name)
   local handle, _ = vim.loop.fs_scandir(path)
   if not handle then
     return path, display_name
   end
 
-  local dirs = {}
-  while true do
-    local name, type = vim.loop.fs_scandir_next(handle)
-    if not name then
-      break
-    end
-    if type ~= 'directory' or #dirs > 1 then
-      return path, display_name
-    end
-    table.insert(dirs, name)
+  local first_node_name, first_node_type = vim.loop.fs_scandir_next(handle)
+
+  -- Empty dir, or node is not a directory
+  if not first_node_name or first_node_type ~= 'directory' then
+    return path, display_name
   end
 
-  if #dirs == 1 then
-    return read_collapsed_dirs(path .. '/' .. dirs[1], display_name .. dirs[1] .. '/')
+  local second_node_name, _ = vim.loop.fs_scandir_next(handle)
+
+  -- Directory contains more than 1 node
+  if second_node_name then
+    return path, display_name
   end
 
-  return path, display_name
+  return read_collapsed_dirs(path .. '/' .. first_node_name, display_name .. first_node_name .. '/')
 end
 
 ---@param _path string
----@param show_hidden boolean
-function M.read_path(_path, show_hidden)
+---@param include_collapsed boolean whether to drill recursively into collapsed dirs
+function M.read_path(_path, include_collapsed)
   local path = vim.fs.normalize(_path)
 
   local tree = {
@@ -85,7 +83,7 @@ function M.read_path(_path, show_hidden)
   local handle, _ = vim.loop.fs_scandir(path)
   if not handle then
     -- On error fallback to cwd
-    return M.get_path_details(vim.fn.getcwd(), show_hidden)
+    return M.read_path(vim.fn.getcwd())
   end
 
   while true do
@@ -109,7 +107,7 @@ function M.read_path(_path, show_hidden)
       end),
       children = {},
     }
-    if is_dir then
+    if is_dir and include_collapsed then
       local collapsed_path, collapsed_display_name = read_collapsed_dirs(entry_path, display_name)
       entry.collapse_path = collapsed_path
       entry.collapse_display_name = collapsed_display_name

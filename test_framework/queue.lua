@@ -106,7 +106,7 @@ function TestQueue:handle_test_fail(test, fail_message)
   test.result = 'failed'
   vim.schedule(function()
     u.print('[FAILED] ' .. test.name)
-    error(fail_message)
+    u.raise_error(fail_message or 'Unknown reason')
     test:reset()
     self:cleanup()
     if u.is_headless() then

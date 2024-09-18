@@ -72,7 +72,7 @@ end
 function Test:run_async(callback)
   local success, err = pcall(self.test_body_async, function(test_finish)
     if self.has_run then
-      error 'Attempted to invoke test completion more than once. Check that any async callbacks in the test are not firing multiple times.'
+      u.raise_error 'Attempted to invoke test completion more than once. Check that any async callbacks in the test are not firing multiple times.'
     end
 
     -- Scheduling this allows cleanup to complete before running the next test
@@ -83,7 +83,7 @@ function Test:run_async(callback)
     if test_finish.cleanup then
       local cleanup_successful, cleanup_err = pcall(test_finish.cleanup)
       if not cleanup_successful then
-        error(cleanup_err)
+        u.raise_error(cleanup_err)
       end
     end
 
