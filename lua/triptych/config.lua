@@ -39,6 +39,7 @@ end
 
 ---@class TriptychConfigOptions
 ---@field dirs_first boolean
+---@field collapse_dirs boolean
 ---@field show_hidden boolean
 ---@field line_numbers TriptychConfigLineNumbers
 ---@field file_icons TriptychConfigFileIcons

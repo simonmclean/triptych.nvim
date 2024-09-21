@@ -412,7 +412,9 @@ function Actions.new(State, refresh_view)
         else
           target_path = target.path
         end
-        view.set_primary_and_parent_window_targets(State, target_path)
+        if target_path then
+          view.set_primary_and_parent_window_targets(State, target_path)
+        end
       else
         edit_file(target.path, 'in-place')
       end
