@@ -365,21 +365,13 @@ function Actions.new(State, refresh_view)
 
   ---@return nil
   M.toggle_hidden = function()
-    if State.show_hidden then
-      State.show_hidden = false
-    else
-      State.show_hidden = true
-    end
+    State.show_hidden = not State.show_hidden
     refresh_view()
   end
 
   ---@return nil
   M.toggle_collapse_dirs = function()
-    if State.collapse_dirs then
-      State.collapse_dirs = false
-    else
-      State.collapse_dirs = true
-    end
+    State.collapse_dirs = not State.collapse_dirs
     refresh_view()
   end
 
