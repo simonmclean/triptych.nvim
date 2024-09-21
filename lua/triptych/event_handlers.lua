@@ -3,6 +3,7 @@ local log = require 'triptych.logger'
 local float = require 'triptych.float'
 local autocmds = require 'triptych.autocmds'
 local view = require 'triptych.view'
+local fs = require 'triptych.fs'
 
 local M = {}
 
@@ -16,7 +17,13 @@ function M.handle_cursor_moved(State)
   local line_number = vim.api.nvim_win_get_cursor(0)[1]
   State.path_to_line_map[current_dir] = line_number
   if target then
-    view.set_child_window_target(State, target)
+    local final_target
+    if State.collapse_dirs and target.is_dir and target.collapse_path then
+      final_target = fs.read_path(target.collapse_path, true)
+    else
+      final_target = target
+    end
+    view.set_child_window_target(State, final_target)
   end
 end
 

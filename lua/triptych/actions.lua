@@ -365,11 +365,13 @@ function Actions.new(State, refresh_view)
 
   ---@return nil
   M.toggle_hidden = function()
-    if State.show_hidden then
-      State.show_hidden = false
-    else
-      State.show_hidden = true
-    end
+    State.show_hidden = not State.show_hidden
+    refresh_view()
+  end
+
+  ---@return nil
+  M.toggle_collapse_dirs = function()
+    State.collapse_dirs = not State.collapse_dirs
     refresh_view()
   end
 
@@ -396,7 +398,15 @@ function Actions.new(State, refresh_view)
     local target = view.get_target_under_cursor(State)
     if target then
       if target.is_dir then
-        view.set_primary_and_parent_window_targets(State, target.path)
+        local target_path
+        if State.collapse_dirs and target.collapse_path then
+          target_path = target.collapse_path
+        else
+          target_path = target.path
+        end
+        if target_path then
+          view.set_primary_and_parent_window_targets(State, target_path)
+        end
       else
         edit_file(target.path, 'in-place')
       end

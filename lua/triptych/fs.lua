@@ -38,10 +38,37 @@ M.read_file_async = plenary_async.wrap(function(file_path, callback)
   end)
 end, 2)
 
+---Keep recursively reading into sub-directories, so long as each sub-directory contains only a single directory and no files
+---@param path string
+---@param display_name string
+---@return string - full path
+---@return string - display name
+local function read_collapsed_dirs(path, display_name)
+  local handle, _ = vim.loop.fs_scandir(path)
+  if not handle then
+    return path, display_name
+  end
+
+  local first_node_name, first_node_type = vim.loop.fs_scandir_next(handle)
+
+  -- Empty dir, or node is not a directory
+  if not first_node_name or first_node_type ~= 'directory' then
+    return path, display_name
+  end
+
+  local second_node_name, _ = vim.loop.fs_scandir_next(handle)
+
+  -- Directory contains more than 1 node
+  if second_node_name then
+    return path, display_name
+  end
+
+  return read_collapsed_dirs(path .. '/' .. first_node_name, display_name .. first_node_name .. '/')
+end
+
 ---@param _path string
----@param show_hidden boolean
----@param callback fun(path_details: PathDetails): nil
-function M.get_path_details(_path, show_hidden, callback)
+---@param include_collapsed boolean whether to drill recursively into collapsed dirs
+function M.read_path(_path, include_collapsed)
   local path = vim.fs.normalize(_path)
 
   local tree = {
@@ -56,8 +83,7 @@ function M.get_path_details(_path, show_hidden, callback)
   local handle, _ = vim.loop.fs_scandir(path)
   if not handle then
     -- On error fallback to cwd
-    M.get_path_details(vim.fn.getcwd(), show_hidden, callback)
-    return
+    return M.read_path(vim.fn.getcwd())
   end
 
   while true do
@@ -66,16 +92,13 @@ function M.get_path_details(_path, show_hidden, callback)
       break
     end
     local entry_path = path .. '/' .. name
-    table.insert(tree.children, {
-      display_name = u.eval(function()
-        if type == 'directory' then
-          return name .. '/'
-        end
-        return name
-      end),
+    local is_dir = type == 'directory'
+    local display_name = is_dir and (name .. '/') or name
+    local entry = {
+      display_name = display_name,
       path = entry_path,
       dirname = path,
-      is_dir = type == 'directory',
+      is_dir = is_dir,
       filetype = u.eval(function()
         if type == 'directory' then
           return
@@ -83,7 +106,13 @@ function M.get_path_details(_path, show_hidden, callback)
         return M.get_filetype_from_path(entry_path)
       end),
       children = {},
-    })
+    }
+    if is_dir and include_collapsed then
+      local collapsed_path, collapsed_display_name = read_collapsed_dirs(entry_path, display_name)
+      entry.collapse_path = collapsed_path
+      entry.collapse_display_name = collapsed_display_name
+    end
+    table.insert(tree.children, entry)
   end
 
   if vim.g.triptych_config.options.dirs_first then
@@ -98,7 +127,7 @@ function M.get_path_details(_path, show_hidden, callback)
     end)
   end
 
-  callback(tree)
+  return tree
 end
 
 return M

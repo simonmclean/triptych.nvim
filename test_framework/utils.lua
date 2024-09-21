@@ -58,4 +58,13 @@ function M.is_headless()
   return vim.fn.getenv 'HEADLESS' == 'true'
 end
 
+---@param error_message string
+function M.raise_error(error_message)
+  if M.is_headless() then
+    M.print(error_message)
+  else
+    error(error_message)
+  end
+end
+
 return M

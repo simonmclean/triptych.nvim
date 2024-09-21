@@ -96,11 +96,13 @@ require 'triptych'.setup {
     paste = 'p',
     quit = 'q',
     toggle_hidden = '<leader>.',
+    toggle_collapse_dirs = 'z',
   },
   extension_mappings = {},
   options = {
     dirs_first = true,
     show_hidden = false,
+    collapse_dirs = true,
     line_numbers = {
       enabled = true,
       relative = false,

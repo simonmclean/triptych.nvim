@@ -44,6 +44,7 @@ function Mappings.new(State, actions, refresh_fn)
   map('n', mappings.paste, actions.paste)
   map('n', mappings.show_help, actions.help)
   map('n', mappings.toggle_hidden, actions.toggle_hidden)
+  map('n', mappings.toggle_collapse_dirs, actions.toggle_collapse_dirs)
   map('n', mappings.quit, function()
     vim.g.triptych_close() -- TODO: Move to actions
   end)

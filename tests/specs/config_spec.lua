@@ -25,10 +25,12 @@ local function expected_default_config()
       paste = 'p',
       quit = 'q',
       toggle_hidden = '<leader>.',
+      toggle_collapse_dirs = 'z',
     },
     extension_mappings = {},
     options = {
       dirs_first = true,
+      collapse_dirs = true,
       show_hidden = false,
       line_numbers = {
         enabled = true,

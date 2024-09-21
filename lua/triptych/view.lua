@@ -17,6 +17,7 @@ local M = {}
 ---@param Git? Git
 ---@return PathDetails
 local function filter_and_encrich_dir_contents(path_details, show_hidden, Diagnostics, Git)
+  -- If not show_hidden, then filter out git ignored files
   local filtered_children = u.cond(show_hidden, {
     when_true = path_details.children,
     when_false = function()
@@ -39,20 +40,18 @@ local function filter_and_encrich_dir_contents(path_details, show_hidden, Diagno
   return path_details
 end
 
---- Asyncronously read a directory, then publish the results to a User event
+--- Read a directory, then publish the results to a User event
 ---@param path string
----@param show_hidden boolean
 ---@param win_type WinType
-local function read_path_async(path, show_hidden, win_type)
-  fs.get_path_details(path, show_hidden, function(path_details)
-    autocmds.send_path_read(path_details, win_type)
-  end)
+local function read_path_and_publish(path, win_type)
+  local path_details = fs.read_path(path, win_type ~= 'parent')
+  autocmds.send_path_read(path_details, win_type)
 end
 
----Asyncronously read a file, then publish the results to a User event
+---Read a file, then publish the results to a User event
 ---@param child_win_buf number
 ---@param path string
-local function read_file_async(child_win_buf, path)
+local function read_file_and_publish(child_win_buf, path)
   plenary_async.run(function()
     fs.read_file_async(path, function(err, lines)
       if err then
@@ -67,12 +66,16 @@ end
 ---Take a PathDetails and return lines and highlights for an nvim buffer
 ---@param State TriptychState
 ---@param path_details PathDetails
+---@param win_type WinType
+---@param hidden_count integer
 ---@return string[] # Lines including icons
 ---@return HighlightDetails[]
-local function path_details_to_lines(State, path_details)
+local function path_details_to_lines(State, path_details, win_type, hidden_count)
   local config_options = vim.g.triptych_config.options
   local icons_enabled = config_options.file_icons.enabled
+  ---@type string[]
   local lines = {}
+  ---@type { icon: { highlight_name: string, length: integer }, text: { highlight_name: string, starts: integer } }[]
   local highlights = {}
 
   for _, child in ipairs(path_details.children) do
@@ -95,9 +98,15 @@ local function path_details_to_lines(State, path_details)
             }),
           },
         }
+        local display_name = u.eval(function()
+          if State.collapse_dirs and win_type ~= 'parent' then
+            return child.collapse_display_name
+          end
+          return child.display_name
+        end)
         local line = u.cond(icons_enabled, {
-          when_true = config_options.file_icons.directory_icon .. ' ' .. child.display_name,
-          when_false = child.display_name,
+          when_true = config_options.file_icons.directory_icon .. ' ' .. display_name,
+          when_false = display_name,
         })
         return line, highlight
       end,
@@ -153,6 +162,20 @@ local function path_details_to_lines(State, path_details)
 
     table.insert(lines, line)
     table.insert(highlights, highlight_name)
+  end
+
+  if hidden_count > 0 then
+    table.insert(lines, '+ ' .. hidden_count .. ' hidden...')
+    table.insert(highlights, {
+      icon = {
+        highlight_name = '',
+        length = 0,
+      },
+      text = {
+        highlight_name = 'Comment',
+        starts = 0,
+      },
+    })
   end
 
   return lines, highlights
@@ -277,8 +300,8 @@ function M.set_primary_and_parent_window_targets(State, target_dir)
     },
   }
 
-  read_path_async(parent_path, State.show_hidden, 'parent')
-  read_path_async(target_dir, State.show_hidden, 'primary')
+  read_path_and_publish(parent_path, 'parent')
+  read_path_and_publish(target_dir, 'primary')
 end
 
 --- Set lines for the parent or primary window
@@ -305,9 +328,14 @@ function M.set_parent_or_primary_window_lines(State, path_details, win_type, Dia
 
   local buf = vim.api.nvim_win_get_buf(state.win)
 
+  -- Counting before filter_and_encrich_dir_contents as that method mutates this list
+  local original_children_count = #path_details.children
+
   local contents = filter_and_encrich_dir_contents(path_details, State.show_hidden, Diagnostics, Git)
 
-  local lines, highlights = path_details_to_lines(State, contents)
+  local hidden_count = original_children_count - #contents.children
+
+  local lines, highlights = path_details_to_lines(State, contents, win_type, hidden_count)
 
   float.win_set_lines(state.win, lines, win_type == 'primary')
 
@@ -386,7 +414,7 @@ function M.set_child_window_target(State, path_details)
       'Directory',
       get_title_postfix(path_details.path)
     )
-    read_path_async(path_details.path, State.show_hidden, 'child')
+    read_path_and_publish(path_details.path, 'child')
   else
     local filetype = fs.get_filetype_from_path(path_details.path) -- TODO: De-dupe this
     local icon, highlight = icons.get_icon_by_filetype(filetype)
@@ -394,7 +422,7 @@ function M.set_child_window_target(State, path_details)
     float.buf_set_lines(buf, {})
     local file_size = fs.get_file_size_in_kb(path_details.path)
     if file_size < 300 then
-      read_file_async(buf, path_details.path)
+      read_file_and_publish(buf, path_details.path)
     else
       local msg = '[File size too large to preview]'
       float.buf_set_lines(buf, { msg })
@@ -417,8 +445,11 @@ function M.set_child_window_lines(State, path_details, Diagnostics, Git)
   end
 
   if path_details.is_dir then
+    -- Counting before filter_and_encrich_dir_contents as that method mutates this list
+    local original_children_count = #path_details.children
     local contents = filter_and_encrich_dir_contents(path_details, State.show_hidden, Diagnostics, Git)
-    local lines, highlights = path_details_to_lines(State, contents)
+    local hidden_count = original_children_count - #contents.children
+    local lines, highlights = path_details_to_lines(State, contents, 'child', hidden_count)
     vim.treesitter.stop(buf)
     vim.api.nvim_buf_set_option(buf, 'syntax', 'off')
     float.buf_set_lines(buf, lines)

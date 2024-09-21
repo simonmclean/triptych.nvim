@@ -6,6 +6,93 @@ local function config_warn(config_prop_name)
   end
 end
 
+---@class TriptychConfig
+---@field debug boolean
+---@field mappings TriptychConfigMappings
+---@field extension_mappings { [string]: ExtensionMapping }
+---@field options TriptychConfigOptions
+---@field git_signs TriptychConfigGitSigns
+---@field diagnostic_signs TriptychConfigDiagnostic
+
+---@class TriptychConfigMappings
+---@field show_help KeyMapping
+---@field jump_to_cwd KeyMapping
+---@field nav_left KeyMapping
+---@field nav_right KeyMapping
+---@field open_vsplit KeyMapping
+---@field open_hsplit KeyMapping
+---@field open_tab KeyMapping
+---@field cd KeyMapping
+---@field delete KeyMapping
+---@field add KeyMapping
+---@field copy KeyMapping
+---@field rename KeyMapping
+---@field cut KeyMapping
+---@field paste KeyMapping
+---@field quit KeyMapping
+---@field toggle_hidden KeyMapping
+---@field toggle_collapse_dirs KeyMapping
+
+---@class ExtensionMapping
+---@field mode string
+---@field fn fun(contents?: PathDetails, refresh_fn: fun(): nil): nil
+
+---@class TriptychConfigOptions
+---@field dirs_first boolean
+---@field collapse_dirs boolean
+---@field show_hidden boolean
+---@field line_numbers TriptychConfigLineNumbers
+---@field file_icons TriptychConfigFileIcons
+---@field responsive_column_widths { [string]: number[] }
+---@field highlights TriptychConfigHighlights
+---@field syntax_highlighting TriptychConfigSyntaxHighlighting
+---@field backdrop number
+---@field border string | table
+---@field max_height number
+---@field max_width number
+---@field margin_x number
+---@field margin_y number
+
+---@class TriptychConfigHighlights
+---@field file_names string
+---@field directory_names string
+
+---@class TriptychConfigSyntaxHighlighting
+---@field enabled boolean
+---@field debounce_ms number
+
+---@class TriptychConfigLineNumbers
+---@field enabled boolean
+---@field relative boolean
+
+---@class TriptychConfigFileIcons
+---@field enabled boolean
+---@field directory_icon string
+---@field fallback_file_icon  string
+
+---@class TriptychConfigGitSigns
+---@field enabled boolean
+---@field signs TriptychConfigGitSignsSigns
+
+---@class TriptychConfigGitSignsSigns
+---@field add string | TriptychConfigGitSignDefineOptions
+---@field modify string | TriptychConfigGitSignDefineOptions
+---@field rename string | TriptychConfigGitSignDefineOptions
+---@field untracked string | TriptychConfigGitSignDefineOptions
+
+---@class TriptychConfigGitSignDefineOptions
+---@field icon? string
+---@field linehl? string
+---@field numhl? string
+---@field text? string
+---@field texthl? string
+---@field culhl? string
+
+---@class TriptychConfigDiagnostic
+---@field enabled boolean
+
+---@alias KeyMapping (string | string[])
+
 ---@return TriptychConfig
 local function default_config()
   return {
@@ -28,10 +115,12 @@ local function default_config()
       paste = 'p',
       quit = 'q',
       toggle_hidden = '<leader>.',
+      toggle_collapse_dirs = 'z',
     },
     extension_mappings = {},
     options = {
       dirs_first = true,
+      collapse_dirs = true,
       show_hidden = false,
       line_numbers = {
         enabled = true,

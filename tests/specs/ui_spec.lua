@@ -54,12 +54,12 @@ describe('Triptych UI', {
   test('populates windows with files and folders', function(done)
     local expected_lines = {
       child = { 'level_5/', 'level_4_file_1.lua' },
-      primary = { 'level_4/', 'level_3_file_1.md' },
+      primary = { 'level_4/', 'level_3_file_1.md', '+ 1 hidden...' },
       parent = { 'level_3/', 'level_2_file_1.lua' },
     }
 
     local expected_winbars = {
-      child = '%#WinBar#%=%#WinBar#level_4/%=',
+      child = '%#WinBar#%=%#WinBar#level_4%=',
       primary = '%#WinBar#%=%#WinBar#level_3%=',
       parent = '%#WinBar#%=%#WinBar#level_2%=',
     }
@@ -83,11 +83,11 @@ describe('Triptych UI', {
     local expected_lines = {
       child = { 'level_5_file_1.lua' },
       primary = { 'level_5/', 'level_4_file_1.lua' },
-      parent = { 'level_4/', 'level_3_file_1.md' },
+      parent = { 'level_4/', 'level_3_file_1.md', '+ 1 hidden...' },
     }
 
     local expected_winbars = {
-      child = '%#WinBar#%=%#WinBar#level_5/%=',
+      child = '%#WinBar#%=%#WinBar#level_5%=',
       primary = '%#WinBar#%=%#WinBar#level_4%=',
       parent = '%#WinBar#%=%#WinBar#level_3%=',
     }
@@ -110,13 +110,13 @@ describe('Triptych UI', {
 
   test('navigates up the filesystem', function(done)
     local expected_lines = {
-      child = { 'level_4/', 'level_3_file_1.md' },
+      child = { 'level_4/', 'level_3_file_1.md', '+ 1 hidden...' },
       primary = { 'level_3/', 'level_2_file_1.lua' },
       parent = { 'level_2/', 'level_1_file_1.lua' },
     }
 
     local expected_winbars = {
-      child = '%#WinBar#%=%#WinBar#level_3/%=',
+      child = '%#WinBar#%=%#WinBar#level_3%=',
       primary = '%#WinBar#%=%#WinBar#level_2%=',
       parent = '%#WinBar#%=%#WinBar#level_1%=',
     }
@@ -189,6 +189,7 @@ describe('Triptych UI', {
         'level_4/',
         'a_new_file.lua',
         'level_3_file_1.md',
+        '+ 1 hidden...',
       },
       child = {
         'another_new_file.md',
@@ -260,6 +261,7 @@ describe('Triptych UI', {
       primary = {
         'level_4/',
         'level_3_file_1.md',
+        '+ 1 hidden...',
       },
       child = {
         'another_new_file.md',
@@ -409,6 +411,7 @@ describe('Triptych UI', {
         'level_4/',
         'level_3_file_1.md',
         'level_3_file_1_copy1.md',
+        '+ 1 hidden...',
       },
       child = {
         'level_5/',
@@ -457,6 +460,7 @@ describe('Triptych UI', {
       primary = {
         'renamed_dir/',
         'renamed_file.lua',
+        '+ 1 hidden...',
       },
     }
 
@@ -534,6 +538,7 @@ describe('Triptych UI', {
       primary = {
         'level_4/',
         'level_3_file_1.md',
+        '+ 2 hidden...',
       },
     }
     local expected_lines_with_hidden = {
@@ -600,6 +605,42 @@ describe('Triptych UI', {
               end,
             }
           end)
+        end)
+      end)
+    end)
+  end),
+
+  test('toggles collapsed folders', function(done)
+    os.execute('mkdir -p ' .. opening_dir .. '/a/b/c')
+    os.execute('touch ' .. opening_dir .. '/a/b/c/file')
+
+    local expected_collapsed_lines = {
+      primary = { 'a/b/c/', 'level_4/', 'level_3_file_1.md', '+ 1 hidden...' },
+      child = { 'file' },
+    }
+
+    local expected_uncollapsed_lines = {
+      primary = { 'a/', 'level_4/', 'level_3_file_1.md', '+ 1 hidden...' },
+      child = { 'b/' },
+    }
+
+    open_triptych(function()
+      local state_collapsed = u.get_state()
+      u.press_keys 'z'
+      u.on_all_wins_updated(function()
+        local state_uncollapsed = u.get_state()
+        close_triptych(function()
+          done {
+            assertions = function()
+              assert.same(expected_collapsed_lines.primary, state_collapsed.lines.primary)
+              assert.same(expected_collapsed_lines.child, state_collapsed.lines.child)
+              assert.same(expected_uncollapsed_lines.primary, state_uncollapsed.lines.primary)
+              assert.same(expected_uncollapsed_lines.child, state_uncollapsed.lines.child)
+            end,
+            cleanup = function()
+              os.execute('rm -rf ' .. opening_dir .. '/a')
+            end,
+          }
         end)
       end)
     end)
