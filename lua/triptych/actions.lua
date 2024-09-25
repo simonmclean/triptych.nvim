@@ -164,6 +164,8 @@ function Actions.new(State, refresh_view)
     end
     local response_length = string.len(response)
     local includes_file = string.sub(response, response_length, response_length) ~= '/'
+    local resulting_path
+    local resulting_path_is_dir = false
     if includes_file then
       local includes_dirs = string.find(response, '/') ~= nil
 
@@ -174,18 +176,20 @@ function Actions.new(State, refresh_view)
         local absolute_dir_path = u.path_join(current_directory, dirs_to_create)
         vim.fn.mkdir(absolute_dir_path, 'p')
         -- TODO: writefile is destructive. Add checking
-        local final_path = absolute_dir_path .. filename
-        write_node_and_publish(final_path, false)
+        resulting_path = absolute_dir_path .. filename
       else
-        local final_path = u.path_join(current_directory, response)
-        write_node_and_publish(final_path, false)
+        resulting_path = u.path_join(current_directory, response)
       end
     else
-      local path = u.path_join(current_directory, response)
-      write_node_and_publish(path, true)
+      resulting_path = u.path_join(current_directory, response)
+      resulting_path_is_dir = true
     end
 
-    refresh_view()
+    if resulting_path then
+      write_node_and_publish(resulting_path, resulting_path_is_dir)
+    end
+
+    refresh_view(resulting_path)
   end
 
   ---@return nil
