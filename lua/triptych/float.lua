@@ -66,7 +66,7 @@ function M.win_set_title(win, title, icon, icon_highlight, postfix)
     local maybe_icon = ''
     if vim.g.triptych_config.options.file_icons.enabled and icon then
       if icon_highlight then
-        -- Apply icon highlight as foreground, combined with Winbar Background
+        -- Apply icon highlight as foreground, combined with Winbar background
         maybe_icon = hl_utils.with_highlight_groups(icon_highlight, winbar_highlight_group, icon) .. ' '
       else
         maybe_icon = icon .. ' '
@@ -76,7 +76,6 @@ function M.win_set_title(win, title, icon, icon_highlight, postfix)
     if postfix and postfix ~= '' then
       safe_title = safe_title .. ' ' .. hl_utils.with_highlight_groups('Comment', winbar_highlight_group, postfix)
     end
-    local title_with_hi = hl_utils.with_highlight_group(winbar_highlight_group, safe_title)
     vim.wo.winbar = hl_utils.with_highlight_group(winbar_highlight_group, '%=' .. maybe_icon .. safe_title .. '%=')
   end)
 end
