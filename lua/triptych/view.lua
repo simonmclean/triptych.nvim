@@ -468,22 +468,6 @@ function M.set_child_window_lines(State, path_details, Diagnostics, Git)
 end
 
 ---@param State TriptychState
----@param path string
----@return nil
-function M.jump_cursor_to(State, path)
-  local line_num
-  for index, item in ipairs(State.windows.current.contents.children) do
-    if item.path == path then
-      line_num = index
-      break
-    end
-  end
-  if line_num then
-    vim.api.nvim_win_set_cursor(0, { line_num, 0 })
-  end
-end
-
----@param State TriptychState
 ---@param maybe_cursor_target_path string?
 ---@return nil
 function M.refresh_view(State, maybe_cursor_target_path)

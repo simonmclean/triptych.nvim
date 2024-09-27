@@ -90,7 +90,7 @@ end
 
 --- TODO: Return type
 ---@param State TriptychState
----@param refresh_view fun(): nil
+---@param refresh_view fun(maybe_cursor_target_path: string?): nil
 function Actions.new(State, refresh_view)
   local M = {}
 
@@ -310,6 +310,10 @@ function Actions.new(State, refresh_view)
   ---@return nil
   M.paste = function()
     local cursor_target = view.get_target_under_cursor(State)
+
+    ---@type string|nil
+    local cursor_target_after_paste
+
     local destination_dir = u.eval(function()
       if not cursor_target then
         return State.windows.current.path
@@ -319,15 +323,20 @@ function Actions.new(State, refresh_view)
       end
       return cursor_target.dirname
     end)
+
     ---@type PathDetails[]
     local delete_list = {}
 
     local success, result = pcall(function()
+      ---@type string[]
+      local pasted_paths = {}
+
       -- Handle cut items
       for _, item in ipairs(State.cut_list) do
         local destination = u.path_join(destination_dir, item.display_name)
         if item.path ~= destination then
           rename_node_and_publish(item.path, destination)
+          table.insert(pasted_paths, destination)
         end
       end
 
@@ -339,16 +348,19 @@ function Actions.new(State, refresh_view)
           destination = string.sub(destination, 1, #destination - 1)
         end
         duplicate_node_and_publish(item, destination)
+        table.insert(pasted_paths, destination)
       end
 
-      view.jump_cursor_to(State, destination_dir)
+      -- Set cursor_target_after_paste as the first item alphabetically
+      table.sort(pasted_paths)
+      cursor_target_after_paste = pasted_paths[1]
     end)
     if not success then
       vim.print('Failed to paste "' .. result .. '"')
     end
     State:list_remove_all 'cut'
     State:list_remove_all 'copy'
-    refresh_view()
+    refresh_view(cursor_target_after_paste)
   end
 
   ---@param path string

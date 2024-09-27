@@ -104,7 +104,7 @@ local function toggle_triptych(dir)
   -- Autocmds need to be created after the above state is set
   local AutoCmds = autocmds.new(event_handlers, State, Diagnostics, Git)
 
-  ---@param maybe_cursor_target_path string
+  ---@param maybe_cursor_target_path string?
   local refresh_fn = function(maybe_cursor_target_path)
     if vim.g.triptych_is_open then
       view.refresh_view(State, maybe_cursor_target_path)
