@@ -77,13 +77,6 @@ local function string_join(sep, str_list)
   return result
 end
 
----@param group_name string
----@param str string
----@return string
-local function with_highlight_group(group_name, str)
-  return '%#' .. group_name .. '#' .. str
-end
-
 ---@param list any[]
 ---@param value_or_fn function | string | number | integer
 ---@return integer
@@ -310,7 +303,6 @@ return {
   list_includes = list_includes,
   list_index_of = list_index_of,
   list_concat = list_concat,
-  with_highlight_group = with_highlight_group,
   is_empty = is_empty,
   is_defined = is_defined,
   trim_last_char = trim_last_char,

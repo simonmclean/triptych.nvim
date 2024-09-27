@@ -1,8 +1,11 @@
 local u = require 'triptych.utils'
 local fs = require 'triptych.fs'
 local syntax_highlighting = require 'triptych.syntax_highlighting'
+local hl_utils = require 'triptych.highlight_groups'
 
 local M = {}
+
+local winbar_highlight_group = 'WinBar'
 
 ---Modify a buffer which is readonly and not modifiable
 ---@param buf number
@@ -55,25 +58,26 @@ end
 ---@param win number
 ---@param title string
 ---@param icon? string
----@param highlight? string
+---@param icon_highlight? string
 ---@param postfix? string
 ---@return nil
-function M.win_set_title(win, title, icon, highlight, postfix)
+function M.win_set_title(win, title, icon, icon_highlight, postfix)
   vim.api.nvim_win_call(win, function()
     local maybe_icon = ''
     if vim.g.triptych_config.options.file_icons.enabled and icon then
-      if highlight then
-        maybe_icon = u.with_highlight_group(highlight, icon) .. ' '
+      if icon_highlight then
+        -- Apply icon highlight as foreground, combined with Winbar Background
+        maybe_icon = hl_utils.with_highlight_groups(icon_highlight, winbar_highlight_group, icon) .. ' '
       else
         maybe_icon = icon .. ' '
       end
     end
     local safe_title = string.gsub(title, '%%', '')
     if postfix and postfix ~= '' then
-      safe_title = safe_title .. ' ' .. u.with_highlight_group('Comment', postfix)
+      safe_title = safe_title .. ' ' .. hl_utils.with_highlight_groups('Comment', winbar_highlight_group, postfix)
     end
-    local title_with_hi = u.with_highlight_group('WinBar', safe_title)
-    vim.wo.winbar = u.with_highlight_group('WinBar', '%=' .. maybe_icon .. title_with_hi .. '%=')
+    local title_with_hi = hl_utils.with_highlight_group(winbar_highlight_group, safe_title)
+    vim.wo.winbar = hl_utils.with_highlight_group(winbar_highlight_group, '%=' .. maybe_icon .. safe_title .. '%=')
   end)
 end
 
