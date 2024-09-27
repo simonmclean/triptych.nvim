@@ -59,9 +59,9 @@ describe('Triptych UI', {
     }
 
     local expected_winbars = {
-      child = '%#WinBar#%=%#WinBar#level_4%=',
-      primary = '%#WinBar#%=%#WinBar#level_3%=',
-      parent = '%#WinBar#%=%#WinBar#level_2%=',
+      child = '%#WinBar#%=level_4%=',
+      primary = '%#WinBar#%=level_3%=',
+      parent = '%#WinBar#%=level_2%=',
     }
 
     local result
@@ -87,9 +87,9 @@ describe('Triptych UI', {
     }
 
     local expected_winbars = {
-      child = '%#WinBar#%=%#WinBar#level_5%=',
-      primary = '%#WinBar#%=%#WinBar#level_4%=',
-      parent = '%#WinBar#%=%#WinBar#level_3%=',
+      child = '%#WinBar#%=level_5%=',
+      primary = '%#WinBar#%=level_4%=',
+      parent = '%#WinBar#%=level_3%=',
     }
 
     open_triptych(function()
@@ -116,9 +116,9 @@ describe('Triptych UI', {
     }
 
     local expected_winbars = {
-      child = '%#WinBar#%=%#WinBar#level_3%=',
-      primary = '%#WinBar#%=%#WinBar#level_2%=',
-      parent = '%#WinBar#%=%#WinBar#level_1%=',
+      child = '%#WinBar#%=level_3%=',
+      primary = '%#WinBar#%=level_2%=',
+      parent = '%#WinBar#%=level_1%=',
     }
 
     open_triptych(function()
@@ -582,8 +582,8 @@ describe('Triptych UI', {
 
   test('jumps to cwd and back', function(done)
     -- Using the winbar as a proxy for directory
-    local expected_winbar_after_first_jump = '%#WinBar#%=%#WinBar#triptych %#Comment#(cwd)%='
-    local expected_winbar_after_second_jump = '%#WinBar#%=%#WinBar#level_3%='
+    local expected_winbar_after_first_jump = '%#WinBar#%=triptych %#TriptychFgCommentBgWinBar#(cwd)%#WinBar#%='
+    local expected_winbar_after_second_jump = '%#WinBar#%=level_3%='
 
     local winbar_after_first_jump
     local winbar_after_second_jump
