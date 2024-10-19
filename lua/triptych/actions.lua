@@ -175,7 +175,6 @@ function Actions.new(State, refresh_view)
         local dirs_to_create = string.sub(response, 1, response_length - length_of_filename)
         local absolute_dir_path = u.path_join(current_directory, dirs_to_create)
         vim.fn.mkdir(absolute_dir_path, 'p')
-        -- TODO: writefile is destructive. Add checking
         resulting_path = absolute_dir_path .. filename
       else
         resulting_path = u.path_join(current_directory, response)
@@ -189,7 +188,9 @@ function Actions.new(State, refresh_view)
       write_node_and_publish(resulting_path, resulting_path_is_dir)
     end
 
-    refresh_view(resulting_path)
+    local cursor_target = u.path_join(current_directory, u.path_split(response)[1])
+
+    refresh_view(cursor_target)
   end
 
   ---@return nil
