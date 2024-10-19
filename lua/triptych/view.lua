@@ -43,9 +43,10 @@ end
 --- Read a directory, then publish the results to a User event
 ---@param path string
 ---@param win_type WinType
-local function read_path_and_publish(path, win_type)
+---@param maybe_cursor_target_path string?
+local function read_path_and_publish(path, win_type, maybe_cursor_target_path)
   local path_details = fs.read_path(path, win_type ~= 'parent')
-  autocmds.send_path_read(path_details, win_type)
+  autocmds.send_path_read(path_details, win_type, maybe_cursor_target_path)
 end
 
 ---Read a file, then publish the results to a User event
@@ -266,8 +267,9 @@ end
 --- On the parent and primary windows, update the title and state, then trigger async directory read
 ---@param State TriptychState
 ---@param target_dir string
+---@param maybe_cursor_target_path string?
 ---@return nil
-function M.set_primary_and_parent_window_targets(State, target_dir)
+function M.set_primary_and_parent_window_targets(State, target_dir, maybe_cursor_target_path)
   local focused_win = State.windows.current.win
   local parent_win = State.windows.parent.win
   local child_win = State.windows.child.win
@@ -301,7 +303,7 @@ function M.set_primary_and_parent_window_targets(State, target_dir)
   }
 
   read_path_and_publish(parent_path, 'parent')
-  read_path_and_publish(target_dir, 'primary')
+  read_path_and_publish(target_dir, 'primary', maybe_cursor_target_path)
 end
 
 --- Set lines for the parent or primary window
@@ -466,25 +468,10 @@ function M.set_child_window_lines(State, path_details, Diagnostics, Git)
 end
 
 ---@param State TriptychState
----@param path string
+---@param maybe_cursor_target_path string?
 ---@return nil
-function M.jump_cursor_to(State, path)
-  local line_num
-  for index, item in ipairs(State.windows.current.contents.children) do
-    if item.path == path then
-      line_num = index
-      break
-    end
-  end
-  if line_num then
-    vim.api.nvim_win_set_cursor(0, { line_num, 0 })
-  end
-end
-
----@param State TriptychState
----@return nil
-function M.refresh_view(State)
-  M.set_primary_and_parent_window_targets(State, State.windows.current.path)
+function M.refresh_view(State, maybe_cursor_target_path)
+  M.set_primary_and_parent_window_targets(State, State.windows.current.path, maybe_cursor_target_path)
 end
 
 return M

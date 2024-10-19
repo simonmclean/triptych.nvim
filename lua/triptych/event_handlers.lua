@@ -30,11 +30,11 @@ end
 ---Get the line number of a particular path in the buffer
 ---@param path string
 ---@param path_details PathDetails[]
----@return integer
+---@return integer|nil
 local function line_number_of_path(path, path_details)
-  local num = 1
+  local num
   for i, child in ipairs(path_details) do
-    if child.path == path then
+    if child.path == path or child.path .. '/' == path then
       num = i
       break
     end
@@ -46,10 +46,11 @@ end
 ---@param State TriptychState
 ---@param path_details PathDetails
 ---@param win_type WinType
+---@param maybe_cursor_target? string
 ---@param Diagnostics? Diagnostics
 ---@param Git? Git
 ---@return nil
-function M.handle_dir_read(State, path_details, win_type, Diagnostics, Git)
+function M.handle_dir_read(State, path_details, win_type, maybe_cursor_target, Diagnostics, Git)
   log.debug('handle_cursor_moved', { win_type = win_type })
   view.set_parent_or_primary_window_lines(State, path_details, win_type, Diagnostics, Git)
 
@@ -66,6 +67,22 @@ function M.handle_dir_read(State, path_details, win_type, Diagnostics, Git)
         -- Cache this line number
         State.path_to_line_map[path_details.path] = line_num
       end
+    end
+  elseif win_type == 'primary' and maybe_cursor_target then
+    local maybe_line_num = u.eval(function()
+      -- If the target is a hidden file/dir then we won't have a line number
+      local from_cursor_target = line_number_of_path(maybe_cursor_target, path_details.children)
+      if from_cursor_target then
+        return from_cursor_target
+      elseif maybe_cached_line_num then
+        return maybe_cached_line_num
+      end
+    end)
+    vim.api.nvim_win_set_cursor(State.windows.current.win, { maybe_line_num or 1, 0 })
+    if maybe_line_num then
+      -- Cache this line number
+      State.path_to_line_map[path_details.path] = maybe_line_num
+    else
     end
   elseif win_type == 'primary' and maybe_cached_line_num then
     local line_count = vim.api.nvim_buf_line_count(vim.api.nvim_win_get_buf(State.windows.current.win))

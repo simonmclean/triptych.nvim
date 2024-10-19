@@ -428,7 +428,7 @@ describe('Triptych UI', {
         u.press_keys 'p'
         u.on_primary_window_updated(function()
           -- Copy file again, move up over directory
-          u.press_keys 'ck'
+          u.press_keys 'kck'
           u.on_primary_window_updated(function()
             -- Paste
             u.press_keys 'p'

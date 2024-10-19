@@ -90,7 +90,7 @@ end
 
 --- TODO: Return type
 ---@param State TriptychState
----@param refresh_view fun(): nil
+---@param refresh_view fun(maybe_cursor_target_path: string?): nil
 function Actions.new(State, refresh_view)
   local M = {}
 
@@ -164,6 +164,8 @@ function Actions.new(State, refresh_view)
     end
     local response_length = string.len(response)
     local includes_file = string.sub(response, response_length, response_length) ~= '/'
+    local resulting_path
+    local resulting_path_is_dir = false
     if includes_file then
       local includes_dirs = string.find(response, '/') ~= nil
 
@@ -173,19 +175,22 @@ function Actions.new(State, refresh_view)
         local dirs_to_create = string.sub(response, 1, response_length - length_of_filename)
         local absolute_dir_path = u.path_join(current_directory, dirs_to_create)
         vim.fn.mkdir(absolute_dir_path, 'p')
-        -- TODO: writefile is destructive. Add checking
-        local final_path = absolute_dir_path .. filename
-        write_node_and_publish(final_path, false)
+        resulting_path = absolute_dir_path .. filename
       else
-        local final_path = u.path_join(current_directory, response)
-        write_node_and_publish(final_path, false)
+        resulting_path = u.path_join(current_directory, response)
       end
     else
-      local path = u.path_join(current_directory, response)
-      write_node_and_publish(path, true)
+      resulting_path = u.path_join(current_directory, response)
+      resulting_path_is_dir = true
     end
 
-    refresh_view()
+    if resulting_path then
+      write_node_and_publish(resulting_path, resulting_path_is_dir)
+    end
+
+    local cursor_target = u.path_join(current_directory, u.path_split(response)[1])
+
+    refresh_view(cursor_target)
   end
 
   ---@return nil
@@ -306,6 +311,10 @@ function Actions.new(State, refresh_view)
   ---@return nil
   M.paste = function()
     local cursor_target = view.get_target_under_cursor(State)
+
+    ---@type string|nil
+    local cursor_target_after_paste
+
     local destination_dir = u.eval(function()
       if not cursor_target then
         return State.windows.current.path
@@ -315,15 +324,20 @@ function Actions.new(State, refresh_view)
       end
       return cursor_target.dirname
     end)
+
     ---@type PathDetails[]
     local delete_list = {}
 
     local success, result = pcall(function()
+      ---@type string[]
+      local pasted_paths = {}
+
       -- Handle cut items
       for _, item in ipairs(State.cut_list) do
         local destination = u.path_join(destination_dir, item.display_name)
         if item.path ~= destination then
           rename_node_and_publish(item.path, destination)
+          table.insert(pasted_paths, destination)
         end
       end
 
@@ -335,16 +349,19 @@ function Actions.new(State, refresh_view)
           destination = string.sub(destination, 1, #destination - 1)
         end
         duplicate_node_and_publish(item, destination)
+        table.insert(pasted_paths, destination)
       end
 
-      view.jump_cursor_to(State, destination_dir)
+      -- Set cursor_target_after_paste as the first item alphabetically
+      table.sort(pasted_paths)
+      cursor_target_after_paste = pasted_paths[1]
     end)
     if not success then
       vim.print('Failed to paste "' .. result .. '"')
     end
     State:list_remove_all 'cut'
     State:list_remove_all 'copy'
-    refresh_view()
+    refresh_view(cursor_target_after_paste)
   end
 
   ---@param path string

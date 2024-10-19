@@ -36,7 +36,14 @@ function AutoCommands.new(event_handlers, State, Diagnostics, Git)
       group = au_group_internal,
       pattern = 'TriptychPathRead',
       callback = function(data)
-        event_handlers.handle_dir_read(State, data.data.path_details, data.data.win_type, Diagnostics, Git)
+        event_handlers.handle_dir_read(
+          State,
+          data.data.path_details,
+          data.data.win_type,
+          data.data.maybe_cursor_target_path,
+          Diagnostics,
+          Git
+        )
       end,
     }),
 
@@ -95,11 +102,13 @@ end
 ---Publish the results of an async directory read
 ---@param path_details PathDetails
 ---@param win_type WinType
+---@param maybe_cursor_target_path string?
 ---@return nil
-function M.send_path_read(path_details, win_type)
+function M.send_path_read(path_details, win_type, maybe_cursor_target_path)
   exec_internal_autocmd('TriptychPathRead', {
     path_details = path_details,
     win_type = win_type,
+    maybe_cursor_target_path = maybe_cursor_target_path,
   })
 end
 
