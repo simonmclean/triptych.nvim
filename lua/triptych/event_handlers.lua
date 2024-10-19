@@ -34,7 +34,7 @@ end
 local function line_number_of_path(path, path_details)
   local num
   for i, child in ipairs(path_details) do
-    if (child.path == path or child.path .. '/' == path) then
+    if child.path == path or child.path .. '/' == path then
       num = i
       break
     end
