@@ -65,7 +65,9 @@ Example using Lazy <https://github.com/folke/lazy.nvim>.
         'antosha417/nvim-lsp-file-operations' -- optional LSP integration
       },
       opts = {}, -- config options here
-      keys = { '<leader>-', ':Triptych<CR>' }
+      keys = {
+        { '<leader>-', ':Triptych<CR>' },
+      },
     }
 <
 
