@@ -39,12 +39,12 @@ You only ever control or focus the middle window.
 ## ⚡️ Requirements
 
 - Neovim >= 0.9.0
-- [nvim-lua/plenary.nvim](https://github.com/nvim-lua/plenary.nvim) 
+- [nvim-lua/plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
 - Optional, if you want fancy icons
-    - [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons) 
+    - [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons)
     -  A [Nerd Font](https://www.nerdfonts.com/)
 - Optional, if you want LSP integration for filesystem operations
-   - [antosha417/nvim-lsp-file-operations](https://github.com/antosha417/nvim-lsp-file-operations) 
+   - [antosha417/nvim-lsp-file-operations](https://github.com/antosha417/nvim-lsp-file-operations)
 
 ## 📦 Installation
 
@@ -60,7 +60,9 @@ Example using [Lazy](https://github.com/folke/lazy.nvim).
     'antosha417/nvim-lsp-file-operations' -- optional LSP integration
   },
   opts = {}, -- config options here
-  keys = { '<leader>-', ':Triptych<CR>' }
+  keys = {
+    { '<leader>-', ':Triptych<CR>' },
+  },
 }
 ```
 
@@ -165,7 +167,7 @@ Key mappings can either be a string, or a table of strings if you want multiple 
 If you have [antosha417/nvim-lsp-file-operations](https://github.com/antosha417/nvim-lsp-file-operations) installed, performing
 certain filesystem operations in Triptych (creating, deleting and moving/renaming files and folders) will send a message to the language server via LSP.
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > Triptych itself doesn't have any LSP related code. It merely publishes events about what's changed. `nvim-lsp-file-operations` then subscribes to these events, and informs the language server via LSP. What effect this has depends entirely on the capabilities of the language server, as well as how the user has configured it.
 
 ## Extending functionality
