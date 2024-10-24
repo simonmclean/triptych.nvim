@@ -31,6 +31,7 @@ You only ever control or focus the middle window.
     - Delete (including bulk)
     - Copy 'n' paste (including bulk) [^1]
     - Cut 'n' paste (including bulk) [^1]
+    - LSP integration (via [antosha417/nvim-lsp-file-operations](https://github.com/antosha417/nvim-lsp-file-operations))
 - Extensible
 
 [^1]: These are not currently working on the Windows operating system
@@ -42,6 +43,8 @@ You only ever control or focus the middle window.
 - Optional, if you want fancy icons
     - [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons) plugin
     -  A [Nerd Font](https://www.nerdfonts.com/)
+- Optional, if you want LSP integration for filesystem operations
+   - [antosha417/nvim-lsp-file-operations](https://github.com/antosha417/nvim-lsp-file-operations)
 
 ## 📦 Installation
 
@@ -53,21 +56,24 @@ Example using [Lazy](https://github.com/folke/lazy.nvim).
   event = 'VeryLazy',
   dependencies = {
     'nvim-lua/plenary.nvim', -- required
-    'nvim-tree/nvim-web-devicons', -- optional
-  }
+    'nvim-tree/nvim-web-devicons', -- optional for icons
+    'antosha417/nvim-lsp-file-operations' -- optional LSP integration
+  },
+  opts = {}, -- config options here
+  keys = { '<leader>-', ':Triptych<CR>' }
 }
 ```
 
-Then call the `setup` function somewhere in your Neovim config to initialise it with the default options.
+If not using Lazy, make sure to call the `setup` function like this:
 
 ```lua
 require 'triptych'.setup()
 ```
 
-Launch using the `:Triptych` command, which will toggle Triptych open/closed. You may want to create a binding for this.
+And optionally create a keymap for opening Triptych like this:
 
 ```lua
-vim.keymap.set('n', '<leader>-', ':Triptych<CR>', { silent = true })
+vim.keymap.set('n', '<leader>-', ':Triptych<CR>', { silent = true, desc = 'Toggle Triptych' })
 ```
 
 ## ⚙️ Configuration
@@ -77,7 +83,7 @@ Below is the default configuration. Feel free to override any of these.
 Key mappings can either be a string, or a table of strings if you want multiple bindings.
 
 ```lua
-require 'triptych'.setup {
+{
   mappings = {
     -- Everything below is buffer-local, meaning it will only apply to Triptych windows
     show_help = 'g?',
@@ -154,6 +160,13 @@ require 'triptych'.setup {
 }
 ```
 
+## LSP Integration
+
+If you have [antosha417/nvim-lsp-file-operations](https://github.com/antosha417/nvim-lsp-file-operations) installed and loaded, performing
+certain filesystem operations in Triptych (creating, deleting and moving/renaming files and folders) will send a message to the language server via LSP.
+
+What effect this has, if any, is entirely dependant on the language server.
+
 ## Extending functionality
 
 The `extension_mappings` property allows you add any arbitrary functionality based on the current cursor target.
@@ -178,14 +191,16 @@ If you want to make `<c-f>` search the file or directory under the cursor using 
 
 ```lua
 {
-  extension_mappings = {
-    ['<c-f>'] = {
-      mode = 'n',
-      fn = function(target, _)
-        require 'telescope.builtin'.live_grep {
-          search_dirs = { target.path }
-        }
-      end
+  opts = {
+    extension_mappings = {
+      ['<c-f>'] = {
+        mode = 'n',
+        fn = function(target, _)
+          require 'telescope.builtin'.live_grep {
+            search_dirs = { target.path }
+          }
+        end
+      }
     }
   }
 }
