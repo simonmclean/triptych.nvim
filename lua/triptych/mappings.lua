@@ -1,3 +1,4 @@
+local tbl = require 'plenary.tbl'
 local view = require 'triptych.view'
 
 local Mappings = {}
@@ -12,12 +13,14 @@ function Mappings.new(State, actions, refresh_fn)
   ---@param mode string
   ---@param key_or_keys string | string[]
   ---@param fn fun(): nil
-  local function map(mode, key_or_keys, fn)
+  ---@param opts table 
+  local function map(mode, key_or_keys, fn, opts)
+    opts = tbl.apply_defaults(opts, { buffer = 0, nowait = true })
     if type(key_or_keys) == 'string' then
-      vim.keymap.set(mode, key_or_keys, fn, { buffer = 0, nowait = true })
+      vim.keymap.set(mode, key_or_keys, fn, opts)
     else
       for _, key in pairs(key_or_keys) do
-        vim.keymap.set(mode, key, fn, { buffer = 0, nowait = true })
+        vim.keymap.set(mode, key, fn, opts)
       end
     end
   end
@@ -26,31 +29,31 @@ function Mappings.new(State, actions, refresh_fn)
   -- Mappings for built-in functionality --
   -----------------------------------------
 
-  map('n', mappings.nav_left, actions.nav_left)
-  map('n', mappings.nav_right, actions.nav_right)
-  map('n', mappings.open_tab, actions.open_tab)
-  map('n', mappings.open_hsplit, actions.open_hsplit)
-  map('n', mappings.open_vsplit, actions.open_vsplit)
-  map('n', mappings.cd, actions.cd)
-  map('n', mappings.jump_to_cwd, actions.jump_to_cwd)
-  map('n', mappings.delete, actions.delete)
-  map('v', mappings.delete, actions.bulk_delete)
-  map('n', mappings.add, actions.add_file_or_dir)
-  map('n', mappings.copy, actions.toggle_copy)
-  map('v', mappings.copy, actions.bulk_toggle_copy)
-  map('n', mappings.rename, actions.rename)
-  map('n', mappings.cut, actions.toggle_cut)
-  map('v', mappings.cut, actions.bulk_toggle_cut)
-  map('n', mappings.paste, actions.paste)
-  map('n', mappings.show_help, actions.help)
-  map('n', mappings.toggle_hidden, actions.toggle_hidden)
-  map('n', mappings.toggle_collapse_dirs, actions.toggle_collapse_dirs)
+  map('n', mappings.nav_left, actions.nav_left, { desc = 'navigate left' })
+  map('n', mappings.nav_right, actions.nav_right, { desc = 'navigate right' })
+  map('n', mappings.open_tab, actions.open_tab, { desc = 'open in new tab' })
+  map('n', mappings.open_hsplit, actions.open_hsplit, { desc = 'open in horizontal split' })
+  map('n', mappings.open_vsplit, actions.open_vsplit, { desc = 'open in vertical split' })
+  map('n', mappings.cd, actions.cd, { desc = 'change directory' })
+  map('n', mappings.jump_to_cwd, actions.jump_to_cwd, { desc = 'jump to current directory' })
+  map('n', mappings.delete, actions.delete, { desc = 'delete' })
+  map('v', mappings.delete, actions.bulk_delete, { desc = 'bulk delete' })
+  map('n', mappings.add, actions.add_file_or_dir, { desc = 'add file to directory' })
+  map('n', mappings.copy, actions.toggle_copy, { desc = 'copy' })
+  map('v', mappings.copy, actions.bulk_toggle_copy, { desc = 'bulk copy' })
+  map('n', mappings.rename, actions.rename, { desc = 'rename' })
+  map('n', mappings.cut, actions.toggle_cut, { desc = 'cut' })
+  map('v', mappings.cut, actions.bulk_toggle_cut, { desc = 'bulk cut' })
+  map('n', mappings.paste, actions.paste, { desc = 'paste' })
+  map('n', mappings.show_help, actions.help, { desc = 'help' })
+  map('n', mappings.toggle_hidden, actions.toggle_hidden, { desc = 'toggle hidden' })
+  map('n', mappings.toggle_collapse_dirs, actions.toggle_collapse_dirs, { desc = 'toggle collapse directories' })
   map('n', mappings.quit, function()
     vim.g.triptych_close() -- TODO: Move to actions
-  end)
+  end, { desc = 'quit' })
   map('v', mappings.quit, function()
     vim.g.triptych_close()
-  end)
+  end, { desc = 'quit' })
 
   -----------------------------------------
   ----------- Extension mappings ----------
