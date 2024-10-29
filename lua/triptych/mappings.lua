@@ -15,7 +15,7 @@ function Mappings.new(State, actions, refresh_fn)
   ---@param fn fun(): nil
   ---@param opts table
   local function map(mode, key_or_keys, fn, opts)
-    opts = utils.merge_tables({ buffer = 0, nowait = true }, opts or {})
+    opts = utils.merge_tables({ buffer = 0, nowait = true }, opts)
     if type(key_or_keys) == 'string' then
       vim.keymap.set(mode, key_or_keys, fn, opts)
     else
@@ -61,7 +61,7 @@ function Mappings.new(State, actions, refresh_fn)
   for key, ext_mapping in pairs(extension_mappings) do
     map(ext_mapping.mode, key, function()
       ext_mapping.fn(view.get_target_under_cursor(State), refresh_fn)
-    end)
+    end, {})
   end
 end
 
