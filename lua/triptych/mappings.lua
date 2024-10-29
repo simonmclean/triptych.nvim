@@ -13,9 +13,9 @@ function Mappings.new(State, actions, refresh_fn)
   ---@param mode string
   ---@param key_or_keys string | string[]
   ---@param fn fun(): nil
-  ---@param opts table 
+  ---@param opts table
   local function map(mode, key_or_keys, fn, opts)
-    opts = utils.merge_tables({ buffer = 0, nowait = true }, opts)
+    opts = utils.merge_tables({ buffer = 0, nowait = true }, opts or {})
     if type(key_or_keys) == 'string' then
       vim.keymap.set(mode, key_or_keys, fn, opts)
     else
