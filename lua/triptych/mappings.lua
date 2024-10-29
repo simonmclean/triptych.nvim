@@ -1,4 +1,4 @@
-local tbl = require 'plenary.tbl'
+local utils = require 'triptych.utils'
 local view = require 'triptych.view'
 
 local Mappings = {}
@@ -15,7 +15,7 @@ function Mappings.new(State, actions, refresh_fn)
   ---@param fn fun(): nil
   ---@param opts table 
   local function map(mode, key_or_keys, fn, opts)
-    opts = tbl.apply_defaults(opts, { buffer = 0, nowait = true })
+    opts = utils.merge_tables({ buffer = 0, nowait = true }, opts)
     if type(key_or_keys) == 'string' then
       vim.keymap.set(mode, key_or_keys, fn, opts)
     else
@@ -37,15 +37,15 @@ function Mappings.new(State, actions, refresh_fn)
   map('n', mappings.cd, actions.cd, { desc = 'change directory' })
   map('n', mappings.jump_to_cwd, actions.jump_to_cwd, { desc = 'jump to current directory' })
   map('n', mappings.delete, actions.delete, { desc = 'delete' })
-  map('v', mappings.delete, actions.bulk_delete, { desc = 'bulk delete' })
-  map('n', mappings.add, actions.add_file_or_dir, { desc = 'add file to directory' })
+  map('v', mappings.delete, actions.bulk_delete, { desc = 'delete selection' })
+  map('n', mappings.add, actions.add_file_or_dir, { desc = 'add file or directory' })
   map('n', mappings.copy, actions.toggle_copy, { desc = 'copy' })
-  map('v', mappings.copy, actions.bulk_toggle_copy, { desc = 'bulk copy' })
+  map('v', mappings.copy, actions.bulk_toggle_copy, { desc = 'copy selection' })
   map('n', mappings.rename, actions.rename, { desc = 'rename' })
   map('n', mappings.cut, actions.toggle_cut, { desc = 'cut' })
-  map('v', mappings.cut, actions.bulk_toggle_cut, { desc = 'bulk cut' })
+  map('v', mappings.cut, actions.bulk_toggle_cut, { desc = 'cut selection' })
   map('n', mappings.paste, actions.paste, { desc = 'paste' })
-  map('n', mappings.show_help, actions.help, { desc = 'help' })
+  map('n', mappings.show_help, actions.help, { desc = 'show help' })
   map('n', mappings.toggle_hidden, actions.toggle_hidden, { desc = 'toggle hidden' })
   map('n', mappings.toggle_collapse_dirs, actions.toggle_collapse_dirs, { desc = 'toggle collapse directories' })
   map('n', mappings.quit, function()
