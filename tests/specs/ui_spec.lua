@@ -646,3 +646,44 @@ describe('Triptych UI', {
     end)
   end),
 })
+
+describe('Triptych config', {
+  test('extension_mappings', function(done)
+    local expected_data = {
+      ['children'] = {},
+      ['collapse_display_name'] = 'level_4/',
+      ['collapse_path'] = opening_dir .. '/level_4',
+      ['dirname'] = opening_dir,
+      ['display_name'] = 'level_4/',
+      ['is_dir'] = true,
+      ['path'] = opening_dir .. '/level_4',
+    }
+
+    local resulting_callback_params = {}
+
+    u.open_triptych(opening_dir, {
+      extension_mappings = {
+        ['<c-x>'] = {
+          mode = 'n',
+          fn = function(contents, refresh_fn)
+            resulting_callback_params[1] = contents
+            resulting_callback_params[2] = refresh_fn
+          end,
+        },
+      },
+    })
+    u.on_all_wins_updated(function()
+      u.press_keys '<c-x>'
+      vim.defer_fn(function()
+        close_triptych(function()
+          done {
+            assertions = function()
+              assert.same(expected_data, resulting_callback_params[1])
+              assert.same('function', type(resulting_callback_params[2]))
+            end,
+          }
+        end)
+      end, 50)
+    end)
+  end),
+})

@@ -1,3 +1,5 @@
+local u = require 'triptych.utils'
+
 local api = vim.api
 
 local M = {}
@@ -136,8 +138,9 @@ function M.on_wins_updated(wins, callback)
   end, false)
 end
 
-function M.setup_triptych()
-  require('triptych.init').setup {
+---@param opts? table
+function M.setup_triptych(opts)
+  local default = {
     debug = false,
     -- Set options for easier testing
     options = {
@@ -149,10 +152,12 @@ function M.setup_triptych()
       },
     },
   }
+  local merged_opts = u.merge_tables(default, opts or {})
+  require('triptych.init').setup(merged_opts)
 end
 
-function M.open_triptych(opening_dir)
-  M.setup_triptych()
+function M.open_triptych(opening_dir, opts)
+  M.setup_triptych(opts)
   require('triptych.init').toggle_triptych(opening_dir)
 end
 
