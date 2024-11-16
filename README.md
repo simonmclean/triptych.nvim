@@ -138,6 +138,7 @@ Key mappings can either be a string, or a table of strings if you want multiple 
       debounce_ms = 100,
     },
     backdrop = 60 -- Backdrop opacity. 0 is fully opaque, 100 is fully transparent (disables the feature)
+    transparency = 0, -- 0 is fully opaque, 100 is fully transparent
     border = 'single' -- See :h nvim_open_win for border options
     max_height = 45,
     max_width = 220,
