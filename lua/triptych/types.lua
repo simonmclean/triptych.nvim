@@ -57,6 +57,7 @@
 ---@field relative_numbers boolean
 ---@field role WinType
 ---@field hidden boolean
+---@field transparency number
 
 ---@class HighlightDetails
 ---@field icon HighlightDetailsIcon

@@ -122,6 +122,7 @@ local function create_floating_window(config)
     -- 2 to accomodate both diagnostics and git signs
     vim.api.nvim_win_set_option(win, 'signcolumn', 'auto:2')
   end
+  vim.api.nvim_win_set_option(win, 'winblend', config.transparency)
   return win
 end
 
@@ -152,6 +153,7 @@ end
 ---@param relative_numbers boolean
 ---@param column_widths number[]
 ---@param backdrop number
+---@param transparency number
 ---@param border string | table
 ---@param max_height number
 ---@param max_width number
@@ -163,6 +165,7 @@ function M.create_three_floating_windows(
   relative_numbers,
   column_widths,
   backdrop,
+  transparency,
   border,
   max_height,
   max_width,
@@ -263,6 +266,7 @@ function M.create_three_floating_windows(
       role = role,
       hidden = width == 1,
       border = border,
+      transparency = transparency,
     }
   end
 

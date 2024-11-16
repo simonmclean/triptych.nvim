@@ -55,6 +55,7 @@ local function expected_default_config()
         debounce_ms = 100,
       },
       backdrop = 60,
+      transparency = 0,
       border = 'single',
       max_height = 45,
       max_width = 220,
