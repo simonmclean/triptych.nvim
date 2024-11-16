@@ -47,6 +47,7 @@ end
 ---@field highlights TriptychConfigHighlights
 ---@field syntax_highlighting TriptychConfigSyntaxHighlighting
 ---@field backdrop number
+---@field transparency number
 ---@field border string | table
 ---@field max_height number
 ---@field max_width number
@@ -145,6 +146,7 @@ local function default_config()
         debounce_ms = 100,
       },
       backdrop = 60,
+      transparency = 0,
       border = 'single',
       max_height = 45,
       max_width = 220,

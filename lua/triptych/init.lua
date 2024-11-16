@@ -79,6 +79,7 @@ local function toggle_triptych(dir)
     column_widths,
     config.options.backdrop,
     config.options.border,
+    config.options.transparency,
     config.options.max_height,
     config.options.max_width,
     config.options.margin_x,
