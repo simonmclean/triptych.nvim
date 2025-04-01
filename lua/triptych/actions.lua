@@ -369,14 +369,15 @@ function Actions.new(State, refresh_view)
   ---@return nil
   local function edit_file(path, kind)
     vim.g.triptych_close()
+    local escaped_path = vim.fn.fnameescape(path)
     if kind == 'in-place' then
-      vim.cmd.edit(path)
+      vim.cmd.edit(escaped_path)
     elseif kind == 'hsplit' then
-      vim.cmd.split(path)
+      vim.cmd.split(escaped_path)
     elseif kind == 'vsplit' then
-      vim.cmd.vsplit(path)
+      vim.cmd.vsplit(escaped_path)
     elseif kind == 'tab' then
-      vim.cmd.tabedit(path)
+      vim.cmd.tabedit(escaped_path)
     end
   end
 
