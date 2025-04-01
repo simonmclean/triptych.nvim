@@ -140,6 +140,7 @@ local function create_backdrop(winblend)
     noautocmd = true,
     focusable = false,
     zindex = 100,
+    border = 'none'
   })
   vim.api.nvim_set_hl(0, 'TriptychBackdrop', { bg = '#000000', default = true })
   vim.api.nvim_win_set_option(win, 'winhighlight', 'Normal:TriptychBackdrop')
