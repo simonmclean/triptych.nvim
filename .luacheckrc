@@ -1,0 +1,5 @@
+globals = {
+  'vim',
+  'require'
+}
+
