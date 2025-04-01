@@ -35,8 +35,8 @@ jobs:
         cd $HOME
         curl -OJL https://github.com/neovim/neovim/releases/download/v$LATEST_NVIM_VERSION/nvim-linux-x86_64.tar.gz
         tar xzf *.tar.gz
-        mv $HOME/nvim-linux64 $HOME/nvim-linux64-$LATEST_NVIM_VERSION
-        rm nvim-linux64.tar.gz
+        mv $HOME/nvim-linux-x86_64 $HOME/nvim-linux-x86_64-$LATEST_NVIM_VERSION
+        rm nvim-linux-x86_64.tar.gz
         $HOME/nvim-linux64-$LATEST_NVIM_VERSION/bin/nvim --version
     - name: install neovim plugins
       run: |
