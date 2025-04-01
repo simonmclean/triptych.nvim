@@ -3,7 +3,7 @@ name: CI
 env:
   TRIPTYCH_DIR: .local/share/nvim/site/pack/simonmclean/start/triptych
   LUA_LS_LOG_PATH: /home/runner/lua-language-server/logs
-  LATEST_NVIM_VERSION: "0.10.2"
+  LATEST_NVIM_VERSION: "0.11.0"
 
 on:
   push:
@@ -33,11 +33,11 @@ jobs:
     - name: install latest stable neovim
       run: |
         cd $HOME
-        curl -OJL https://github.com/neovim/neovim/releases/download/v$LATEST_NVIM_VERSION/nvim-linux64.tar.gz
+        curl -OJL https://github.com/neovim/neovim/releases/download/v$LATEST_NVIM_VERSION/nvim-linux-x86_64.tar.gz
         tar xzf *.tar.gz
-        mv $HOME/nvim-linux64 $HOME/nvim-linux64-$LATEST_NVIM_VERSION
-        rm nvim-linux64.tar.gz
-        $HOME/nvim-linux64-$LATEST_NVIM_VERSION/bin/nvim --version
+        mv $HOME/nvim-linux-x86_64 $HOME/nvim-linux-x86_64-$LATEST_NVIM_VERSION
+        rm nvim-linux-x86_64.tar.gz
+        $HOME/nvim-linux-x86_64-$LATEST_NVIM_VERSION/bin/nvim --version
     - name: install neovim plugins
       run: |
         git config --global advice.detachedHead false
@@ -69,4 +69,4 @@ jobs:
     - name: run unit tests against latest stable neovim
       run: |
         cd $HOME/$TRIPTYCH_DIR
-        HEADLESS=true $HOME/nvim-linux64-$LATEST_NVIM_VERSION/bin/nvim --headless +"so%" tests/run_specs.lua
+        HEADLESS=true $HOME/nvim-linux-x86_64-$LATEST_NVIM_VERSION/bin/nvim --headless +"so%" tests/run_specs.lua
