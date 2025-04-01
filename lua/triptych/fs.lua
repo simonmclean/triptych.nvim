@@ -92,12 +92,14 @@ function M.read_path(_path, include_collapsed)
       break
     end
     local entry_path = path .. '/' .. name
-    local is_dir = false
-    if type == 'directory' then
-      is_dir = true
-    elseif type == 'link' then
-      is_dir = vim.fn.isdirectory(entry_path) == 1
-    end
+    local is_dir = u.eval(function()
+      if type == 'directory' then
+        return true
+      elseif type == 'link' then
+        return vim.fn.isdirectory(entry_path) == 1
+      end
+      return false
+    end)
     local display_name = is_dir and (name .. '/') or name
     local entry = {
       display_name = display_name,
