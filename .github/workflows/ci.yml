@@ -37,7 +37,7 @@ jobs:
         tar xzf *.tar.gz
         mv $HOME/nvim-linux-x86_64 $HOME/nvim-linux-x86_64-$LATEST_NVIM_VERSION
         rm nvim-linux-x86_64.tar.gz
-        $HOME/nvim-linux64-$LATEST_NVIM_VERSION/bin/nvim --version
+        $HOME/nvim-linux-x86_64-$LATEST_NVIM_VERSION/bin/nvim --version
     - name: install neovim plugins
       run: |
         git config --global advice.detachedHead false
@@ -69,4 +69,4 @@ jobs:
     - name: run unit tests against latest stable neovim
       run: |
         cd $HOME/$TRIPTYCH_DIR
-        HEADLESS=true $HOME/nvim-linux64-$LATEST_NVIM_VERSION/bin/nvim --headless +"so%" tests/run_specs.lua
+        HEADLESS=true $HOME/nvim-linux-x86_64-$LATEST_NVIM_VERSION/bin/nvim --headless +"so%" tests/run_specs.lua
