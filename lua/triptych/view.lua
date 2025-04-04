@@ -45,8 +45,9 @@ end
 ---@param win_type WinType
 ---@param maybe_cursor_target_path string?
 local function read_path_and_publish(path, win_type, maybe_cursor_target_path)
-  local path_details = fs.read_path(path, win_type ~= 'parent')
-  autocmds.send_path_read(path_details, win_type, maybe_cursor_target_path)
+  fs.read_path(path, win_type ~= 'parent', function(path_details)
+    autocmds.send_path_read(path_details, win_type, maybe_cursor_target_path)
+  end)
 end
 
 ---Read a file, then publish the results to a User event
