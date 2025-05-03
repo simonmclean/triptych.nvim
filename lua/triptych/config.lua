@@ -27,6 +27,7 @@ end
 ---@field add KeyMapping
 ---@field copy KeyMapping
 ---@field rename KeyMapping
+---@field rename_from_scratch KeyMapping
 ---@field cut KeyMapping
 ---@field paste KeyMapping
 ---@field quit KeyMapping
@@ -112,6 +113,7 @@ local function default_config()
       add = 'a',
       copy = 'c',
       rename = 'r',
+      rename_from_scratch = 'R',
       cut = 'x',
       paste = 'p',
       quit = 'q',

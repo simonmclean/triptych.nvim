@@ -465,11 +465,11 @@ describe('Triptych UI', {
     }
 
     open_triptych(function()
-      u.press_keys 'r'
+      u.press_keys 'R'
       u.press_keys 'renamed_dir<cr>'
       u.on_primary_window_updated(function()
         u.press_keys 'j'
-        u.press_keys 'r'
+        u.press_keys 'R'
         u.press_keys 'renamed_file.lua<cr>'
         u.on_primary_window_updated(function()
           local state = u.get_state()
@@ -507,11 +507,11 @@ describe('Triptych UI', {
     }
 
     open_triptych(function()
-      u.press_keys 'r'
+      u.press_keys 'R'
       u.press_keys 'renamed_dir<cr>'
       u.on_primary_window_updated(function()
         u.press_keys 'j'
-        u.press_keys 'r'
+        u.press_keys 'R'
         u.press_keys 'renamed_file.lua<cr>'
       end)
       u.on_events({
