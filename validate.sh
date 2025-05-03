@@ -16,6 +16,13 @@ fi
 
 echo "Check diagnostics..."
 ~/.local/share/nvim/mason/bin/lua-language-server --check .
+diagnostics_exit_code=$?
+
+if [ $diagnostics_exit_code -ne 0 ]; then
+  echo "❌ 1 or more diagnostic problems found";
+else
+  echo "✅ Diagnostics passed";
+fi
 
 echo "Running tests..."
 HEADLESS=true nvim --headless +"so%" tests/run_specs.lua

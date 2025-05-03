@@ -36,16 +36,12 @@ local function help_lines()
   local lines = {}
 
   for _, pair in ipairs(mapping_pairs) do
-    local keys_str = pair.key
     local padding = ''
-    if type(pair.key) == 'table' then
-      keys_str = table.concat(pair.key, ', ')
-    end
     if string.len(pair.action) < left_col_length then
       local diff = left_col_length - string.len(pair.action)
       padding = string.rep(' ', diff)
     end
-    local line = string.format('%s%s  :  %s', pair.action, padding, keys_str)
+    local line = string.format('%s%s  :  %s', pair.action, padding, pair.key)
     table.insert(lines, line)
   end
 

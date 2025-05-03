@@ -97,6 +97,7 @@ local function toggle_triptych(dir)
       win = windows[2],
     },
     child = {
+      path = '',
       win = windows[3],
       is_dir = false,
     },
