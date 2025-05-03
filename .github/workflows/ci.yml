@@ -6,6 +6,7 @@ env:
   LATEST_NVIM_VERSION: "0.11.1"
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "main" ]
     paths:
