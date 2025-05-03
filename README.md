@@ -3,7 +3,7 @@
 
 <p align="center">Directory browser for Neovim, inspired by <a href="https://github.com/ranger/ranger">Ranger</a></p>
 
-![Triptych screenshot](screenshot.jpg?raw=true "Triptych screenshot")
+![Triptych screenshot](screenshot.jpg "Triptych screenshot")
 
 [![CI](https://github.com/simonmclean/triptych.nvim/actions/workflows/ci.yml/badge.svg)](https://github.com/simonmclean/triptych.nvim/actions/workflows/ci.yml)
 
@@ -100,6 +100,7 @@ Key mappings can either be a string, or a table of strings if you want multiple 
     add = 'a',
     copy = 'c',
     rename = 'r',
+    rename_from_scratch = 'R',
     cut = 'x',
     paste = 'p',
     quit = 'q',

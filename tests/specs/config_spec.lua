@@ -21,6 +21,7 @@ local function expected_default_config()
       add = 'a',
       copy = 'c',
       rename = 'r',
+      rename_from_scratch = 'R',
       cut = 'x',
       paste = 'p',
       quit = 'q',

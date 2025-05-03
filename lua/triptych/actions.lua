@@ -260,15 +260,17 @@ function Actions.new(State, refresh_view)
     refresh_view()
   end
 
+  ---@param from_scratch boolean
   ---@return nil
-  M.rename = function()
+  M.rename = function(from_scratch)
     local target = view.get_target_under_cursor(State)
     if target then
       local display_name = u.cond(target.is_dir, {
         when_true = u.trim_last_char(target.display_name),
         when_false = target.display_name,
       })
-      local response = vim.fn.trim(vim.fn.input('Enter new name for "' .. display_name .. '": '))
+      local input_text = from_scratch and '' or display_name
+      local response = vim.fn.trim(vim.fn.input('Enter new name for "' .. display_name .. '": ', input_text))
       if u.is_defined(response) and response ~= target.display_name then
         local destination = u.path_join(target.dirname, response)
         rename_node_and_publish(target.path, destination)
