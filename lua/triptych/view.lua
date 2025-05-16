@@ -271,6 +271,9 @@ end
 ---@param maybe_cursor_target_path string?
 ---@return nil
 function M.set_primary_and_parent_window_targets(State, target_dir, maybe_cursor_target_path)
+  local config_options = vim.g.triptych_config.options
+  local icons_enabled = config_options.file_icons.enabled
+
   local focused_win = State.windows.current.win
   local parent_win = State.windows.parent.win
   local child_win = State.windows.child.win
@@ -280,8 +283,13 @@ function M.set_primary_and_parent_window_targets(State, target_dir, maybe_cursor
   local parent_path = vim.fs.dirname(target_dir)
   local parent_title = vim.fs.basename(parent_path)
 
-  float.win_set_title(parent_win, parent_title, '', 'Directory', get_title_postfix(parent_path))
-  float.win_set_title(focused_win, focused_title, '', 'Directory', get_title_postfix(target_dir))
+  local icon = u.cond(icons_enabled, {
+    when_true = config_options.file_icons.directory_icon,
+    when_false = '',
+  })
+
+  float.win_set_title(parent_win, parent_title, icon, 'Directory', get_title_postfix(parent_path))
+  float.win_set_title(focused_win, focused_title, icon, 'Directory', get_title_postfix(target_dir))
 
   State.windows = {
     parent = {
@@ -376,6 +384,7 @@ end
 ---@param path_details PathDetails
 ---@return nil
 function M.set_child_window_target(State, path_details)
+  local config_options = vim.g.triptych_config.options
   local buf = vim.api.nvim_win_get_buf(State.windows.child.win)
 
   -- TODO: Can we make path_details mandatory to avoid the repeated checks
@@ -409,11 +418,16 @@ function M.set_child_window_target(State, path_details)
     float.win_set_title(State.windows.child.win, '[empty directory]')
     float.buf_set_lines(buf, {})
   elseif path_details.is_dir then
+    local icon = u.cond(config_options.file_icons.enabled, {
+      when_true = config_options.file_icons.directory_icon,
+      when_false = '',
+    })
+
     syntax_highlighting.stop(buf)
     float.win_set_title(
       State.windows.child.win,
       path_details.display_name,
-      '',
+      icon,
       'Directory',
       get_title_postfix(path_details.path)
     )
