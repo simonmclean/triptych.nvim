@@ -66,15 +66,11 @@ Example using [Lazy](https://github.com/folke/lazy.nvim).
 }
 ```
 
-If not using Lazy, make sure to call the `setup` function like this:
+If you're not using Lazy, call the `setup` function and specify a keymap manually.
 
 ```lua
+-- Manual setup
 require('triptych').setup()
-```
-
-And optionally create a keymap for opening Triptych like this:
-
-```lua
 vim.keymap.set('n', '<leader>-', ':Triptych<CR>', { silent = true, desc = 'Toggle Triptych' })
 ```
 
