@@ -114,7 +114,7 @@ local function path_details_to_lines(State, path_details, win_type, hidden_count
       end,
       when_false = function()
         local icon, icon_highlight = u.eval(function()
-          local maybe_icon, maybe_highlight = icons.get_icon_by_filetype(child.filetype)
+          local maybe_icon, maybe_highlight = icons.get_icon_by_filename(child.display_name)
           local highlight = maybe_highlight or 'Comment'
           local fallback_icon = config_options.file_icons.fallback_file_icon
           local icon = maybe_icon or fallback_icon
@@ -433,8 +433,7 @@ function M.set_child_window_target(State, path_details)
     )
     read_path_and_publish(path_details.path, 'child')
   else
-    local filetype = fs.get_filetype_from_path(path_details.path) -- TODO: De-dupe this
-    local icon, highlight = icons.get_icon_by_filetype(filetype)
+    local icon, highlight = icons.get_icon_by_filename(path_details.display_name)
     float.win_set_title(State.windows.child.win, path_details.display_name, icon, highlight)
     float.buf_set_lines(buf, {})
     local file_size = fs.get_file_size_in_kb(path_details.path)
