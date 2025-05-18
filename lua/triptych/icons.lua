@@ -10,7 +10,7 @@ return {
   get_icon_by_filename = function(filename)
     if devicons_installed and filename then
       -- Capture all characters after the last dot
-      local file_ext = filename:match('^.*%.(.*)$')
+      local file_ext = filename:match '^.*%.(.*)$'
 
       local icon, highlight = devicons.get_icon(filename, file_ext)
       return icon, highlight
