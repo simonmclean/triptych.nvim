@@ -53,7 +53,6 @@ Example using [Lazy](https://github.com/folke/lazy.nvim).
 ```lua
 {
   'simonmclean/triptych.nvim',
-  event = 'VeryLazy',
   dependencies = {
     'nvim-lua/plenary.nvim', -- required
     'nvim-tree/nvim-web-devicons', -- optional for icons
@@ -66,7 +65,7 @@ Example using [Lazy](https://github.com/folke/lazy.nvim).
 }
 ```
 
-If you're not using Lazy, call the `setup` function and specify a keymap manually.
+If not using Lazy, you may need to call the `setup` function and specify a keymap manually.
 
 ```lua
 -- Manual setup
