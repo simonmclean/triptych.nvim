@@ -159,6 +159,15 @@ Key mappings can either be a string, or a table of strings if you want multiple 
 }
 ```
 
+## Commands
+```viml
+" Toggle Triptych
+:Triptych
+
+" Open Triptych at specific directory
+:Triptych ~/Documents
+```
+
 ## LSP Integration
 
 If you have [antosha417/nvim-lsp-file-operations](https://github.com/antosha417/nvim-lsp-file-operations) installed, performing
