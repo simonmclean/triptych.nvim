@@ -271,6 +271,9 @@ end
 ---@param maybe_cursor_target_path string?
 ---@return nil
 function M.set_primary_and_parent_window_targets(State, target_dir, maybe_cursor_target_path)
+  if target_dir:len() > 1 and string.sub(target_dir, -1) == '/' then
+    target_dir = string.sub(target_dir, 1, target_dir:len() - 1)
+  end
   local config_options = vim.g.triptych_config.options
   local icons_enabled = config_options.file_icons.enabled
 
