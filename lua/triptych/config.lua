@@ -149,7 +149,7 @@ local function default_config()
       },
       backdrop = 60,
       transparency = 0,
-      border = 'single',
+      border = (vim.fn.exists '+winborder' == 1 and vim.o.winborder ~= '') and vim.o.winborder or 'single',
       max_height = 45,
       max_width = 220,
       margin_x = 4,
