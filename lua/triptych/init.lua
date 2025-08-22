@@ -158,18 +158,17 @@ local function setup(user_config)
   vim.g.triptych_is_open = false
 
   vim.api.nvim_create_user_command('Triptych', function(opts)
-      if opts.args == "" then
-        toggle_triptych()
-      else
-        local path = vim.fn.expand(opts.args)
+    if opts.args == '' then
+      toggle_triptych()
+    else
+      local path = vim.fn.expand(opts.args)
 
-        toggle_triptych(path)
-      end
-    end,
-    {
-      nargs = '?',
-      complete = 'dir',
-    })
+      toggle_triptych(path)
+    end
+  end, {
+    nargs = '?',
+    complete = 'dir',
+  })
 
   vim.g.triptych_config = require('triptych.config').create_merged_config(user_config or {})
 end
