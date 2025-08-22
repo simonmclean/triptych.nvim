@@ -8,6 +8,7 @@ Table of Contents                            *triptych.nvim-table-of-contents*
   - Requirements                                  |triptych.nvim-requirements|
   - Installation                                  |triptych.nvim-installation|
   - Configuration                                |triptych.nvim-configuration|
+  - Commands                                          |triptych.nvim-commands|
   - LSP Integration                            |triptych.nvim-lsp-integration|
   - Extending functionality            |triptych.nvim-extending-functionality|
 
@@ -165,6 +166,17 @@ bindings.
         enabled = true,
       }
     }
+<
+
+
+COMMANDS                                              *triptych.nvim-commands*
+
+>viml
+    " Toggle Triptych
+    :Triptych
+    
+    " Open Triptych at specific directory
+    :Triptych ~/Documents
 <
 
 
