@@ -3,7 +3,7 @@ name: CI
 env:
   TRIPTYCH_DIR: .local/share/nvim/site/pack/simonmclean/start/triptych
   LUA_LS_LOG_PATH: /home/runner/lua-language-server/logs
-  LATEST_NVIM_VERSION: "0.11.1"
+  LATEST_NVIM_VERSION: "0.11.3"
 
 on:
   workflow_dispatch:
