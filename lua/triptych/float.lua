@@ -219,6 +219,11 @@ function M.create_three_floating_windows(
     child = {},
   }
 
+  -- If nvim is transparent then we don't want to apply winblend because
+  -- for some reason the effect is reversed
+  local normal_hl = vim.api.nvim_get_hl and vim.api.nvim_get_hl(0, { name = 'Normal' })
+  local is_nvim_transparent = normal_hl and normal_hl.bg == nil
+
   -- Build up the configs that will be passed to create_floating_window
   for i, percentage in ipairs(column_widths) do
     local is_parent = i == 1
@@ -267,7 +272,7 @@ function M.create_three_floating_windows(
       role = role,
       hidden = width == 1,
       border = border,
-      transparency = transparency,
+      transparency = is_nvim_transparent and 0 or transparency,
     }
   end
 
