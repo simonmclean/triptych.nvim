@@ -63,7 +63,7 @@ function M.raise_error(error_message)
   if M.is_headless() then
     M.print(error_message)
   else
-    error(error_message)
+    vim.notify(error_message, vim.log.levels.ERROR)
   end
 end
 

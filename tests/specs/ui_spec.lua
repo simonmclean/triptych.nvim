@@ -1,4 +1,3 @@
-local assert = require 'luassert'
 local u = require 'tests.utils'
 local framework = require 'test_framework.test'
 local describe = framework.describe
@@ -29,7 +28,7 @@ describe('Triptych UI', {
       close_triptych(function()
         done {
           assertions = function()
-            assert.same(is_open, true)
+            u.assert_same(is_open, true)
             -- This is kinda janky, but basically this test could be called from one of 2 places
             assert(current_line == 'run_specs.lua' or current_line == 'ui_spec.lua', 'got ' .. tostring(current_line))
           end,
@@ -43,7 +42,7 @@ describe('Triptych UI', {
       u.on_event('TriptychDidClose', function()
         done {
           assertions = function()
-            assert.same(vim.g.triptych_is_open, false)
+            u.assert_same(vim.g.triptych_is_open, false)
           end,
         }
       end)
@@ -71,8 +70,8 @@ describe('Triptych UI', {
       close_triptych(function()
         done {
           assertions = function()
-            assert.same(expected_lines, result.lines)
-            assert.same(expected_winbars, result.winbars)
+            u.assert_same(expected_lines, result.lines)
+            u.assert_same(expected_winbars, result.winbars)
           end,
         }
       end)
@@ -99,8 +98,8 @@ describe('Triptych UI', {
         close_triptych(function()
           done {
             assertions = function()
-              assert.same(expected_lines, result.lines)
-              assert.same(expected_winbars, result.winbars)
+              u.assert_same(expected_lines, result.lines)
+              u.assert_same(expected_winbars, result.winbars)
             end,
           }
         end)
@@ -128,8 +127,8 @@ describe('Triptych UI', {
         close_triptych(function()
           done {
             assertions = function()
-              assert.same(expected_lines, result.lines)
-              assert.same(expected_winbars, result.winbars)
+              u.assert_same(expected_lines, result.lines)
+              u.assert_same(expected_winbars, result.winbars)
             end,
           }
         end)
@@ -145,7 +144,7 @@ describe('Triptych UI', {
       u.on_event('TriptychDidClose', function()
         done {
           assertions = function()
-            assert.same(vim.g.triptych_is_open, false)
+            u.assert_same(vim.g.triptych_is_open, false)
           end,
           cleanup = function()
             vim.api.nvim_set_current_buf(current_buf)
@@ -173,7 +172,7 @@ describe('Triptych UI', {
         close_triptych(function()
           done {
             assertions = function()
-              assert.same(expected_file_preview, state.lines.child)
+              u.assert_same(expected_file_preview, state.lines.child)
             end,
           }
         end)
@@ -206,8 +205,8 @@ describe('Triptych UI', {
         close_triptych(function()
           done {
             assertions = function()
-              assert.same(expected_lines.primary, state.lines.primary)
-              assert.same(expected_lines.child, state.lines.child)
+              u.assert_same(expected_lines.primary, state.lines.primary)
+              u.assert_same(expected_lines.child, state.lines.child)
             end,
             cleanup = function()
               vim.fn.delete(u.join_path(opening_dir, 'a_new_dir'), 'rf')
@@ -243,7 +242,7 @@ describe('Triptych UI', {
         close_triptych(function()
           done {
             assertions = function()
-              assert.same(expected_events, events)
+              u.assert_same(expected_events, events)
             end,
             cleanup = function()
               vim.fn.delete(u.join_path(opening_dir, 'a_new_dir'), 'rf')
@@ -282,8 +281,8 @@ describe('Triptych UI', {
           close_triptych(function()
             done {
               assertions = function()
-                assert.same(expected_lines.primary, state.lines.primary)
-                assert.same(expected_lines.child, state.lines.child)
+                u.assert_same(expected_lines.primary, state.lines.primary)
+                u.assert_same(expected_lines.child, state.lines.child)
               end,
             }
           end)
@@ -318,8 +317,8 @@ describe('Triptych UI', {
             close_triptych(function()
               done {
                 assertions = function()
-                  assert.same(expected_lines.child, state.lines.child)
-                  assert.same(expected_lines.primary, state.lines.primary)
+                  u.assert_same(expected_lines.child, state.lines.child)
+                  u.assert_same(expected_lines.primary, state.lines.primary)
                 end,
                 cleanup = function()
                   vim.fn.delete(u.join_path(cwd, 'tests/test_playground/level_1/level_2/level_4'), 'rf')
@@ -357,7 +356,7 @@ describe('Triptych UI', {
             close_triptych(function()
               done {
                 assertions = function()
-                  assert.same(expected_events, events)
+                  u.assert_same(expected_events, events)
                 end,
                 cleanup = function()
                   vim.fn.delete(u.join_path(cwd, 'tests/test_playground/level_1/level_2/level_4'), 'rf')
@@ -393,7 +392,7 @@ describe('Triptych UI', {
           close_triptych(function()
             done {
               assertions = function()
-                assert.same(expected_events, events)
+                u.assert_same(expected_events, events)
               end,
               cleanup = function()
                 vim.fn.delete(u.join_path(opening_dir, 'level_3_file_1_copy1.md'))
@@ -437,8 +436,8 @@ describe('Triptych UI', {
               close_triptych(function()
                 done {
                   assertions = function()
-                    assert.same(expected_lines.primary, state.lines.primary)
-                    assert.same(expected_lines.child, state.lines.child)
+                    u.assert_same(expected_lines.primary, state.lines.primary)
+                    u.assert_same(expected_lines.child, state.lines.child)
                   end,
                   cleanup = function()
                     vim.fn.delete(u.join_path(opening_dir, 'level_3_file_1_copy1.md'))
@@ -476,7 +475,7 @@ describe('Triptych UI', {
           close_triptych(function()
             done {
               assertions = function()
-                assert.same(expected_lines.primary, state.lines.primary)
+                u.assert_same(expected_lines.primary, state.lines.primary)
               end,
               cleanup = function()
                 vim.fn.rename(u.join_path(opening_dir, 'renamed_dir'), u.join_path(opening_dir, 'level_4'))
@@ -521,7 +520,7 @@ describe('Triptych UI', {
         close_triptych(function()
           done {
             assertions = function()
-              assert.same(expected_events, events)
+              u.assert_same(expected_events, events)
             end,
             cleanup = function()
               vim.fn.rename(u.join_path(opening_dir, 'renamed_dir'), u.join_path(opening_dir, 'level_4'))
@@ -566,9 +565,9 @@ describe('Triptych UI', {
           close_triptych(function()
             done {
               assertions = function()
-                assert.same(expected_lines_without_hidden.primary, first_state.lines.primary)
-                assert.same(expected_lines_with_hidden.primary, second_state.lines.primary)
-                assert.same(expected_lines_without_hidden.primary, third_state.lines.primary)
+                u.assert_same(expected_lines_without_hidden.primary, first_state.lines.primary)
+                u.assert_same(expected_lines_with_hidden.primary, second_state.lines.primary)
+                u.assert_same(expected_lines_without_hidden.primary, third_state.lines.primary)
               end,
               cleanup = function()
                 vim.fn.delete(git_ignored_file)
@@ -600,8 +599,8 @@ describe('Triptych UI', {
           close_triptych(function()
             done {
               assertions = function()
-                assert.same(expected_winbar_after_first_jump, winbar_after_first_jump)
-                assert.same(expected_winbar_after_second_jump, winbar_after_second_jump)
+                u.assert_same(expected_winbar_after_first_jump, winbar_after_first_jump)
+                u.assert_same(expected_winbar_after_second_jump, winbar_after_second_jump)
               end,
             }
           end)
@@ -632,10 +631,10 @@ describe('Triptych UI', {
         close_triptych(function()
           done {
             assertions = function()
-              assert.same(expected_collapsed_lines.primary, state_collapsed.lines.primary)
-              assert.same(expected_collapsed_lines.child, state_collapsed.lines.child)
-              assert.same(expected_uncollapsed_lines.primary, state_uncollapsed.lines.primary)
-              assert.same(expected_uncollapsed_lines.child, state_uncollapsed.lines.child)
+              u.assert_same(expected_collapsed_lines.primary, state_collapsed.lines.primary)
+              u.assert_same(expected_collapsed_lines.child, state_collapsed.lines.child)
+              u.assert_same(expected_uncollapsed_lines.primary, state_uncollapsed.lines.primary)
+              u.assert_same(expected_uncollapsed_lines.child, state_uncollapsed.lines.child)
             end,
             cleanup = function()
               os.execute('rm -rf ' .. opening_dir .. '/a')
@@ -678,8 +677,8 @@ describe('Triptych config', {
         close_triptych(function()
           done {
             assertions = function()
-              assert.same(expected_data, resulting_callback_params[1])
-              assert.same('function', type(resulting_callback_params[2]))
+              u.assert_same(expected_data, resulting_callback_params[1])
+              u.assert_same('function', type(resulting_callback_params[2]))
             end,
           }
         end)

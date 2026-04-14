@@ -101,7 +101,7 @@ local function default_config()
     debug = false,
     mappings = {
       -- Everything below is buffer-local, meaning it will only apply to Triptych windows
-      show_help = 'g?',
+      show_help = '?',
       jump_to_cwd = '.',
       nav_left = 'h',
       nav_right = { 'l', '<CR>' },

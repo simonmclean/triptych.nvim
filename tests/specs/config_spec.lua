@@ -1,4 +1,3 @@
-local assert = require 'luassert'
 local u = require 'tests.utils'
 local config = require 'triptych.config'
 local framework = require 'test_framework.test'
@@ -80,7 +79,7 @@ end
 
 describe('create_merged_config', {
   it('returns the default config when user config is empty', function()
-    assert.same(expected_default_config(), config.create_merged_config {})
+    u.assert_same(expected_default_config(), config.create_merged_config {})
   end),
 
   it('merges partial user config with the default', function()
@@ -99,6 +98,6 @@ describe('create_merged_config', {
       result.git_signs.enabled = false
       return result
     end)
-    assert.same(expected, config.create_merged_config(user_config))
+    u.assert_same(expected, config.create_merged_config(user_config))
   end),
 })

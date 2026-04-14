@@ -20,6 +20,7 @@ diagnostics_exit_code=$?
 
 if [ $diagnostics_exit_code -ne 0 ]; then
   echo "❌ 1 or more diagnostic problems found";
+  exit 1;
 else
   echo "✅ Diagnostics passed";
 fi
@@ -30,6 +31,7 @@ tests_exit_code=$?
 
 if [ $tests_exit_code -ne 0 ]; then
   echo "❌ 1 or more tests failed";
+  exit 1;
 else
   echo "✅ Tests passed";
 fi

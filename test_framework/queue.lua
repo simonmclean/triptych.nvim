@@ -91,7 +91,9 @@ function TestQueue:handle_all_tests_succeeded()
       .. result_count.skipped
       .. ' skipped, '
       .. result_count.passed
-      .. ' passed, 0 failed'
+      .. ' passed, '
+      .. result_count.failed
+      .. ' failed'
   )
 
   self:cleanup()
