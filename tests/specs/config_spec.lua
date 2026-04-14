@@ -3,6 +3,7 @@ local config = require 'triptych.config'
 local framework = require 'test_framework.test'
 local it = framework.test
 local describe = framework.describe
+local assert_same = framework.assert_same
 
 local function expected_default_config()
   return {
@@ -79,7 +80,7 @@ end
 
 describe('create_merged_config', {
   it('returns the default config when user config is empty', function()
-    u.assert_same(expected_default_config(), config.create_merged_config {})
+    assert_same(expected_default_config(), config.create_merged_config {})
   end),
 
   it('merges partial user config with the default', function()
@@ -98,6 +99,6 @@ describe('create_merged_config', {
       result.git_signs.enabled = false
       return result
     end)
-    u.assert_same(expected, config.create_merged_config(user_config))
+    assert_same(expected, config.create_merged_config(user_config))
   end),
 })

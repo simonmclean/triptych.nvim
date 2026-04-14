@@ -232,42 +232,4 @@ function M.eval(fn)
   return fn()
 end
 
----Deep-equality assertion.
----@param expected any
----@param actual any
----@param msg? string
-function M.assert_same(expected, actual, msg)
-  local function deep_eq(a, b)
-    if type(a) ~= type(b) then
-      return false
-    end
-    if type(a) ~= 'table' then
-      return a == b
-    end
-    for k, v in pairs(a) do
-      if not deep_eq(v, b[k]) then
-        return false
-      end
-    end
-    for k in pairs(b) do
-      if a[k] == nil then
-        return false
-      end
-    end
-    return true
-  end
-
-  if not deep_eq(expected, actual) then
-    local lines = {}
-    if msg then
-      table.insert(lines, msg)
-    end
-    table.insert(lines, 'Expected:')
-    table.insert(lines, vim.inspect(expected))
-    table.insert(lines, 'Got:')
-    table.insert(lines, vim.inspect(actual))
-    error(table.concat(lines, '\n'), 2)
-  end
-end
-
 return M
