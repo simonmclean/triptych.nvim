@@ -1,6 +1,11 @@
 local u = require 'test_framework.utils'
 local uv = vim.loop
 
+-- Register a built-in luassert shim so that specs don't need an external dependency
+package.preload['luassert'] = function()
+  return require 'test_framework.luassert'
+end
+
 local function get_files_in_dir(dir)
   local files = {}
   local handle = uv.fs_scandir(dir)
