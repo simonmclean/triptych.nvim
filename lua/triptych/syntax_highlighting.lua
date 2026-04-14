@@ -30,7 +30,6 @@ M.start = function(buf, filetype)
     local success, _ = pcall(vim.treesitter.get_parser, buf, lang)
     if success then
       local start_success, _ = pcall(vim.treesitter.start, buf, lang)
-      vim.print('start_success', start_success)
       treesitter_applied = start_success
     end
   end

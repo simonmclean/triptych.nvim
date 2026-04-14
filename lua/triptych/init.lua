@@ -18,7 +18,6 @@ end
 ---@param dir? string Path of directory to open. If omitted will be the directory containing the current buffer
 ---@return fun()|nil
 local function toggle_triptych(dir)
-  vim.print(dir)
   if dir and vim.fn.isdirectory(dir) == 0 then
     return warn(tostring(dir) .. ' is not a directory')
   end
