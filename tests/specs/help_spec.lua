@@ -1,14 +1,14 @@
 local help = require 'triptych.help'
-local assert = require 'luassert'
 local framework = require 'test_framework.test'
 local it = framework.test
 local describe = framework.describe
+local assert_same = framework.assert_same
 
 describe('help_lines', {
   it('returns key bindings', function()
     local result = help.help_lines()
 
-    assert.same({
+    assert_same({
       ' Triptych key bindings',
       ' ',
       ' add                   :  a',

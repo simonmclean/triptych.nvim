@@ -5,7 +5,6 @@ local fs = require 'triptych.fs'
 local git = require 'triptych.git'
 local diagnostics = require 'triptych.diagnostics'
 local autocmds = require 'triptych.autocmds'
-local plenary_async = require 'plenary.async'
 local syntax_highlighting = require 'triptych.syntax_highlighting'
 
 local M = {}
@@ -54,14 +53,18 @@ end
 ---@param child_win_buf number
 ---@param path string
 local function read_file_and_publish(child_win_buf, path)
-  plenary_async.run(function()
-    fs.read_file_async(path, function(err, lines)
-      if err then
+  fs.read_file_async(path, function(err, lines)
+    if err then
+      vim.schedule(function()
         vim.notify(err, vim.log.levels.ERROR)
-      else
-        autocmds.send_file_read(child_win_buf, path, lines)
+      end)
+    else
+      if lines then
+        vim.schedule(function()
+          autocmds.send_file_read(child_win_buf, path, lines)
+        end)
       end
-    end)
+    end
   end)
 end
 

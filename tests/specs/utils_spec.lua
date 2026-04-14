@@ -1,8 +1,8 @@
-local assert = require 'luassert'
 local u = require 'triptych.utils'
 local framework = require 'test_framework.test'
 local it = framework.test
 local describe = framework.describe
+local assert_same = framework.assert_same
 
 describe('set', {
   it('returns a copy of the table with the specified value changed', function()
@@ -11,7 +11,7 @@ describe('set', {
       bar = 2,
     }
     local result = u.set(tbl, 'foo', 3)
-    assert.same(3, result.foo)
+    assert_same(3, result.foo)
   end),
 })
 
@@ -37,7 +37,7 @@ describe('merge_tables', {
       },
     }
     local result = u.merge_tables(a, b)
-    assert.same(expected, result)
+    assert_same(expected, result)
   end),
 
   it('merges tables - first one is empty', function()
@@ -53,7 +53,7 @@ describe('merge_tables', {
       },
     }
     local result = u.merge_tables(a, b)
-    assert.same(expected, result)
+    assert_same(expected, result)
   end),
 
   it('merges tables - second one empty', function()
@@ -71,17 +71,17 @@ describe('merge_tables', {
       },
     }
     local result = u.merge_tables(a, b)
-    assert.same(expected, result)
+    assert_same(expected, result)
   end),
 })
 
 describe('round', {
   it('rounds to x decimal places', function()
-    assert.same(0.33, u.round(0.333, 2))
-    assert.same(0.333, u.round(0.333, 3))
-    assert.same(1.2, u.round(1.16, 1))
-    assert.same(1.1, u.round(1.11, 1))
-    assert.same(1, u.round(1.16, 0))
-    assert.same(200.99, u.round(200.99, 3))
+    assert_same(0.33, u.round(0.333, 2))
+    assert_same(0.333, u.round(0.333, 3))
+    assert_same(1.2, u.round(1.16, 1))
+    assert_same(1.1, u.round(1.11, 1))
+    assert_same(1, u.round(1.16, 0))
+    assert_same(200.99, u.round(200.99, 3))
   end),
 })

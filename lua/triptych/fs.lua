@@ -1,7 +1,4 @@
 local u = require 'triptych.utils'
-local plenary_filetype = require 'plenary.filetype'
-local plenary_path = require 'plenary.path'
-local plenary_async = require 'plenary.async'
 
 local M = {}
 
@@ -15,28 +12,53 @@ end
 ---@param path string
 ---@return string?
 function M.get_filetype_from_path(path)
-  -- plenary locks up when trying to read a fifo file, so we're sniffing this out first
+  -- Bail out early for fifo files to avoid hangs
   if vim.fn.getftype(path) == 'fifo' then
     return 'fifo'
   end
-  -- We still want to use plenary though, because it has more advanced filetype detection
-  local success, result = pcall(plenary_filetype.detect, path)
-  if success then
+  local success, result = pcall(vim.filetype.match, { filename = path })
+  if success and result then
     return result
+  end
+  -- Fallback: read a small chunk to sniff the filetype by content
+  local f = io.open(path, 'r')
+  if f then
+    local sample = f:read(512) or ''
+    f:close()
+    local ok, ft = pcall(vim.filetype.match, { filename = path, contents = vim.split(sample, '\n') })
+    if ok and ft then
+      return ft
+    end
   end
 end
 
-M.read_file_async = plenary_async.wrap(function(file_path, callback)
-  local file = plenary_path:new(file_path)
+---Read a file asynchronously and call callback(err, lines)
+---@param file_path string
+---@param callback fun(err: string|nil, lines: string[]|nil)
+function M.read_file_async(file_path, callback)
+  local uv = vim.uv or vim.loop
 
-  if not file:exists() then
-    return callback('File does not exist', nil)
-  end
+  uv.fs_open(file_path, 'r', 438, function(open_err, fd)
+    if open_err or not fd then
+      return callback('Could not open file: ' .. (open_err or 'unknown error'), nil)
+    end
 
-  file:read(function(content)
-    callback(nil, u.multiline_str_to_table(content))
+    uv.fs_fstat(fd, function(stat_err, stat)
+      if stat_err or not stat then
+        uv.fs_close(fd, function() end)
+        return callback('Could not stat file: ' .. (stat_err or 'unknown error'), nil)
+      end
+
+      uv.fs_read(fd, stat.size, 0, function(read_err, data)
+        uv.fs_close(fd, function() end)
+        if read_err then
+          return callback('Could not read file: ' .. read_err, nil)
+        end
+        callback(nil, u.multiline_str_to_table(data))
+      end)
+    end)
   end)
-end, 2)
+end
 
 ---Keep recursively reading into sub-directories, so long as each sub-directory contains only a single directory and no files
 ---@param path string
