@@ -149,12 +149,6 @@ local function setup(user_config)
     return warn 'triptych.nvim requires Neovim >= 0.9.0'
   end
 
-  local plenary_installed, _ = pcall(require, 'plenary')
-
-  if not plenary_installed then
-    return warn 'triptych.nvim requires plenary.nvim'
-  end
-
   vim.g.triptych_is_open = false
 
   vim.api.nvim_create_user_command('Triptych', function(opts)

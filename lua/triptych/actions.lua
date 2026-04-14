@@ -1,7 +1,6 @@
 local u = require 'triptych.utils'
-local float = require 'triptych.float'
 local view = require 'triptych.view'
-local plenary_path = require 'plenary.path'
+local float = require 'triptych.float'
 local triptych_help = require 'triptych.help'
 local autocmds = require 'triptych.autocmds'
 local log = require 'triptych.logger'
@@ -45,7 +44,51 @@ local function rename_node_and_publish(from, to)
   end
 end
 
----Wraps plenary Path:copy with public events
+---Recursively copy a file or directory to a destination path.
+---Returns a flat list of all file paths that were created.
+---@param src string
+---@param dest string
+---@return string[] created_files
+local function copy_recursive(src, dest)
+  local created = {}
+  local src_type = vim.fn.getftype(src)
+
+  if src_type == 'dir' then
+    vim.fn.mkdir(dest, 'p')
+    local handle = vim.loop.fs_scandir(src)
+    if handle then
+      while true do
+        local name, _ = vim.loop.fs_scandir_next(handle)
+        if not name then
+          break
+        end
+        local sub_created = copy_recursive(src .. '/' .. name, dest .. '/' .. name)
+        for _, p in ipairs(sub_created) do
+          table.insert(created, p)
+        end
+      end
+    end
+  else
+    -- Read source file and write to destination
+    local f_in = io.open(src, 'rb')
+    if f_in then
+      local data = f_in:read '*a'
+      f_in:close()
+      local dest_dir = vim.fn.fnamemodify(dest, ':h')
+      vim.fn.mkdir(dest_dir, 'p')
+      local f_out = io.open(dest, 'wb')
+      if f_out then
+        f_out:write(data)
+        f_out:close()
+        table.insert(created, dest)
+      end
+    end
+  end
+
+  return created
+end
+
+---Copy a node (file or directory) to destination, publishing events for created files.
 ---Note: It only publishes events for files, not folders. This is probably fine for LSP purposes
 ---@param target PathDetails
 ---@param destination string
@@ -56,29 +99,7 @@ local function duplicate_node_and_publish(target, destination)
     autocmds.publish_will_create_node(destination)
   end
 
-  local p = plenary_path:new(target.path)
-  -- Note: Plenary has a bug whereby a copying a directory into itself creates hundreds of nested copies
-  -- https://github.com/nvim-lua/plenary.nvim/pull/358
-  local results = p:copy {
-    destination = destination,
-    recursive = true,
-    override = false,
-    interactive = true,
-  }
-
-  local files_created = {}
-
-  local function handle_results(results)
-    for key, value in pairs(results) do
-      if type(value) == 'table' then
-        handle_results(value)
-      elseif value then
-        table.insert(files_created, key.filename)
-      end
-    end
-  end
-
-  handle_results(results)
+  local files_created = copy_recursive(target.path, destination)
 
   -- Sorting to avoid flakey test
   table.sort(files_created)

@@ -13,6 +13,7 @@ end
 ---@param filetype? string
 ---@return nil
 M.start = function(buf, filetype)
+  vim.print 'HELLO!'
   -- Because this function will be debounced we need to check that the buffer still exists
   if not vim.api.nvim_buf_is_valid(buf) then
     return
@@ -28,8 +29,8 @@ M.start = function(buf, filetype)
   if lang then
     local success, _ = pcall(vim.treesitter.get_parser, buf, lang)
     if success then
-      vim.treesitter.start(buf, lang)
-      treesitter_applied = true
+      local start_success, _ = pcall(vim.treesitter.start, buf, lang)
+      treesitter_applied = start_success
     end
   end
   if not treesitter_applied then

@@ -3,7 +3,7 @@ name: CI
 env:
   TRIPTYCH_DIR: .local/share/nvim/site/pack/simonmclean/start/triptych
   LUA_LS_LOG_PATH: /home/runner/lua-language-server/logs
-  LATEST_NVIM_VERSION: "0.11.3"
+  LATEST_NVIM_VERSION: "0.12.1"
 
 on:
   workflow_dispatch:
@@ -42,7 +42,6 @@ jobs:
     - name: install neovim plugins
       run: |
         git config --global advice.detachedHead false
-        git clone https://github.com/nvim-lua/plenary.nvim.git $HOME/.local/share/nvim/site/pack/plenary/start/plenary
         git clone https://github.com/nvim-tree/nvim-web-devicons $HOME/.local/share/nvim/site/pack/nvim-tree/start/nvim-web-devicons
         git clone --recurse-submodules https://github.com/$GITHUB_REPOSITORY $HOME/$TRIPTYCH_DIR
         cd $HOME/$TRIPTYCH_DIR

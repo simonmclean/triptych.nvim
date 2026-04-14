@@ -39,7 +39,6 @@ You only ever control or focus the middle window.
 ## ⚡️ Requirements
 
 - Neovim >= 0.9.0
-- [nvim-lua/plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
 - Optional, if you want fancy icons
     - [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons)
     -  A [Nerd Font](https://www.nerdfonts.com/)
@@ -54,7 +53,6 @@ Example using [Lazy](https://github.com/folke/lazy.nvim).
 {
   'simonmclean/triptych.nvim',
   dependencies = {
-    'nvim-lua/plenary.nvim', -- required
     'nvim-tree/nvim-web-devicons', -- optional for icons
     'antosha417/nvim-lsp-file-operations' -- optional LSP integration
   },
